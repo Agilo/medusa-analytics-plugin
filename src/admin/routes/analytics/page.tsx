@@ -16,16 +16,16 @@ import {
 import { ChartNoAxesCombined } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
-import { LineChart } from '@/components/LineChart';
-import { BarChart } from '@/components/BarChart';
-import { PieChart } from '@/components/PieChart';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { LineChart } from '../../components/LineChart';
+import { BarChart } from '../../components/BarChart';
+import { PieChart } from '../../components/PieChart';
+import { Button } from '../../components/ui/button';
+import { Calendar } from '../../components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from '../../components/ui/popover';
 
 const data1 = [
   {

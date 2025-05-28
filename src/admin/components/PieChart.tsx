@@ -22,6 +22,13 @@ const renderCustomizedLabel = ({
   innerRadius,
   outerRadius,
   percent,
+}: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
 }) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -61,7 +68,7 @@ export const PieChart: React.FC<PieChartProps> = ({
           dataKey={dataKey}
         >
           {data &&
-            data.map((entry, index) => (
+            data.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={COLORS[index % COLORS.length]}

@@ -27,7 +27,7 @@ export const BarChart: React.FC<BarChartProps> = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisDataKey} />
         <YAxis />
-        <Tooltip />
+        <Tooltip labelClassName="text-ui-fg-subtle" />
         <Bar dataKey={yAxisDataKey} fill={lineColor} />
       </RechartsBarChart>
     </ResponsiveContainer>

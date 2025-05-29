@@ -14,33 +14,21 @@ type LineChartProps = {
   xAxisDataKey: string;
   yAxisDataKey: string;
   lineColor?: string;
-  className?: string;
 };
 
 export const LineChart: React.FC<LineChartProps> = ({
   data,
   xAxisDataKey,
   yAxisDataKey,
-  lineColor = '#8884d8',
-  className,
+  lineColor,
 }) => {
   return (
-    <ResponsiveContainer width="100%" height="100%" className={className}>
-      <RechartsLineChart
-        width={500}
-        height={300}
-        data={data}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 5,
-          bottom: 5,
-        }}
-      >
+    <ResponsiveContainer aspect={16 / 9}>
+      <RechartsLineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisDataKey} />
         <YAxis />
-        <Tooltip />
+        <Tooltip labelClassName="text-ui-fg-subtle" />
         <Line
           type="monotone"
           dataKey={yAxisDataKey}

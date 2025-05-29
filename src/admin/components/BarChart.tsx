@@ -13,29 +13,17 @@ type BarChartProps = {
   xAxisDataKey: string;
   yAxisDataKey: string;
   lineColor?: string;
-  className?: string;
 };
 
 export const BarChart: React.FC<BarChartProps> = ({
   data,
   xAxisDataKey,
   yAxisDataKey,
-  lineColor = '#8884d8',
-  className,
+  lineColor,
 }) => {
   return (
-    <ResponsiveContainer width="100%" height="100%" className={className}>
-      <RechartsBarChart
-        width={500}
-        height={300}
-        data={data}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
+    <ResponsiveContainer aspect={16 / 9}>
+      <RechartsBarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisDataKey} />
         <YAxis />

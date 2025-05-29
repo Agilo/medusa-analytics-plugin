@@ -26,6 +26,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../components/ui/popover';
+import { ProductsTable } from '../../components/ProductsTable';
 
 const data1 = [
   {
@@ -112,6 +113,39 @@ const data3 = [
   },
 ];
 
+const products = [
+  {
+    sku: 'WH-001-BLK',
+    variantName: 'Wireless Headphones - Black	',
+    inventoryQuantity: 0,
+  },
+  {
+    sku: 'WH-002-BLK',
+    variantName: 'Smart Watch - Silver	',
+    inventoryQuantity: 20,
+  },
+  {
+    sku: 'WH-003-BLK',
+    variantName: 'Wireless Earbuds - Black	',
+    inventoryQuantity: 30,
+  },
+  {
+    sku: 'WH-004-BLK',
+    variantName: 'Bluetooth Speaker - Blue	',
+    inventoryQuantity: 0, // Out of stock
+  },
+  {
+    sku: 'WH-005-BLK',
+    variantName: 'Smartphone Case - Red	',
+    inventoryQuantity: 5,
+  },
+  {
+    sku: 'WH-006-BLK',
+    variantName: 'Laptop Sleeve - Grey	',
+    inventoryQuantity: 0,
+  },
+];
+
 const AnalyticsPage = () => {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
@@ -145,10 +179,10 @@ const AnalyticsPage = () => {
 
   return (
     <Container className="divide-y p-0">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex flex-wrap gap-x-2 gap-y-4 items-center justify-between px-6 py-4">
         <Heading level="h1">Analytics</Heading>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="w-[170px]">
             <Select
               defaultValue="this-month"
@@ -170,9 +204,9 @@ const AnalyticsPage = () => {
               <Button
                 id="date"
                 variant="outline"
-                className=" justify-start bg-[#fafafa] border-[#dedede] text-[13px] py-1.5 text-left font-normal"
+                className=" justify-start bg-ui-bg-field text-ui-fg-base txt-compact-small !py-1.5 h-auto text-left font-normal border-0 shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg"
               >
-                <CalendarIcon className="mr-2 h-4 w-4 text-[#71717a]" />
+                <CalendarIcon className="mr-2 h-4 w-4 text-ui-fg-muted" />
                 {date?.from ? (
                   date.to ? (
                     <>
@@ -208,7 +242,7 @@ const AnalyticsPage = () => {
           </Tabs.List>
           <div className="mt-8">
             <Tabs.Content value="orders">
-              <div className="flex gap-4 mb-4">
+              <div className="flex max-md:flex-col gap-4 mb-4">
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
@@ -221,16 +255,17 @@ const AnalyticsPage = () => {
                     </Text>
                   </Container>
 
-                  <Container className="relative">
-                    <Text size="xlarge" weight="plus" className="mb-8">
+                  <Container>
+                    <Text size="xlarge" weight="plus">
                       Orders Over Time
                     </Text>
-
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Total number of orders in the selected period
+                    </Text>
                     <LineChart
                       data={data1}
                       xAxisDataKey="name"
                       yAxisDataKey="Number of orders"
-                      className="aspect-[16/9]"
                     />
                   </Container>
                 </div>
@@ -247,51 +282,98 @@ const AnalyticsPage = () => {
                     </Text>
                   </Container>
 
-                  <Container className="relative">
-                    <Text size="xlarge" weight="plus" className="mb-8">
+                  <Container>
+                    <Text size="xlarge" weight="plus">
                       Sales Over Time
                     </Text>
-
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Total sales in the selected period
+                    </Text>
                     <LineChart
                       data={data2}
                       xAxisDataKey="name"
                       yAxisDataKey="Sales"
                       lineColor="#82ca9d"
-                      className="aspect-[16/9]"
                     />
                   </Container>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex max-md:flex-col gap-4">
                 <div className="flex-1">
-                  <Container className="relative">
-                    <Text size="xlarge" weight="plus" className="mb-8">
+                  <Container>
+                    <Text size="xlarge" weight="plus">
                       Top Regions by Sales
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Sales breakdown by region in the selected period
                     </Text>
                     <BarChart
                       data={data3}
                       xAxisDataKey="name"
                       yAxisDataKey="Sales"
                       lineColor="#82ca9d"
-                      className="aspect-[16/9]"
                     />
                   </Container>
                 </div>
                 <div className="flex-1">
-                  <Container className="relative">
-                    <Text size="xlarge" weight="plus" className="mb-8">
+                  <Container>
+                    <Text size="xlarge" weight="plus">
                       Order Status Breakdown
                     </Text>
-                    <PieChart
-                      data={data3}
-                      dataKey="Sales"
-                      className="aspect-[16/9]"
-                    />
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Distribution of orders by status in the selected period
+                    </Text>
+                    <PieChart data={data3} dataKey="Sales" />
                   </Container>
                 </div>
               </div>
             </Tabs.Content>
-            <Tabs.Content value="products"></Tabs.Content>
+            <Tabs.Content value="products">
+              <Container className="mb-4">
+                <Text size="xlarge" weight="plus">
+                  Top-Selling Products
+                </Text>
+                <Text size="small" className="mb-8 text-ui-fg-muted">
+                  Products by quantity sold in selected period
+                </Text>
+                <BarChart
+                  data={data3}
+                  xAxisDataKey="name"
+                  yAxisDataKey="Sales"
+                  lineColor="#82ca9d"
+                />
+              </Container>
+              <div className="flex gap-4 max-xl:flex-col">
+                <Container>
+                  <Text size="xlarge" weight="plus">
+                    Out-of-Stock Variants
+                  </Text>
+                  <Text size="small" className="mb-8 text-ui-fg-muted">
+                    Products with zero inventory
+                  </Text>
+                  <ProductsTable
+                    products={products.filter(
+                      (product) => product.inventoryQuantity === 0
+                    )}
+                  />
+                </Container>
+                <Container>
+                  <Text size="xlarge" weight="plus">
+                    Low Stock Variants
+                  </Text>
+                  <Text size="small" className="mb-8 text-ui-fg-muted">
+                    Products with inventory below threshold
+                  </Text>
+                  <ProductsTable
+                    products={products.filter(
+                      (product) =>
+                        product.inventoryQuantity > 0 &&
+                        product.inventoryQuantity < 10
+                    )}
+                  />
+                </Container>
+              </div>
+            </Tabs.Content>
           </div>
         </Tabs>
       </div>

@@ -19,7 +19,6 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
 import { PieChart } from '../../components/PieChart';
-import { Button } from '../../components/ui/button';
 import { Calendar } from '../../components/ui/calendar';
 import {
   Popover,
@@ -151,11 +150,15 @@ const AnalyticsPage = () => {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
+  const [selectValue, setSelectValue] = React.useState<string | undefined>(
+    'this-month'
+  );
+  const [popoverOpen, setPopoverOpen] = React.useState<boolean>(false);
 
-  const handlePresetSelect = (preset: string) => {
+  React.useEffect(() => {
     const today = new Date();
 
-    switch (preset) {
+    switch (selectValue) {
       case 'this-month':
         setDate({
           from: startOfMonth(today),
@@ -175,7 +178,13 @@ const AnalyticsPage = () => {
         });
         break;
     }
-  };
+  }, [selectValue]);
+
+  React.useEffect(() => {
+    if (selectValue !== 'custom' && date && popoverOpen) {
+      setSelectValue('custom');
+    }
+  }, [date]);
 
   return (
     <Container className="divide-y p-0">
@@ -186,7 +195,8 @@ const AnalyticsPage = () => {
           <div className="w-[170px]">
             <Select
               defaultValue="this-month"
-              onValueChange={handlePresetSelect}
+              value={selectValue}
+              onValueChange={setSelectValue}
             >
               <Select.Trigger>
                 <Select.Value />
@@ -199,27 +209,24 @@ const AnalyticsPage = () => {
               </Select.Content>
             </Select>
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="date"
-                variant="outline"
-                className=" justify-start bg-ui-bg-field text-ui-fg-base txt-compact-small !py-1.5 h-auto text-left font-normal border-0 shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4 text-ui-fg-muted" />
-                {date?.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, 'LLL dd, y')} -{' '}
-                      {format(date.to, 'LLL dd, y')}
-                    </>
-                  ) : (
-                    format(date.from, 'LLL dd, y')
-                  )
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger
+              id="date"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small py-1.5 h-auto text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 px-4 dark:border-input dark:hover:bg-input/50"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4 text-ui-fg-muted group-disabled:text-ui-fg-disabled" />
+              {date?.from ? (
+                date.to ? (
+                  <>
+                    {format(date.from, 'LLL dd, y')} -{' '}
+                    {format(date.to, 'LLL dd, y')}
+                  </>
                 ) : (
-                  <span>Pick a date range</span>
-                )}
-              </Button>
+                  format(date.from, 'LLL dd, y')
+                )
+              ) : (
+                <span>Pick a date range</span>
+              )}
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar

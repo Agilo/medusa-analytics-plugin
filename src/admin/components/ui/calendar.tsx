@@ -14,7 +14,10 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn('p-3', className)}
+      className={cn(
+        'p-3 text-ui-fg-base bg-ui-bg-base border-0 shadow-none rounded-lg',
+        className
+      )}
       classNames={{
         months: 'flex flex-col sm:flex-row gap-2',
         month: 'flex flex-col gap-4',
@@ -29,11 +32,10 @@ function Calendar({
         nav_button_next: 'absolute right-1',
         table: 'w-full border-collapse space-x-1',
         head_row: 'flex',
-        head_cell:
-          'text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]',
+        head_cell: 'text-ui-fg-muted rounded-md w-8 font-normal text-[0.8rem]',
         row: 'flex w-full mt-2',
         cell: cn(
-          'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md',
+          'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-ui-bg-highlight [&:has([aria-selected].day-range-end)]:rounded-r-md',
           props.mode === 'range'
             ? '[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md'
             : '[&:has([aria-selected])]:rounded-md'
@@ -43,17 +45,14 @@ function Calendar({
           'size-8 p-0 font-normal aria-selected:opacity-100'
         ),
         day_range_start:
-          'day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground',
+          'day-range-start aria-selected:text-white aria-selected:bg-ui-bg-interactive',
         day_range_end:
-          'day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground',
-        day_selected:
-          'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
-        day_today: 'bg-accent text-accent-foreground',
+          'day-range-end aria-selected:text-white aria-selected:bg-ui-bg-interactive',
+        day_today:
+          'relative after:absolute after:content[""] after:w-1 after:h-1 after:bg-ui-bg-interactive after:rounded-full after:left-1/2 after:bottom-[2px] after:-translate-x-1/2 aria-selected:after:bg-white aria-selected:after:border-[0.0313rem] aria-selected:after:border-ui-border-interactive',
         day_outside:
-          'day-outside text-muted-foreground aria-selected:text-muted-foreground',
-        day_disabled: 'text-muted-foreground opacity-50',
-        day_range_middle:
-          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+          'day-outside text-ui-fg-muted aria-selected:text-ui-fg-muted',
+        day_disabled: 'text-ui-fg-muted opacity-50',
         day_hidden: 'invisible',
         ...classNames,
       }}

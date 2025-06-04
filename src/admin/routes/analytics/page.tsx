@@ -228,7 +228,7 @@ const AnalyticsPage = () => {
                 <span>Pick a date range</span>
               )}
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 bg-transparent" align="end">
               <Calendar
                 initialFocus
                 mode="range"

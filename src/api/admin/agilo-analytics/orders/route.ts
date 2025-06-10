@@ -55,10 +55,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   let regions: Record<string, number> = {};
   let totalSales = 0;
   let statuses: Record<string, number> = {};
-  const groupedByDate: Record<
-    string,
-    { orderCount: number; totalAmount: number }
-  > = {};
+  const groupedByDate: Record<string, { orderCount: number; sales: number }> =
+    {};
 
   data.forEach((order) => {
     const exchangeRate =
@@ -69,10 +67,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const date = new Date(order.created_at).toISOString().split("T")[0];
 
     if (!groupedByDate[date]) {
-      groupedByDate[date] = { orderCount: 0, totalAmount: 0 };
+      groupedByDate[date] = { orderCount: 0, sales: 0 };
     }
     groupedByDate[date].orderCount += 1;
-    groupedByDate[date].totalAmount += orderTotal;
+    groupedByDate[date].sales += orderTotal;
 
     totalSales += orderTotal;
     if (order.region?.name && regions[order?.region?.name]) {
@@ -90,18 +88,33 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
   });
 
-  const dateOrders = dateRange.map((date) => ({
-    date,
-    orderCount: groupedByDate[date]?.orderCount ?? 0,
-    totalAmount: groupedByDate[date]?.totalAmount ?? 0,
+  const salesArray = dateRange.map((date) => ({
+    name: date,
+    sales: groupedByDate[date]?.sales ?? 0,
+  }));
+
+  const orderCountArray = dateRange.map((date) => ({
+    name: date,
+    count: groupedByDate[date]?.orderCount ?? 0,
+  }));
+
+  const regionsArray = Object.entries(regions).map(([region, amount]) => ({
+    name: region,
+    sales: Number(amount.toFixed(2)),
+  }));
+
+  const statusesArray = Object.entries(statuses).map(([status, count]) => ({
+    name: status,
+    count,
   }));
 
   const orderData = {
     total_orders: data.length,
-    regions,
+    regions: regionsArray,
     total_sales: totalSales,
-    statuses,
-    grouped_orders: dateOrders,
+    statuses: statusesArray,
+    order_sales: salesArray,
+    order_count: orderCountArray,
   };
 
   res.json({ data: orderData });

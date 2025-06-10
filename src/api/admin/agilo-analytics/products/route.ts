@@ -41,23 +41,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
   });
 
-  const outOfStock: ProductVariantDTO[] = [];
-  const lowStock: ProductVariantDTO[] = [];
+  const lowStockVariants: {
+    sku: string;
+    variantName: string;
+    inventoryQuantity: number;
+  }[] = [];
 
   productVariants.forEach((variant) => {
     if (variant.sku) {
       const qty = quantityBySku[variant.sku];
-      if (qty === 0) {
-        outOfStock.push(variant);
-      } else {
-        lowStock.push(variant);
-      }
+      lowStockVariants.push({
+        sku: variant.sku,
+        inventoryQuantity: quantityBySku[variant.sku],
+        variantName: variant.title,
+      });
     }
   });
-
-  const variantInventoryData = {
-    out_of_stock_variants: outOfStock,
-    low_stock_variants: lowStock,
-  }
-  
 }

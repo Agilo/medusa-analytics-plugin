@@ -19,7 +19,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const response = await fetch(
-    "https://api.frankfurter.dev/v1/latest?base=DKK"
+    `https://api.frankfurter.dev/v1/latest?base=${DEAFULT_CURRENCY}`
   );
   const exchangeRates = await response.json();
 

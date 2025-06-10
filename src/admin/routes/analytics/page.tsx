@@ -26,6 +26,7 @@ import {
   PopoverTrigger,
 } from '../../components/ui/popover';
 import { ProductsTable } from '../../components/ProductsTable';
+import { useProductAnalytics } from '../../hooks/product-analytics';
 
 const data1 = [
   {
@@ -112,38 +113,38 @@ const data3 = [
   },
 ];
 
-const products = [
-  {
-    sku: 'WH-001-BLK',
-    variantName: 'Wireless Headphones - Black	',
-    inventoryQuantity: 0,
-  },
-  {
-    sku: 'WH-002-BLK',
-    variantName: 'Smart Watch - Silver	',
-    inventoryQuantity: 20,
-  },
-  {
-    sku: 'WH-003-BLK',
-    variantName: 'Wireless Earbuds - Black	',
-    inventoryQuantity: 30,
-  },
-  {
-    sku: 'WH-004-BLK',
-    variantName: 'Bluetooth Speaker - Blue	',
-    inventoryQuantity: 0, // Out of stock
-  },
-  {
-    sku: 'WH-005-BLK',
-    variantName: 'Smartphone Case - Red	',
-    inventoryQuantity: 5,
-  },
-  {
-    sku: 'WH-006-BLK',
-    variantName: 'Laptop Sleeve - Grey	',
-    inventoryQuantity: 0,
-  },
-];
+// const products = [
+//   {
+//     sku: "WH-001-BLK",
+//     variantName: "Wireless Headphones - Black	",
+//     inventoryQuantity: 0,
+//   },
+//   {
+//     sku: "WH-002-BLK",
+//     variantName: "Smart Watch - Silver	",
+//     inventoryQuantity: 20,
+//   },
+//   {
+//     sku: "WH-003-BLK",
+//     variantName: "Wireless Earbuds - Black	",
+//     inventoryQuantity: 30,
+//   },
+//   {
+//     sku: "WH-004-BLK",
+//     variantName: "Bluetooth Speaker - Blue	",
+//     inventoryQuantity: 0, // Out of stock
+//   },
+//   {
+//     sku: "WH-005-BLK",
+//     variantName: "Smartphone Case - Red	",
+//     inventoryQuantity: 5,
+//   },
+//   {
+//     sku: "WH-006-BLK",
+//     variantName: "Laptop Sleeve - Grey	",
+//     inventoryQuantity: 0,
+//   },
+// ];
 
 const AnalyticsPage = () => {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -154,6 +155,8 @@ const AnalyticsPage = () => {
     'this-month'
   );
   const [popoverOpen, setPopoverOpen] = React.useState<boolean>(false);
+
+  const { data: products } = useProductAnalytics(date);
 
   React.useEffect(() => {
     const today = new Date();
@@ -344,9 +347,9 @@ const AnalyticsPage = () => {
                   Products by quantity sold in selected period
                 </Text>
                 <BarChart
-                  data={data3}
+                  data={products?.variantQuantitySold || []}
                   xAxisDataKey="name"
-                  yAxisDataKey="Sales"
+                  yAxisDataKey="quantity"
                   lineColor="#82ca9d"
                 />
               </Container>
@@ -359,9 +362,11 @@ const AnalyticsPage = () => {
                     Products with zero inventory
                   </Text>
                   <ProductsTable
-                    products={products.filter(
-                      (product) => product.inventoryQuantity === 0
-                    )}
+                    products={
+                      products?.lowStockVariants?.filter(
+                        (product) => product.inventoryQuantity === 0
+                      ) || []
+                    }
                   />
                 </Container>
                 <Container>
@@ -372,11 +377,11 @@ const AnalyticsPage = () => {
                     Products with inventory below threshold
                   </Text>
                   <ProductsTable
-                    products={products.filter(
-                      (product) =>
-                        product.inventoryQuantity > 0 &&
-                        product.inventoryQuantity < 10
-                    )}
+                    products={
+                      products?.lowStockVariants?.filter(
+                        (product) => product.inventoryQuantity > 0
+                      ) || []
+                    }
                   />
                 </Container>
               </div>

@@ -221,7 +221,7 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Distribution of orders by status in the selected period
                     </Text>
-                    <PieChart data={orders?.statuses} dataKey="Sales" />
+                    <PieChart data={orders?.statuses} dataKey="count" />
                   </Container>
                 </div>
               </div>
@@ -236,7 +236,7 @@ const AnalyticsPage = () => {
                 </Text>
                 <BarChart
                   data={products?.variantQuantitySold || []}
-                  xAxisDataKey="name"
+                  xAxisDataKey="title"
                   yAxisDataKey="quantity"
                   lineColor="#82ca9d"
                 />

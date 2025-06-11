@@ -5,7 +5,7 @@ import {
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
 import _ from 'lodash';
-import { getDateRange } from '../../../../utils/orders';
+import { format, eachDayOfInterval } from 'date-fns';
 
 export const adminOrdersListQuerySchema = z.object({
   date_from: z.string(),
@@ -47,10 +47,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
   });
 
-  const dateRange = getDateRange(
-    validatedQuery.date_from,
-    validatedQuery.date_to
-  );
+  const dateRange = eachDayOfInterval({
+    start: validatedQuery.date_from,
+    end: validatedQuery.date_to,
+  }).map((d) => format(d, 'yyyy-MM-dd'));
 
   let regions: Record<string, number> = {};
   let totalSales = 0;
@@ -64,7 +64,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
-    const date = new Date(order.created_at).toISOString().split('T')[0];
+    const date = format(new Date(order.created_at), 'yyyy-MM-dd');
 
     if (!groupedByDate[date]) {
       groupedByDate[date] = { orderCount: 0, sales: 0 };

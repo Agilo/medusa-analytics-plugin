@@ -98,10 +98,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     count: groupedByDate[date]?.orderCount ?? 0,
   }));
 
-  const regionsArray = Object.entries(regions).map(([region, amount]) => ({
-    name: region,
-    sales: Number(amount.toFixed(2)),
-  }));
+  const regionsArray = Object.entries(regions)
+    .map(([region, amount]) => ({
+      name: region,
+      sales: Number(amount.toFixed(2)),
+    }))
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 5);
 
   const statusesArray = Object.entries(statuses).map(([status, count]) => ({
     name: status,

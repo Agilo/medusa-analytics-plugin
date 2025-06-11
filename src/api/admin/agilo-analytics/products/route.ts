@@ -1,6 +1,6 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
-import { z } from "zod";
+import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import { z } from 'zod';
 
 const DEFAULT_THRESHOLD = 5;
 
@@ -17,11 +17,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const inventoryService = req.scope.resolve(Modules.INVENTORY);
 
   const { data: orders } = await query.graph({
-    entity: "order",
-    fields: ["id", "items.quantity", "items.variant.id", "items.variant.title"],
+    entity: 'order',
+    fields: [
+      'id',
+      'items.quantity',
+      'items.variant.id',
+      'items.variant.title',
+      'items.product.title',
+      'items.*',
+    ],
     pagination: {
       order: {
-        created_at: "asc",
+        created_at: 'asc',
       },
     },
     filters: {
@@ -29,8 +36,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         $gte: validatedQuery.date_from,
         $lte: validatedQuery.date_to,
       },
-
-      status: { $nin: ["draft"] },
+      status: { $nin: ['draft'] },
     },
   });
 
@@ -38,14 +44,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     {};
 
   orders.forEach((o) => {
-    o.items.forEach((i) => {
-      if (!variantQuantitySold[i.variant.id]) {
-        variantQuantitySold[i.variant.id] = {
-          title: i.variant.title,
+    o.items?.forEach((i) => {
+      if (i?.variant?.id && !variantQuantitySold[i?.variant?.id]) {
+        variantQuantitySold[i?.variant.id] = {
+          title: i.product?.title + ' ' + i.variant.title,
           quantity: 0,
         };
+      } else if (i?.variant?.id) {
+        variantQuantitySold[i.variant.id].quantity += i.quantity;
       }
-      variantQuantitySold[i.variant.id].quantity += i.quantity;
     });
   });
 
@@ -57,13 +64,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     {
       stocked_quantity: { $lte: DEFAULT_THRESHOLD },
     },
-    { select: ["id", "inventory_item_id", "stocked_quantity"] }
+    { select: ['id', 'inventory_item_id', 'stocked_quantity'] }
   );
   const inventoryItems = await inventoryService.listInventoryItems(
     {
       id: inventoryLevel.map((i) => i.inventory_item_id),
     },
-    { select: ["id", "sku"] }
+    { select: ['id', 'sku'] }
   );
   const productVariants = await productService.listProductVariants(
     {
@@ -71,15 +78,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         .map((i) => i.sku)
         .filter((i) => i !== undefined && i !== null),
     },
-    { select: ["id", "title", "sku"] }
+    { select: ['id', 'title', 'sku'] }
   );
 
-  const quantityByItemId = {};
+  const quantityByItemId: Record<string, number> = {};
   inventoryLevel.forEach((level) => {
-    quantityByItemId[level.inventory_item_id] = level.stocked_quantity;
+    quantityByItemId[level?.inventory_item_id] = level.stocked_quantity;
   });
 
-  const quantityBySku = {};
+  const quantityBySku: Record<string, number> = {};
   inventoryItems.forEach((item) => {
     if (item.sku) {
       quantityBySku[item.sku] = quantityByItemId[item.id];

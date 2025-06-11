@@ -27,124 +27,7 @@ import {
 } from '../../components/ui/popover';
 import { ProductsTable } from '../../components/ProductsTable';
 import { useProductAnalytics } from '../../hooks/product-analytics';
-
-const data1 = [
-  {
-    name: 'Jan 1',
-    'Number of orders': 20,
-  },
-  {
-    name: 'Jan 2',
-    'Number of orders': 40,
-  },
-  {
-    name: 'Jan 3',
-    'Number of orders': 25,
-  },
-  {
-    name: 'Jan 4',
-    'Number of orders': 60,
-  },
-  {
-    name: 'Jan 5',
-    'Number of orders': 65,
-  },
-  {
-    name: 'Jan 6',
-    'Number of orders': 70,
-  },
-  {
-    name: 'Jan 7',
-    'Number of orders': 90,
-  },
-];
-
-const data2 = [
-  {
-    name: 'Jan 1',
-    Sales: 20000,
-  },
-  {
-    name: 'Jan 2',
-    Sales: 40000,
-  },
-  {
-    name: 'Jan 3',
-    Sales: 25000,
-  },
-  {
-    name: 'Jan 4',
-    Sales: 60000,
-  },
-  {
-    name: 'Jan 5',
-    Sales: 65000,
-  },
-  {
-    name: 'Jan 6',
-    Sales: 60000,
-  },
-  {
-    name: 'Jan 7',
-    Sales: 45000,
-  },
-];
-
-const data3 = [
-  {
-    name: 'North America',
-    Sales: 20000,
-  },
-  {
-    name: 'Europe',
-    Sales: 40000,
-  },
-  {
-    name: 'Asia',
-    Sales: 25000,
-  },
-  {
-    name: 'Australia',
-    Sales: 60000,
-  },
-  {
-    name: 'Africa',
-    Sales: 65000,
-  },
-];
-
-// const products = [
-//   {
-//     sku: "WH-001-BLK",
-//     variantName: "Wireless Headphones - Black	",
-//     inventoryQuantity: 0,
-//   },
-//   {
-//     sku: "WH-002-BLK",
-//     variantName: "Smart Watch - Silver	",
-//     inventoryQuantity: 20,
-//   },
-//   {
-//     sku: "WH-003-BLK",
-//     variantName: "Wireless Earbuds - Black	",
-//     inventoryQuantity: 30,
-//   },
-//   {
-//     sku: "WH-004-BLK",
-//     variantName: "Bluetooth Speaker - Blue	",
-//     inventoryQuantity: 0, // Out of stock
-//   },
-//   {
-//     sku: "WH-005-BLK",
-//     variantName: "Smartphone Case - Red	",
-//     inventoryQuantity: 5,
-//   },
-//   {
-//     sku: "WH-006-BLK",
-//     variantName: "Laptop Sleeve - Grey	",
-//     inventoryQuantity: 0,
-//   },
-// ];
+import { useOrderAnalytics } from '../../hooks/order-analytics';
 
 const AnalyticsPage = () => {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -157,6 +40,8 @@ const AnalyticsPage = () => {
   const [popoverOpen, setPopoverOpen] = React.useState<boolean>(false);
 
   const { data: products } = useProductAnalytics(date);
+
+  const { data: orders } = useOrderAnalytics(date);
 
   React.useEffect(() => {
     const today = new Date();
@@ -258,7 +143,7 @@ const AnalyticsPage = () => {
                     <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Total Orders</Text>
                     <Text size="xlarge" weight="plus">
-                      1,845
+                      {orders?.total_orders || 0}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
                       +12.5% from previous period
@@ -273,9 +158,9 @@ const AnalyticsPage = () => {
                       Total number of orders in the selected period
                     </Text>
                     <LineChart
-                      data={data1}
+                      data={orders?.order_count}
                       xAxisDataKey="name"
-                      yAxisDataKey="Number of orders"
+                      yAxisDataKey="count"
                     />
                   </Container>
                 </div>
@@ -285,7 +170,10 @@ const AnalyticsPage = () => {
                     <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
                     <Text size="small">Total Sales</Text>
                     <Text size="xlarge" weight="plus">
-                      $387,200
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      }).format(orders?.total_sales || 0)}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
                       +8.2% from previous period
@@ -300,9 +188,9 @@ const AnalyticsPage = () => {
                       Total sales in the selected period
                     </Text>
                     <LineChart
-                      data={data2}
+                      data={orders?.order_sales}
                       xAxisDataKey="name"
-                      yAxisDataKey="Sales"
+                      yAxisDataKey="sales"
                       lineColor="#82ca9d"
                     />
                   </Container>
@@ -318,9 +206,9 @@ const AnalyticsPage = () => {
                       Sales breakdown by region in the selected period
                     </Text>
                     <BarChart
-                      data={data3}
+                      data={orders?.regions}
                       xAxisDataKey="name"
-                      yAxisDataKey="Sales"
+                      yAxisDataKey="sales"
                       lineColor="#82ca9d"
                     />
                   </Container>
@@ -333,7 +221,7 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Distribution of orders by status in the selected period
                     </Text>
-                    <PieChart data={data3} dataKey="Sales" />
+                    <PieChart data={orders?.statuses} dataKey="Sales" />
                   </Container>
                 </div>
               </div>

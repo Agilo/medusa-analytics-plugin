@@ -1,18 +1,18 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
+import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
   BigNumber,
   ContainerRegistrationKeys,
-} from "@medusajs/framework/utils";
-import { z } from "zod";
-import _ from "lodash";
-import { getDateRange } from "../../../../utils/orders";
+} from '@medusajs/framework/utils';
+import { z } from 'zod';
+import _ from 'lodash';
+import { getDateRange } from '../../../../utils/orders';
 
 export const adminOrdersListQuerySchema = z.object({
   date_from: z.string(),
   date_to: z.string(),
 });
 
-const DEAFULT_CURRENCY = "EUR";
+const DEAFULT_CURRENCY = 'EUR';
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
@@ -24,18 +24,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const exchangeRates = await response.json();
 
   const { data } = await query.graph({
-    entity: "order",
+    entity: 'order',
     fields: [
-      "id",
-      "total",
-      "created_at",
-      "status",
-      "currency_code",
-      "region.name",
+      'id',
+      'total',
+      'created_at',
+      'status',
+      'currency_code',
+      'region.name',
     ],
     pagination: {
       order: {
-        created_at: "asc",
+        created_at: 'asc',
       },
     },
     filters: {
@@ -43,7 +43,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         $gte: validatedQuery.date_from,
         $lte: validatedQuery.date_to,
       },
-      status: { $nin: ["draft"] },
+      status: { $nin: ['draft'] },
     },
   });
 
@@ -64,7 +64,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
-    const date = new Date(order.created_at).toISOString().split("T")[0];
+    const date = new Date(order.created_at).toISOString().split('T')[0];
 
     if (!groupedByDate[date]) {
       groupedByDate[date] = { orderCount: 0, sales: 0 };
@@ -117,5 +117,5 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     order_count: orderCountArray,
   };
 
-  res.json({ data: orderData });
+  res.json(orderData);
 }

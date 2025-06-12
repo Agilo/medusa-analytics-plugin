@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 
 import { cn } from '../../lib/utils';
-import { buttonVariants } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 
 function Calendar({
   className,
@@ -57,11 +57,27 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn('size-4', className)} {...props} />
+        NextMonthButton: ({ className, ...props }) => (
+          <Button
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              className
+            )}
+            {...props}
+          >
+            <ChevronRight className="size-6" />
+          </Button>
         ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn('size-4', className)} {...props} />
+        PreviousMonthButton: ({ className, ...props }) => (
+          <Button
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              className
+            )}
+            {...props}
+          >
+            <ChevronLeft className="size-6" />
+          </Button>
         ),
       }}
       {...props}

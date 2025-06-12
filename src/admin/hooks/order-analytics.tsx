@@ -9,7 +9,9 @@ export type OrderAnalyticsResponse = {
   total_sales: number;
   statuses: { name: string; count: number }[];
   order_sales: { name: string; sales: number }[];
+  prev_sales_percent: number;
   order_count: { name: string; count: number }[];
+  prev_orders_percent: number;
 };
 
 export const useOrderAnalytics = (

@@ -43,6 +43,17 @@ const AnalyticsPage = () => {
 
   const { data: orders } = useOrderAnalytics(date);
 
+  const someOrderCountsGreaterThanZero = orders?.order_count?.some(
+    (item) => item.count > 0
+  );
+
+  const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
+    (item) => item.sales > 0
+  );
+
+  const someTopSellingProductsGreaterThanZero =
+    products?.variantQuantitySold?.some((item) => item.quantity > 0);
+
   React.useEffect(() => {
     const today = new Date();
 
@@ -118,7 +129,7 @@ const AnalyticsPage = () => {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-transparent" align="end">
               <Calendar
-                initialFocus
+                autoFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
@@ -146,22 +157,36 @@ const AnalyticsPage = () => {
                       {orders?.total_orders || 0}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
-                      +12.5% from previous period
+                      +{orders?.prev_orders_percent || 0}% from previous period
                     </Text>
                   </Container>
 
-                  <Container>
+                  <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Orders Over Time
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Total number of orders in the selected period
                     </Text>
-                    <LineChart
-                      data={orders?.order_count}
-                      xAxisDataKey="name"
-                      yAxisDataKey="count"
-                    />
+                    {orders?.order_count &&
+                    orders?.order_count?.length > 0 &&
+                    someOrderCountsGreaterThanZero ? (
+                      <LineChart
+                        data={orders?.order_count}
+                        xAxisDataKey="name"
+                        yAxisDataKey="count"
+                        yAxisTickFormatter={(value: number) =>
+                          Math.round(value).toString()
+                        }
+                      />
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
                   </Container>
                 </div>
 
@@ -176,70 +201,120 @@ const AnalyticsPage = () => {
                       }).format(orders?.total_sales || 0)}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
-                      +8.2% from previous period
+                      +{orders?.prev_sales_percent || 0}% from previous period
                     </Text>
                   </Container>
 
-                  <Container>
+                  <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Sales Over Time
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Total sales in the selected period
                     </Text>
-                    <LineChart
-                      data={orders?.order_sales}
-                      xAxisDataKey="name"
-                      yAxisDataKey="sales"
-                      lineColor="#82ca9d"
-                    />
+                    {orders?.order_sales &&
+                    orders?.order_sales?.length > 0 &&
+                    someOrderSalesGreaterThanZero ? (
+                      <LineChart
+                        data={orders?.order_sales}
+                        xAxisDataKey="name"
+                        yAxisDataKey="sales"
+                        lineColor="#82ca9d"
+                        yAxisTickFormatter={(value: number) =>
+                          new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'EUR',
+                            maximumFractionDigits: 0,
+                          }).format(value)
+                        }
+                      />
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
                   </Container>
                 </div>
               </div>
               <div className="flex max-md:flex-col gap-4">
                 <div className="flex-1">
-                  <Container>
+                  <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Top Regions by Sales
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Sales breakdown by region in the selected period
                     </Text>
-                    <BarChart
-                      data={orders?.regions}
-                      xAxisDataKey="name"
-                      yAxisDataKey="sales"
-                      lineColor="#82ca9d"
-                    />
+                    {orders?.regions && orders?.regions?.length > 0 ? (
+                      <BarChart
+                        data={orders?.regions}
+                        xAxisDataKey="name"
+                        yAxisDataKey="sales"
+                        lineColor="#82ca9d"
+                        yAxisTickFormatter={(value: number) =>
+                          new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'EUR',
+                            maximumFractionDigits: 0,
+                          }).format(value)
+                        }
+                      />
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
                   </Container>
                 </div>
                 <div className="flex-1">
-                  <Container>
+                  <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Order Status Breakdown
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Distribution of orders by status in the selected period
                     </Text>
-                    <PieChart data={orders?.statuses} dataKey="count" />
+                    {orders?.statuses && orders?.statuses?.length > 0 ? (
+                      <PieChart data={orders?.statuses} dataKey="count" />
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
                   </Container>
                 </div>
               </div>
             </Tabs.Content>
             <Tabs.Content value="products">
-              <Container className="mb-4">
+              <Container className="mb-4 min-h-[9.375rem]">
                 <Text size="xlarge" weight="plus">
                   Top-Selling Products
                 </Text>
                 <Text size="small" className="mb-8 text-ui-fg-muted">
                   Products by quantity sold in selected period
                 </Text>
-                <BarChart
-                  data={products?.variantQuantitySold || []}
-                  xAxisDataKey="title"
-                  yAxisDataKey="quantity"
-                  lineColor="#82ca9d"
-                />
+                {products?.variantQuantitySold &&
+                someTopSellingProductsGreaterThanZero ? (
+                  <BarChart
+                    data={products.variantQuantitySold}
+                    xAxisDataKey="title"
+                    yAxisDataKey="quantity"
+                    lineColor="#82ca9d"
+                  />
+                ) : (
+                  <Text size="small" className="text-ui-fg-muted text-center">
+                    No data available for the selected period.
+                  </Text>
+                )}
               </Container>
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>

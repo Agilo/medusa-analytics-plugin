@@ -5,7 +5,13 @@ import {
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
 import _ from 'lodash';
-import { format, eachDayOfInterval } from 'date-fns';
+import {
+  format,
+  eachDayOfInterval,
+  parseISO,
+  differenceInCalendarDays,
+  subDays,
+} from 'date-fns';
 
 export const adminOrdersListQuerySchema = z.object({
   date_from: z.string(),
@@ -13,6 +19,11 @@ export const adminOrdersListQuerySchema = z.object({
 });
 
 const DEAFULT_CURRENCY = 'EUR';
+
+function getPercentChange(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return ((current - previous) / previous) * 100;
+}
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
@@ -22,6 +33,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     `https://api.frankfurter.dev/v1/latest?base=${DEAFULT_CURRENCY}`
   );
   const exchangeRates = await response.json();
+
+  const start = parseISO(validatedQuery.date_from);
+  const end = parseISO(validatedQuery.date_to);
+  const days = differenceInCalendarDays(end, start) + 1;
+  const prevEnd = subDays(start, 1);
+  const prevStart = subDays(prevEnd, days - 1);
+  const prevFrom = format(prevStart, 'yyyy-MM-dd');
+  const prevTo = format(prevEnd, 'yyyy-MM-dd');
 
   const { data } = await query.graph({
     entity: 'order',
@@ -40,16 +59,40 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
     filters: {
       created_at: {
-        $gte: validatedQuery.date_from,
-        $lte: validatedQuery.date_to,
+        $gte: validatedQuery.date_from + 'T00:00:00Z',
+        $lte: validatedQuery.date_to + 'T23:59:59.999Z',
+      },
+      status: { $nin: ['draft'] },
+    },
+  });
+
+  const { data: prevData } = await query.graph({
+    entity: 'order',
+    fields: [
+      'id',
+      'total',
+      'created_at',
+      'status',
+      'currency_code',
+      'region.name',
+    ],
+    pagination: {
+      order: {
+        created_at: 'asc',
+      },
+    },
+    filters: {
+      created_at: {
+        $gte: prevFrom + 'T00:00:00Z',
+        $lte: prevTo + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft'] },
     },
   });
 
   const dateRange = eachDayOfInterval({
-    start: validatedQuery.date_from,
-    end: validatedQuery.date_to,
+    start: parseISO(validatedQuery.date_from),
+    end: parseISO(validatedQuery.date_to),
   }).map((d) => format(d, 'yyyy-MM-dd'));
 
   let regions: Record<string, number> = {};
@@ -88,6 +131,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
   });
 
+  let prevTotalSales = 0;
+  prevData.forEach((order) => {
+    const exchangeRate =
+      order.currency_code.toUpperCase() !== DEAFULT_CURRENCY
+        ? exchangeRates.rates[order.currency_code.toUpperCase()]
+        : 1;
+    const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
+    prevTotalSales += orderTotal;
+  });
+  const prevTotalOrders = prevData.length;
+
+  const percentOrders = getPercentChange(data.length, prevTotalOrders);
+  const percentSales = getPercentChange(totalSales, prevTotalSales);
+
   const salesArray = dateRange.map((date) => ({
     name: date,
     sales: groupedByDate[date]?.sales ?? 0,
@@ -113,8 +170,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const orderData = {
     total_orders: data.length,
+    prev_orders_percent: percentOrders,
     regions: regionsArray,
     total_sales: totalSales,
+    prev_sales_percent: percentSales,
     statuses: statusesArray,
     order_sales: salesArray,
     order_count: orderCountArray,

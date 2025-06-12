@@ -33,8 +33,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
     filters: {
       created_at: {
-        $gte: validatedQuery.date_from,
-        $lte: validatedQuery.date_to,
+        $gte: validatedQuery.date_from + 'T00:00:00Z',
+        $lte: validatedQuery.date_to + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft'] },
     },
@@ -101,7 +101,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   productVariants.forEach((variant) => {
     if (variant.sku) {
-      const qty = quantityBySku[variant.sku];
       lowStockVariants.push({
         sku: variant.sku,
         inventoryQuantity: quantityBySku[variant.sku],

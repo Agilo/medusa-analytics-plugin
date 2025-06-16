@@ -157,7 +157,8 @@ const AnalyticsPage = () => {
                       {orders?.total_orders || 0}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
-                      +{orders?.prev_orders_percent || 0}% from previous period
+                      {(orders?.prev_orders_percent || 0) > 0 && '+'}
+                      {orders?.prev_orders_percent || 0}% from previous period
                     </Text>
                   </Container>
 
@@ -201,7 +202,8 @@ const AnalyticsPage = () => {
                       }).format(orders?.total_sales || 0)}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
-                      +{orders?.prev_sales_percent || 0}% from previous period
+                      {(orders?.prev_sales_percent || 0) > 0 && '+'}
+                      {orders?.prev_sales_percent || 0}% from previous period
                     </Text>
                   </Container>
 

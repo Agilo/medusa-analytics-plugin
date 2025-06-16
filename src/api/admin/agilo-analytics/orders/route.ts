@@ -7,11 +7,12 @@ import { z } from 'zod';
 import _ from 'lodash';
 import {
   format,
-  eachDayOfInterval,
   parseISO,
   differenceInCalendarDays,
   subDays,
+  differenceInDays,
 } from 'date-fns';
+import { generateKeyRange, getGroupKey } from '../../../../utils/orders';
 
 export const adminOrdersListQuerySchema = z.object({
   date_from: z.string(),
@@ -90,15 +91,29 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
   });
 
-  const dateRange = eachDayOfInterval({
-    start: parseISO(validatedQuery.date_from),
-    end: parseISO(validatedQuery.date_to),
-  }).map((d) => format(d, 'yyyy-MM-dd'));
+  const totalDays = differenceInDays(
+    parseISO(validatedQuery.date_to),
+    parseISO(validatedQuery.date_from)
+  );
+
+  let groupBy: 'day' | 'week' | 'month' = 'day';
+  if (totalDays > 120) {
+    groupBy = 'month';
+  } else if (totalDays > 30) {
+    groupBy = 'week';
+  }
+
+  const keyRange = generateKeyRange(
+    groupBy,
+    validatedQuery.date_from,
+    validatedQuery.date_to
+  );
 
   let regions: Record<string, number> = {};
   let totalSales = 0;
   let statuses: Record<string, number> = {};
-  const groupedByDate: Record<string, { orderCount: number; sales: number }> =
+
+  const groupedByKey: Record<string, { orderCount: number; sales: number }> =
     {};
 
   data.forEach((order) => {
@@ -107,27 +122,30 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
-    const date = format(new Date(order.created_at), 'yyyy-MM-dd');
 
-    if (!groupedByDate[date]) {
-      groupedByDate[date] = { orderCount: 0, sales: 0 };
+    const key = getGroupKey(
+      new Date(order.created_at),
+      groupBy,
+      validatedQuery.date_from,
+      validatedQuery.date_to
+    );
+
+    if (!groupedByKey[key]) {
+      groupedByKey[key] = { orderCount: 0, sales: 0 };
     }
-    groupedByDate[date].orderCount += 1;
-    groupedByDate[date].sales += orderTotal;
+
+    groupedByKey[key].orderCount += 1;
+    groupedByKey[key].sales += orderTotal;
 
     totalSales += orderTotal;
-    if (order.region?.name && regions[order?.region?.name]) {
-      regions[order?.region?.name] += orderTotal;
-    } else if (order.region?.name) {
-      regions[order.region?.name] = orderTotal;
+
+    if (order.region?.name) {
+      regions[order.region.name] =
+        (regions[order.region.name] ?? 0) + orderTotal;
     }
 
     if (order.status) {
-      if (statuses[order.status]) {
-        statuses[order.status] += 1;
-      } else {
-        statuses[order.status] = 1;
-      }
+      statuses[order.status] = (statuses[order.status] ?? 0) + 1;
     }
   });
 
@@ -145,14 +163,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const percentOrders = getPercentChange(data.length, prevTotalOrders);
   const percentSales = getPercentChange(totalSales, prevTotalSales);
 
-  const salesArray = dateRange.map((date) => ({
+  const salesArray = keyRange.map((date) => ({
     name: date,
-    sales: groupedByDate[date]?.sales ?? 0,
+    sales: groupedByKey[date]?.sales ?? 0,
   }));
 
-  const orderCountArray = dateRange.map((date) => ({
+  const orderCountArray = keyRange.map((date) => ({
     name: date,
-    count: groupedByDate[date]?.orderCount ?? 0,
+    count: groupedByKey[date]?.orderCount ?? 0,
   }));
 
   const regionsArray = Object.entries(regions)

@@ -176,9 +176,6 @@ const AnalyticsPage = () => {
                         data={orders?.order_count}
                         xAxisDataKey="name"
                         yAxisDataKey="count"
-                        yAxisTickFormatter={(value: number) =>
-                          Math.round(value).toString()
-                        }
                       />
                     ) : (
                       <Text

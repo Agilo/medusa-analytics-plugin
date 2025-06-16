@@ -22,7 +22,7 @@ const DEAFULT_CURRENCY = 'EUR';
 
 function getPercentChange(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;
-  return ((current - previous) / previous) * 100;
+  return Number((((current - previous) / previous) * 100).toFixed(2));
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

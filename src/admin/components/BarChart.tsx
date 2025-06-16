@@ -28,7 +28,7 @@ export const BarChart: React.FC<BarChartProps> = ({
       <RechartsBarChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisDataKey} />
-        <YAxis tickFormatter={yAxisTickFormatter} />
+        <YAxis tickFormatter={yAxisTickFormatter} allowDecimals={false} />
         <Tooltip
           labelClassName="text-ui-fg-subtle"
           formatter={(value: number) =>

@@ -25,7 +25,7 @@ export function generateWeekKey(
       : addDays(current, 6);
 
     if (date >= weekStart && date <= weekEnd) {
-      return `${format(weekStart, 'dd.MM.')}-${format(weekEnd, 'dd.MM.')}`;
+      return `${format(weekStart, 'dd.MM')}-${format(weekEnd, 'dd.MM')}`;
     }
 
     current = addDays(weekEnd, 1);
@@ -43,7 +43,7 @@ export function generateWeekRanges(start: Date, end: Date): string[] {
     const weekEnd = isAfter(addDays(current, 6), end)
       ? end
       : addDays(current, 6);
-    weeks.push(`${format(weekStart, 'dd.MM.')}-${format(weekEnd, 'dd.MM.')}`);
+    weeks.push(`${format(weekStart, 'dd.MM')}-${format(weekEnd, 'dd.MM')}`);
     current = addDays(weekEnd, 1);
   }
 

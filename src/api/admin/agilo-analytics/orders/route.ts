@@ -5,13 +5,7 @@ import {
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
 import _ from 'lodash';
-import {
-  format,
-  parseISO,
-  differenceInCalendarDays,
-  subDays,
-  differenceInDays,
-} from 'date-fns';
+import { format, parseISO, differenceInCalendarDays, subDays } from 'date-fns';
 import { generateKeyRange, getGroupKey } from '../../../../utils/orders';
 
 export const adminOrdersListQuerySchema = z.object({
@@ -19,7 +13,7 @@ export const adminOrdersListQuerySchema = z.object({
   date_to: z.string(),
 });
 
-const DEAFULT_CURRENCY = 'EUR';
+const DEFAULT_CURRENCY = 'EUR';
 
 function getPercentChange(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;
@@ -29,9 +23,20 @@ function getPercentChange(current: number, previous: number) {
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const config = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE);
+
+  const pluginConfig = config.plugins.find((p) =>
+    typeof p === 'string'
+      ? p === '@agilo/medusa-analytics-plugin'
+      : p.resolve === '@agilo/medusa-analytics-plugin'
+  );
+  const currencyCode =
+    typeof pluginConfig === 'string'
+      ? DEFAULT_CURRENCY
+      : pluginConfig?.options?.currency_code || DEFAULT_CURRENCY;
 
   const response = await fetch(
-    `https://api.frankfurter.dev/v1/latest?base=${DEAFULT_CURRENCY}`
+    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
   );
   const exchangeRates = await response.json();
 
@@ -91,15 +96,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
   });
 
-  const totalDays = differenceInDays(
-    parseISO(validatedQuery.date_to),
-    parseISO(validatedQuery.date_from)
-  );
-
   let groupBy: 'day' | 'week' | 'month' = 'day';
-  if (totalDays > 120) {
+  if (days > 120) {
     groupBy = 'month';
-  } else if (totalDays > 30) {
+  } else if (days > 30) {
     groupBy = 'week';
   }
 
@@ -118,7 +118,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   data.forEach((order) => {
     const exchangeRate =
-      order.currency_code.toUpperCase() !== DEAFULT_CURRENCY
+      order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
@@ -152,7 +152,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   let prevTotalSales = 0;
   prevData.forEach((order) => {
     const exchangeRate =
-      order.currency_code.toUpperCase() !== DEAFULT_CURRENCY
+      order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
@@ -195,6 +195,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     statuses: statusesArray,
     order_sales: salesArray,
     order_count: orderCountArray,
+    currency_code: currencyCode,
   };
 
   res.json(orderData);

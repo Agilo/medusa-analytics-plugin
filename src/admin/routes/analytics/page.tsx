@@ -195,7 +195,7 @@ const AnalyticsPage = () => {
                     <Text size="xlarge" weight="plus">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
-                        currency: 'EUR',
+                        currency: orders?.currency_code || 'EUR',
                       }).format(orders?.total_sales || 0)}
                     </Text>
                     <Text size="xsmall" className="text-ui-fg-muted">
@@ -222,7 +222,7 @@ const AnalyticsPage = () => {
                         yAxisTickFormatter={(value: number) =>
                           new Intl.NumberFormat('en-US', {
                             style: 'currency',
-                            currency: 'EUR',
+                            currency: orders.currency_code,
                             maximumFractionDigits: 0,
                           }).format(value)
                         }
@@ -256,7 +256,7 @@ const AnalyticsPage = () => {
                         yAxisTickFormatter={(value: number) =>
                           new Intl.NumberFormat('en-US', {
                             style: 'currency',
-                            currency: 'EUR',
+                            currency: orders.currency_code,
                             maximumFractionDigits: 0,
                           }).format(value)
                         }

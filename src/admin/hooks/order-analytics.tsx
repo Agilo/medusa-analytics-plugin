@@ -12,6 +12,7 @@ export type OrderAnalyticsResponse = {
   prev_sales_percent: number;
   order_count: { name: string; count: number }[];
   prev_orders_percent: number;
+  currency_code: string;
 };
 
 export const useOrderAnalytics = (

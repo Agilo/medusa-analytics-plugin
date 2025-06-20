@@ -37,7 +37,12 @@ export const BarChartSkeleton = () => {
     <ResponsiveContainer aspect={16 / 9}>
       <RechartsBarChart data={dummyData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <Bar dataKey="a" fill="#E7E7E7" className="animate-pulse" />
+        <Bar
+          dataKey="a"
+          fill="#E7E7E7"
+          className="animate-pulse"
+          isAnimationActive={false}
+        />
       </RechartsBarChart>
     </ResponsiveContainer>
   );

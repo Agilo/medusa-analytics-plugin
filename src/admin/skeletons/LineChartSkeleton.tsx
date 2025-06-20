@@ -42,6 +42,7 @@ export const LineChartSkeleton = () => {
           dataKey="a"
           stroke="#E7E7E7"
           className="animate-pulse"
+          isAnimationActive={false}
         />
       </RechartsLineChart>
     </ResponsiveContainer>

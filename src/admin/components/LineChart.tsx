@@ -31,14 +31,13 @@ export const LineChart: React.FC<LineChartProps> = ({
         <XAxis dataKey={xAxisDataKey} />
         <YAxis tickFormatter={yAxisTickFormatter} allowDecimals={false} />
         <Tooltip
-          labelClassName="text-ui-fg-subtle"
           formatter={(value: number) =>
             yAxisTickFormatter ? yAxisTickFormatter(value) : value
           }
           content={({ label, payload }) => {
             if (!payload || !payload.length) return null;
             return (
-              <div className="bg-white px-3 py-2 rounded shadow-md text-md text-ui-fg-base">
+              <div className="bg-white px-3 py-2 rounded shadow-md text-md text-[#000]">
                 <div className="font-medium mb-1">{label}</div>
                 {payload.map((entry, idx) => {
                   const v = entry.value;

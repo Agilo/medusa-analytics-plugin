@@ -36,7 +36,7 @@ export const PieChartSkeleton = () => {
   return (
     <ResponsiveContainer aspect={16 / 9}>
       <RechartsPieChart width={400} height={400}>
-        <Pie data={dummyData} dataKey="a">
+        <Pie data={dummyData} dataKey="a" isAnimationActive={false}>
           {dummyData &&
             dummyData.map((_, index) => (
               <Cell

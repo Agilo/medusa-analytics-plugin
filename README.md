@@ -32,15 +32,6 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
     - Out-of-Stock Variants (Table: SKU, Variant Name, Inventory)
     - Low Stock Variants (Table: SKU, Variant Name, Inventory)
 
-## Out of Scope (MVP)
-
-The following features are not included in the MVP:
-
-- Export to CSV/PDF
-- Email reports
-- Drilldowns or clickable charts
-- Marketing/customer analytics
-
 ## Getting Started
 
 1. **Install the plugin** in your Medusa project:

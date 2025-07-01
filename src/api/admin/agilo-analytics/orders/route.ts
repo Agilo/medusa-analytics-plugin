@@ -4,7 +4,6 @@ import {
   ContainerRegistrationKeys,
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
-import _ from 'lodash';
 import { format, parseISO, differenceInCalendarDays, subDays } from 'date-fns';
 import { generateKeyRange, getGroupKey } from '../../../../utils/orders';
 
@@ -28,7 +27,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const pluginConfig = config.plugins.find((p) =>
     typeof p === 'string'
       ? p === '@agilo/medusa-analytics-plugin'
-      : p.resolve === '@agilo/medusa-analytics-plugin'
+      : p.resolve === '@agilo/medusa-analytics-plugin',
   );
   const currencyCode =
     typeof pluginConfig === 'string'
@@ -36,7 +35,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       : pluginConfig?.options?.currency_code || DEFAULT_CURRENCY;
 
   const response = await fetch(
-    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
+    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
   );
   const exchangeRates = await response.json();
 
@@ -106,7 +105,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const keyRange = generateKeyRange(
     groupBy,
     validatedQuery.date_from,
-    validatedQuery.date_to
+    validatedQuery.date_to,
   );
 
   let regions: Record<string, number> = {};
@@ -127,7 +126,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       new Date(order.created_at),
       groupBy,
       validatedQuery.date_from,
-      validatedQuery.date_to
+      validatedQuery.date_to,
     );
 
     if (!groupedByKey[key]) {

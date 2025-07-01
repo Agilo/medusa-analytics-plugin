@@ -8,12 +8,14 @@
 </h1>
 
 <p align="center">
-  Actionable analytics for Medusa Admin focused on Orders and Products
+  Get actionable insights into your store's performance and make data-driven decisions right from the Medusa Admin dashboard.
 </p>
 
 ## Overview
 
-The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa admin dashboard. It provides store admins with actionable insights into orders and products through a clean, focused dashboard. This MVP is designed for rapid deployment and easy use, with no reporting/export features.
+The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa Admin dashboard. It provides store admins with a clear view of sales and product performance using focused KPIs, charts, and tables, all accessible directly within the Medusa Admin panel.
+
+✅ Compatible with Medusa v2
 
 ## Features
 
@@ -29,16 +31,16 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
     - Order Status Breakdown (Pie Chart)
   - **Products Tab**:
     - Top-Selling Products (Bar Chart)
-    - Out-of-Stock Variants (Table: SKU, Variant Name, Inventory)
-    - Low Stock Variants (Table: SKU, Variant Name, Inventory)
+    - Out-of-Stock Variants (Table)
+    - Low Stock Variants (Table)
 
 ## Getting Started
 
 1. **Install the plugin** in your Medusa project:
    ```bash
-   npx medusa plugin:add @agilo/medusa-analytics-plugin
+   yarn add @agilo/medusa-analytics-plugin
    ```
-2. **Add the plugin** to your Medusa backend configuration. In your `medusa-config.js` or `medusa-config.ts`, add the following to the `plugins` array:
+2. **Add the plugin** to your Medusa backend configuration. In `medusa-config.ts`, add the following to the `plugins` array:
 
    ```js
    plugins: [
@@ -60,12 +62,7 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
    ```
 5. **Access the Analytics page** from the Medusa Admin dashboard.
 
-## Tech Stack
-
-- [Medusa](https://medusajs.com/)
-- [Recharts](https://recharts.org/) for charts
-- Medusa UI DataTable for tables
-
 ## Contributing
 
-We welcome contributions! Please open issues or pull requests on [GitHub](https://github.com/Agilo/medusa-analytics-plugin).
+We welcome contributions and feedback.
+To get involved, [open an issue](https://github.com/Agilo/medusa-analytics-plugin/issues) or [submit a pull request](https://github.com/Agilo/medusa-analytics-plugin/pulls) on [GitHub →](https://github.com/Agilo/medusa-analytics-plugin)

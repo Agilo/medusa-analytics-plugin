@@ -12,19 +12,32 @@ import {
   ChartBar,
   ShoppingCart,
   Calendar as CalendarIcon,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import {
+  Button,
+  CalendarCell,
+  CalendarGrid,
+  DateInput,
+  DateRangePicker,
+  DateSegment,
+  Dialog,
+  Group,
+  Heading as AriaHeading,
+  Popover,
+  RangeCalendar,
+  DateValue,
+} from 'react-aria-components';
+import { CalendarDate } from '@internationalized/date';
+import type { RangeValue } from '@react-types/shared';
 
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
 import { PieChart } from '../../components/PieChart';
-import { Calendar } from '../../components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '../../components/ui/popover';
 import { ProductsTable } from '../../components/ProductsTable';
 import { useProductAnalytics } from '../../hooks/product-analytics';
 import { useOrderAnalytics } from '../../hooks/order-analytics';
@@ -34,7 +47,47 @@ import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
 import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
 
-/* Popravit dark mode */
+// Analytics page with dark mode support
+
+// Helper functions to convert between DateRange and RangeValue<DateValue>
+function dateToCalendarDate(date: Date): CalendarDate {
+  return new CalendarDate(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  );
+}
+
+function calendarDateToDate(calendarDate: DateValue): Date {
+  const year =
+    'year' in calendarDate ? calendarDate.year : new Date().getFullYear();
+  const month =
+    'month' in calendarDate ? calendarDate.month : new Date().getMonth() + 1;
+  const day = 'day' in calendarDate ? calendarDate.day : new Date().getDate();
+  return new Date(year, month - 1, day);
+}
+
+function dateRangeToRangeValue(
+  dateRange: DateRange | undefined,
+): RangeValue<DateValue> | null {
+  if (!dateRange?.from) return null;
+  return {
+    start: dateToCalendarDate(dateRange.from),
+    end: dateRange.to
+      ? dateToCalendarDate(dateRange.to)
+      : dateToCalendarDate(dateRange.from),
+  };
+}
+
+function rangeValueToDateRange(
+  rangeValue: RangeValue<DateValue> | null,
+): DateRange | undefined {
+  if (!rangeValue) return undefined;
+  return {
+    from: calendarDateToDate(rangeValue.start),
+    to: rangeValue.end ? calendarDateToDate(rangeValue.end) : undefined,
+  };
+}
 
 const AnalyticsPage = () => {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -42,9 +95,8 @@ const AnalyticsPage = () => {
     to: endOfMonth(new Date()),
   });
   const [selectValue, setSelectValue] = React.useState<string | undefined>(
-    'this-month'
+    'this-month',
   );
-  const [popoverOpen, setPopoverOpen] = React.useState<boolean>(false);
 
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
@@ -52,15 +104,25 @@ const AnalyticsPage = () => {
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(date);
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
-    (item) => item.count > 0
+    (item) => item.count > 0,
   );
 
   const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
-    (item) => item.sales > 0
+    (item) => item.sales > 0,
   );
 
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
+
+  // Handle date range changes and automatically switch to custom
+  const handleDateRangeChange = (value: RangeValue<DateValue> | null) => {
+    const newDateRange = rangeValueToDateRange(value);
+    setDate(newDateRange);
+    // Only switch to custom if the value is different from preset values
+    if (selectValue !== 'custom') {
+      setSelectValue('custom');
+    }
+  };
 
   React.useEffect(() => {
     const today = new Date();
@@ -84,14 +146,11 @@ const AnalyticsPage = () => {
           to: today,
         });
         break;
+      case 'custom':
+        // Keep the current date when switching to custom
+        break;
     }
   }, [selectValue]);
-
-  React.useEffect(() => {
-    if (selectValue !== 'custom' && date && popoverOpen) {
-      setSelectValue('custom');
-    }
-  }, [date]);
 
   return (
     <Container className="divide-y p-0">
@@ -117,37 +176,82 @@ const AnalyticsPage = () => {
               </Select.Content>
             </Select>
           </div>
-          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-            <PopoverTrigger
-              disabled={isLoadingOrders || isLoadingProducts}
-              id="date"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small py-1.5 h-auto text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 px-4 dark:border-input dark:hover:bg-input/50"
-            >
-              <CalendarIcon className="mr-2 h-4 w-4 text-ui-fg-muted group-disabled:text-ui-fg-disabled" />
-              {date?.from ? (
-                date.to ? (
-                  <>
-                    {format(date.from, 'LLL dd, y')} -{' '}
-                    {format(date.to, 'LLL dd, y')}
-                  </>
-                ) : (
-                  format(date.from, 'LLL dd, y')
-                )
-              ) : (
-                <span>Pick a date range</span>
-              )}
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-transparent" align="end">
-              <Calendar
-                autoFocus
-                mode="range"
-                defaultMonth={date?.from}
-                selected={date}
-                onSelect={setDate}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
+          <DateRangePicker
+            value={dateRangeToRangeValue(date)}
+            onChange={handleDateRangeChange}
+            isDisabled={isLoadingOrders || isLoadingProducts}
+          >
+            <Group className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small h-8 text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-ui-bg-field-component dark:border-ui-border-base dark:hover:bg-ui-bg-field-hover px-4 border cursor-pointer">
+              <CalendarIcon className="h-4 w-4 text-ui-fg-muted group-disabled:text-ui-fg-disabled flex-shrink-0" />
+              <DateInput slot="start" className="flex-1 min-w-0">
+                {(segment) => (
+                  <DateSegment
+                    segment={segment}
+                    className="outline-none rounded-sm focus:bg-ui-bg-interactive focus:text-ui-fg-on-color caret-transparent placeholder-shown:italic text-ui-fg-base data-[placeholder]:text-ui-fg-muted"
+                  />
+                )}
+              </DateInput>
+              <span aria-hidden="true" className="text-ui-fg-muted px-1">
+                —
+              </span>
+              <DateInput slot="end" className="flex-1 min-w-0">
+                {(segment) => (
+                  <DateSegment
+                    segment={segment}
+                    className="outline-none rounded-sm focus:bg-ui-bg-interactive focus:text-ui-fg-on-color caret-transparent placeholder-shown:italic text-ui-fg-base data-[placeholder]:text-ui-fg-muted"
+                  />
+                )}
+              </DateInput>
+              <Button className="text-ui-fg-muted hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle rounded p-1">
+                <ChevronDown className="size-4" />
+              </Button>
+            </Group>
+            <Popover className="w-auto p-0 bg-transparent z-50">
+              <Dialog className="bg-ui-bg-base dark:bg-ui-bg-base border border-ui-border-base dark:border-ui-border-base rounded-lg shadow-lg p-6 max-w-fit">
+                <RangeCalendar
+                  className="w-fit"
+                  visibleDuration={{ months: 2 }}
+                >
+                  <header className="flex items-center justify-between mb-4">
+                    <Button
+                      slot="previous"
+                      className="p-2 hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle rounded text-ui-fg-base"
+                    >
+                      <ChevronLeft className="size-4" />
+                    </Button>
+                    <AriaHeading className="font-semibold text-lg text-ui-fg-base" />
+                    <Button
+                      slot="next"
+                      className="p-2 hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle rounded text-ui-fg-base"
+                    >
+                      <ChevronRight className="size-4" />
+                    </Button>
+                  </header>
+                  <div className="flex gap-6">
+                    <CalendarGrid className="border-collapse gap-1">
+                      {(date) => (
+                        <CalendarCell
+                          date={date}
+                          className="w-9 h-9 text-sm cursor-pointer rounded flex items-center justify-center hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle selected:bg-ui-bg-interactive selected:text-ui-fg-on-color selection-start:bg-ui-bg-interactive selection-start:text-ui-fg-on-color selection-end:bg-ui-bg-interactive selection-end:text-ui-fg-on-color outside-month:text-ui-fg-disabled unavailable:text-ui-fg-disabled unavailable:cursor-default text-ui-fg-base data-[selected]:bg-ui-bg-interactive data-[selected]:text-ui-fg-on-color data-[selection-start]:bg-ui-bg-interactive data-[selection-start]:text-ui-fg-on-color data-[selection-end]:bg-ui-bg-interactive data-[selection-end]:text-ui-fg-on-color"
+                        />
+                      )}
+                    </CalendarGrid>
+                    <CalendarGrid
+                      offset={{ months: 1 }}
+                      className="border-collapse gap-1"
+                    >
+                      {(date) => (
+                        <CalendarCell
+                          date={date}
+                          className="w-9 h-9 text-sm cursor-pointer rounded flex items-center justify-center hover:bg-ui-bg-subtle dark:hover:bg-ui-bg-subtle selected:bg-ui-bg-interactive selected:text-ui-fg-on-color selection-start:bg-ui-bg-interactive selection-start:text-ui-fg-on-color selection-end:bg-ui-bg-interactive selection-end:text-ui-fg-on-color outside-month:text-ui-fg-disabled unavailable:text-ui-fg-disabled unavailable:cursor-default text-ui-fg-base data-[selected]:bg-ui-bg-interactive data-[selected]:text-ui-fg-on-color data-[selection-start]:bg-ui-bg-interactive data-[selection-start]:text-ui-fg-on-color data-[selection-end]:bg-ui-bg-interactive data-[selection-end]:text-ui-fg-on-color"
+                        />
+                      )}
+                    </CalendarGrid>
+                  </div>
+                </RangeCalendar>
+              </Dialog>
+            </Popover>
+          </DateRangePicker>
         </div>
       </div>
       <div className="px-6 py-4">
@@ -373,7 +477,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity === 0
+                          (product) => product.inventoryQuantity === 0,
                         ) || []
                       }
                     />
@@ -392,7 +496,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity > 0
+                          (product) => product.inventoryQuantity > 0,
                         ) || []
                       }
                     />

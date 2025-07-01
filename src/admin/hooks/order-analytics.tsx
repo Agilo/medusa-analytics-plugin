@@ -5,7 +5,7 @@ import { retrieveOrderAnalytics } from '../lib/data/order-analytics';
 
 export type OrderAnalyticsResponse = {
   total_orders: number;
-  regions: { name: string; sales: number }[][];
+  regions: { name: string; sales: number }[];
   total_sales: number;
   statuses: { name: string; count: number }[];
   order_sales: { name: string; sales: number }[];
@@ -20,7 +20,7 @@ export const useOrderAnalytics = (
   options?: Omit<
     UseQueryOptions<OrderAnalyticsResponse | undefined, Error>,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: ['order-analytics', query?.from, query?.to],

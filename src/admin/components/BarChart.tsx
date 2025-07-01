@@ -7,25 +7,39 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import { useDarkMode } from '../hooks/use-dark-mode';
+import { generateColorsForData } from '../lib/utils';
 
-type BarChartProps = {
-  data: any[] | undefined;
-  xAxisDataKey: string;
-  yAxisDataKey: string;
+type BarChartProps<T extends Record<string, unknown>> = {
+  data: T[] | undefined;
+  xAxisDataKey: keyof T;
+  yAxisDataKey: keyof T;
   lineColor?: string;
   yAxisTickFormatter?: (value: number) => string;
+  useStableColors?: boolean;
+  colorKeyField?: keyof T;
 };
 
-export const BarChart: React.FC<BarChartProps> = ({
+export const BarChart = <T extends Record<string, unknown>>({
   data,
   xAxisDataKey,
   yAxisDataKey,
   lineColor = '#3B82F6',
   yAxisTickFormatter,
-}) => {
+  useStableColors = false,
+  colorKeyField,
+}: BarChartProps<T>) => {
   const isDark = useDarkMode();
+
+  // Generate stable colors if requested
+  const colors = React.useMemo(() => {
+    if (!useStableColors || !data || !colorKeyField) {
+      return [];
+    }
+    return generateColorsForData(data, colorKeyField, 70, isDark ? 60 : 50);
+  }, [data, useStableColors, colorKeyField, isDark]);
 
   return (
     <ResponsiveContainer aspect={16 / 9}>
@@ -35,7 +49,7 @@ export const BarChart: React.FC<BarChartProps> = ({
           stroke={isDark ? '#374151' : '#E5E7EB'}
         />
         <XAxis
-          dataKey={xAxisDataKey}
+          dataKey={String(xAxisDataKey)}
           tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
           axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
           tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
@@ -69,7 +83,13 @@ export const BarChart: React.FC<BarChartProps> = ({
             marginBottom: '4px',
           }}
         />
-        <Bar dataKey={yAxisDataKey} fill={lineColor} />
+        <Bar dataKey={String(yAxisDataKey)} fill={lineColor}>
+          {useStableColors && colors.length > 0
+            ? data?.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={colors[index]} />
+              ))
+            : null}
+        </Bar>
       </RechartsBarChart>
     </ResponsiveContainer>
   );

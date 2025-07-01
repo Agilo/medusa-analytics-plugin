@@ -391,10 +391,12 @@ const AnalyticsPage = () => {
                       <BarChartSkeleton />
                     ) : orders?.regions && orders?.regions?.length > 0 ? (
                       <BarChart
-                        data={orders?.regions}
+                        data={orders.regions}
                         xAxisDataKey="name"
                         yAxisDataKey="sales"
                         lineColor="#82ca9d"
+                        useStableColors={true}
+                        colorKeyField="name"
                         yAxisTickFormatter={(value: number) =>
                           new Intl.NumberFormat('en-US', {
                             style: 'currency',
@@ -454,6 +456,8 @@ const AnalyticsPage = () => {
                     xAxisDataKey="title"
                     yAxisDataKey="quantity"
                     lineColor="#82ca9d"
+                    useStableColors={true}
+                    colorKeyField="title"
                   />
                 ) : (
                   <Text size="small" className="text-ui-fg-muted text-center">

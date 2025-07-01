@@ -47,8 +47,6 @@ import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
 import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
 
-// Analytics page with dark mode support
-
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -7,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useDarkMode } from '../hooks/use-dark-mode';
 
 type BarChartProps = {
   data: any[] | undefined;
@@ -20,36 +22,51 @@ export const BarChart: React.FC<BarChartProps> = ({
   data,
   xAxisDataKey,
   yAxisDataKey,
-  lineColor,
+  lineColor = '#3B82F6',
   yAxisTickFormatter,
 }) => {
+  const isDark = useDarkMode();
+
   return (
     <ResponsiveContainer aspect={16 / 9}>
       <RechartsBarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey={xAxisDataKey} />
-        <YAxis tickFormatter={yAxisTickFormatter} allowDecimals={false} />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke={isDark ? '#374151' : '#E5E7EB'}
+        />
+        <XAxis
+          dataKey={xAxisDataKey}
+          tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
+          axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+          tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+        />
+        <YAxis
+          tickFormatter={yAxisTickFormatter}
+          allowDecimals={false}
+          tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
+          axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+          tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+        />
         <Tooltip
+          cursor={{
+            fill: isDark ? 'rgba(55, 65, 81, 0.2)' : 'rgba(243, 244, 246, 0.5)',
+          }}
           formatter={(value: number) =>
             yAxisTickFormatter ? yAxisTickFormatter(value) : value
           }
-          content={({ label, payload }) => {
-            if (!payload || !payload.length) return null;
-            return (
-              <div className="bg-white px-3 py-2 rounded shadow-md text-md text-[#000]">
-                <div className="font-medium mb-1">{label}</div>
-                {payload.map((entry, idx) => {
-                  const v = entry.value;
-                  return (
-                    <div key={idx}>
-                      {typeof v === 'number' && yAxisTickFormatter
-                        ? yAxisTickFormatter(v)
-                        : v}
-                    </div>
-                  );
-                })}
-              </div>
-            );
+          contentStyle={{
+            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+            border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+            borderRadius: '0.5rem',
+            color: isDark ? '#F9FAFB' : '#111827',
+            boxShadow: isDark
+              ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+              : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          }}
+          labelStyle={{
+            color: isDark ? '#F9FAFB' : '#111827',
+            fontWeight: '500',
+            marginBottom: '4px',
           }}
         />
         <Bar dataKey={yAxisDataKey} fill={lineColor} />

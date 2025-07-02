@@ -7,6 +7,17 @@ import { z } from 'zod';
 import { format, parseISO, differenceInCalendarDays, subDays } from 'date-fns';
 import { generateKeyRange, getGroupKey } from '../../../../utils/orders';
 
+// export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
+//   z.object({
+//     preset: z.literal('custom'),
+//     date_from: z.string(),
+//     date_to: z.string(),
+//   }),
+//   z.object({
+//     preset: z.literal('this-month').or(z.literal('last-month')).or(z.literal('last-3-months')),
+//   })
+// ]);
+
 export const adminOrdersListQuerySchema = z.object({
   date_from: z.string(),
   date_to: z.string(),
@@ -29,16 +40,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       ? p === '@agilo/medusa-analytics-plugin'
       : p.resolve === '@agilo/medusa-analytics-plugin',
   );
+
+  // TODO: replace with store default currency
   const currencyCode =
     typeof pluginConfig === 'string'
       ? DEFAULT_CURRENCY
       : pluginConfig?.options?.currency_code || DEFAULT_CURRENCY;
 
+  // TODO: cache response for 1 day (research caching strategies)
   const response = await fetch(
     `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
   );
   const exchangeRates = await response.json();
 
+  // TODO: provide preset date range value from the frontend and use it for previous range calculation
   const start = parseISO(validatedQuery.date_from);
   const end = parseISO(validatedQuery.date_to);
   const days = differenceInCalendarDays(end, start) + 1;
@@ -47,7 +62,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const prevFrom = format(prevStart, 'yyyy-MM-dd');
   const prevTo = format(prevEnd, 'yyyy-MM-dd');
 
-  const { data } = await query.graph({
+  // TODO: move this to a service
+  const { data: orders } = await query.graph({
     entity: 'order',
     fields: [
       'id',
@@ -71,7 +87,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
   });
 
-  const { data: prevData } = await query.graph({
+  const { data: prevRangeOrders } = await query.graph({
     entity: 'order',
     fields: [
       'id',
@@ -115,7 +131,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const groupedByKey: Record<string, { orderCount: number; sales: number }> =
     {};
 
-  data.forEach((order) => {
+  for (const order of orders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
@@ -146,20 +162,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     if (order.status) {
       statuses[order.status] = (statuses[order.status] ?? 0) + 1;
     }
-  });
+  }
 
   let prevTotalSales = 0;
-  prevData.forEach((order) => {
+  for (const order of prevRangeOrders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     prevTotalSales += orderTotal;
-  });
-  const prevTotalOrders = prevData.length;
+  }
+  const prevTotalOrders = prevRangeOrders.length;
 
-  const percentOrders = getPercentChange(data.length, prevTotalOrders);
+  const percentOrders = getPercentChange(orders.length, prevTotalOrders);
   const percentSales = getPercentChange(totalSales, prevTotalSales);
 
   const salesArray = keyRange.map((date) => ({
@@ -186,7 +202,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }));
 
   const orderData = {
-    total_orders: data.length,
+    total_orders: orders.length,
     prev_orders_percent: percentOrders,
     regions: regionsArray,
     total_sales: totalSales,

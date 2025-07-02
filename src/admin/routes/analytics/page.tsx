@@ -92,14 +92,15 @@ const AnalyticsPage = () => {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [selectValue, setSelectValue] = React.useState<string | undefined>(
-    'this-month',
-  );
+  const [selectValue, setSelectValue] = React.useState<string>('this-month');
 
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
 
-  const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(date);
+  const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
+    selectValue,
+    date
+  );
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
     (item) => item.count > 0,
@@ -140,8 +141,8 @@ const AnalyticsPage = () => {
         break;
       case 'last-3-months':
         setDate({
-          from: subMonths(today, 3),
-          to: today,
+          from: startOfMonth(subMonths(today, 3)),
+          to: endOfMonth(subMonths(today, 1)),
         });
         break;
       case 'custom':

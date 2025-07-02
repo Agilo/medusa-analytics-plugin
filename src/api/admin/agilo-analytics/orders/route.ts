@@ -4,25 +4,29 @@ import {
   ContainerRegistrationKeys,
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
-import { format, parseISO, differenceInCalendarDays, subDays } from 'date-fns';
-import { generateKeyRange, getGroupKey } from '../../../../utils/orders';
+import { format } from 'date-fns';
+import {
+  calculateDateRangeMethod,
+  generateKeyRange,
+  getGroupKey,
+} from '../../../../utils/orders';
 
-// export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
-//   z.object({
-//     preset: z.literal('custom'),
-//     date_from: z.string(),
-//     date_to: z.string(),
-//   }),
-//   z.object({
-//     preset: z.literal('this-month').or(z.literal('last-month')).or(z.literal('last-3-months')),
-//   })
-// ]);
-
-export const adminOrdersListQuerySchema = z.object({
-  date_from: z.string(),
-  date_to: z.string(),
-});
-
+export const adminOrdersListQuerySchema = z.discriminatedUnion("preset", [
+  z.object({
+    preset: z.literal("custom"),
+    date_from: z.string(),
+    date_to: z.string(),
+  }),
+  z.object({
+    preset: z.literal("this-month"),
+  }),
+  z.object({
+    preset: z.literal("last-month"),
+  }),
+  z.object({
+    preset: z.literal("last-3-months"),
+  }),
+]);
 const DEFAULT_CURRENCY = 'EUR';
 
 function getPercentChange(current: number, previous: number) {
@@ -53,14 +57,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   );
   const exchangeRates = await response.json();
 
-  // TODO: provide preset date range value from the frontend and use it for previous range calculation
-  const start = parseISO(validatedQuery.date_from);
-  const end = parseISO(validatedQuery.date_to);
-  const days = differenceInCalendarDays(end, start) + 1;
-  const prevEnd = subDays(start, 1);
-  const prevStart = subDays(prevEnd, days - 1);
-  const prevFrom = format(prevStart, 'yyyy-MM-dd');
-  const prevTo = format(prevEnd, 'yyyy-MM-dd');
+  const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
+
+  if (!calculateDateRange) {
+    throw new Error('Invalid preset value');
+  }
+
+  const { current, previous, days } = calculateDateRange(validatedQuery);
+
+  const currentFrom = format(current.start, 'yyyy-MM-dd');
+  const currentTo = format(current.end, 'yyyy-MM-dd');
+  const previousFrom = format(previous.start, 'yyyy-MM-dd');
+  const previousTo = format(previous.end, 'yyyy-MM-dd');
 
   // TODO: move this to a service
   const { data: orders } = await query.graph({
@@ -80,8 +88,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
     filters: {
       created_at: {
-        $gte: validatedQuery.date_from + 'T00:00:00Z',
-        $lte: validatedQuery.date_to + 'T23:59:59.999Z',
+        $gte: currentFrom + 'T00:00:00Z',
+        $lte: currentTo + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft'] },
     },
@@ -104,8 +112,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
     filters: {
       created_at: {
-        $gte: prevFrom + 'T00:00:00Z',
-        $lte: prevTo + 'T23:59:59.999Z',
+        $gte: previousFrom + 'T00:00:00Z',
+        $lte: previousTo + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft'] },
     },
@@ -118,11 +126,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     groupBy = 'week';
   }
 
-  const keyRange = generateKeyRange(
-    groupBy,
-    validatedQuery.date_from,
-    validatedQuery.date_to,
-  );
+  const keyRange = generateKeyRange(groupBy, currentFrom, currentTo,);
 
   let regions: Record<string, number> = {};
   let totalSales = 0;
@@ -141,8 +145,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const key = getGroupKey(
       new Date(order.created_at),
       groupBy,
-      validatedQuery.date_from,
-      validatedQuery.date_to,
+      currentFrom,
+      currentTo,
     );
 
     if (!groupedByKey[key]) {

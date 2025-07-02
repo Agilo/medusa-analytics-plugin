@@ -16,6 +16,7 @@ export type OrderAnalyticsResponse = {
 };
 
 export const useOrderAnalytics = (
+  preset: string,
   query: DateRange | undefined,
   options?: Omit<
     UseQueryOptions<OrderAnalyticsResponse | undefined, Error>,
@@ -25,7 +26,7 @@ export const useOrderAnalytics = (
   return useQuery({
     queryKey: ['order-analytics', query?.from, query?.to],
     queryFn: async () => {
-      const data = await retrieveOrderAnalytics(query);
+      const data = await retrieveOrderAnalytics(preset, query);
       return data;
     },
     ...options,

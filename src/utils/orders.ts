@@ -6,7 +6,101 @@ import {
   startOfMonth,
   eachDayOfInterval,
   eachMonthOfInterval,
+  differenceInCalendarDays,
+  endOfMonth,
+  subMonths,
 } from 'date-fns';
+
+type DateRange = { start: Date; end: Date };
+
+/**
+ * `calculateDateRangeMethod` provides functions to calculate date ranges
+ * for different presets (e.g., this month, last month, custom).
+ *
+ * Each function returns:
+ * - `current`: the current date range (start and end)
+ * - `previous`: the previous date range for comparison
+ * - `days`: number of days in the current range
+ */
+export const calculateDateRangeMethod: Record<
+  'custom' | 'this-month' | 'last-month' | 'last-3-months',
+  (query: { date_from?: string; date_to?: string; preset: string }) => {
+    current: DateRange;
+    previous: DateRange;
+    days: number;
+  }
+> = {
+  custom: (query) => {
+    if (!query.date_from || !query.date_to) {
+      throw new Error('No date range provided');
+    }
+    const start = parseISO(query.date_from);
+    const end = parseISO(query.date_to);
+
+    const days = differenceInCalendarDays(end, start) + 1;
+    const prevEnd = new Date(start);
+    prevEnd.setDate(start.getDate() - 1);
+    const prevStart = new Date(prevEnd);
+    prevStart.setDate(prevEnd.getDate() - (days - 1));
+
+    return {
+      current: { start, end },
+      previous: { start: prevStart, end: prevEnd },
+      days,
+    };
+  },
+
+  'this-month': () => {
+    const now = new Date();
+    const start = startOfMonth(now);
+    const end = endOfMonth(now);
+
+    const prevStart = startOfMonth(subMonths(now, 1));
+    const prevEnd = endOfMonth(subMonths(now, 1));
+
+    const days = differenceInCalendarDays(end, start) + 1;
+
+    return {
+      current: { start, end },
+      previous: { start: prevStart, end: prevEnd },
+      days,
+    };
+  },
+
+  'last-month': () => {
+    const last = subMonths(new Date(), 1);
+    const start = startOfMonth(last);
+    const end = endOfMonth(last);
+
+    const prevStart = startOfMonth(subMonths(last, 1));
+    const prevEnd = endOfMonth(subMonths(last, 1));
+
+    const days = differenceInCalendarDays(end, start) + 1;
+
+    return {
+      current: { start, end },
+      previous: { start: prevStart, end: prevEnd },
+      days,
+    };
+  },
+
+  'last-3-months': () => {
+    const now = new Date();
+    const start = startOfMonth(subMonths(now, 3));
+    const end = endOfMonth(subMonths(now, 1));
+
+    const prevStart = startOfMonth(subMonths(now, 6));
+    const prevEnd = endOfMonth(subMonths(now, 4));
+
+    const days = differenceInCalendarDays(end, start) + 1;
+
+    return {
+      current: { start, end },
+      previous: { start: prevStart, end: prevEnd },
+      days,
+    };
+  },
+};
 
 export function generateWeekKey(
   date: Date,

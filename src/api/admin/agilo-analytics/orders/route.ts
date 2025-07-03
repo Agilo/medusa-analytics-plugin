@@ -40,6 +40,33 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
 
+  const fetchOrders = async (dateRange: { from: string; to: string }) => {
+    const { data: orders } = await query.graph({
+      entity: 'order',
+      fields: [
+        'id',
+        'total',
+        'created_at',
+        'status',
+        'currency_code',
+        'region.name',
+      ],
+      pagination: {
+        order: {
+          created_at: 'asc',
+        },
+      },
+      filters: {
+        created_at: {
+          $gte: dateRange.from + 'T00:00:00Z',
+          $lte: dateRange.to + 'T23:59:59.999Z',
+        },
+        status: { $nin: ['draft'] },
+      },
+    });
+    return orders;
+  };
+
   const stores = await storeModuleService.listStores(
     {},
     { relations: ['supported_currencies'] }
@@ -69,53 +96,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const previousFrom = format(previous.start, 'yyyy-MM-dd');
   const previousTo = format(previous.end, 'yyyy-MM-dd');
 
-  // TODO: move this to a service
-  const { data: orders } = await query.graph({
-    entity: 'order',
-    fields: [
-      'id',
-      'total',
-      'created_at',
-      'status',
-      'currency_code',
-      'region.name',
-    ],
-    pagination: {
-      order: {
-        created_at: 'asc',
-      },
-    },
-    filters: {
-      created_at: {
-        $gte: currentFrom + 'T00:00:00Z',
-        $lte: currentTo + 'T23:59:59.999Z',
-      },
-      status: { $nin: ['draft'] },
-    },
-  });
+  const orders = await fetchOrders({ from: currentFrom, to: currentTo });
 
-  const { data: prevRangeOrders } = await query.graph({
-    entity: 'order',
-    fields: [
-      'id',
-      'total',
-      'created_at',
-      'status',
-      'currency_code',
-      'region.name',
-    ],
-    pagination: {
-      order: {
-        created_at: 'asc',
-      },
-    },
-    filters: {
-      created_at: {
-        $gte: previousFrom + 'T00:00:00Z',
-        $lte: previousTo + 'T23:59:59.999Z',
-      },
-      status: { $nin: ['draft'] },
-    },
+  const prevRangeOrders = await fetchOrders({
+    from: previousFrom,
+    to: previousTo,
   });
 
   let groupBy: 'day' | 'week' | 'month' = 'day';

@@ -2,6 +2,7 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
   BigNumber,
   ContainerRegistrationKeys,
+  Modules,
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -11,20 +12,20 @@ import {
   getGroupKey,
 } from '../../../../utils/orders';
 
-export const adminOrdersListQuerySchema = z.discriminatedUnion("preset", [
+export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
   z.object({
-    preset: z.literal("custom"),
+    preset: z.literal('custom'),
     date_from: z.string(),
     date_to: z.string(),
   }),
   z.object({
-    preset: z.literal("this-month"),
+    preset: z.literal('this-month'),
   }),
   z.object({
-    preset: z.literal("last-month"),
+    preset: z.literal('last-month'),
   }),
   z.object({
-    preset: z.literal("last-3-months"),
+    preset: z.literal('last-3-months'),
   }),
 ]);
 const DEFAULT_CURRENCY = 'EUR';
@@ -37,23 +38,21 @@ function getPercentChange(current: number, previous: number) {
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const config = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE);
+  const storeModuleService = req.scope.resolve(Modules.STORE);
 
-  const pluginConfig = config.plugins.find((p) =>
-    typeof p === 'string'
-      ? p === '@agilo/medusa-analytics-plugin'
-      : p.resolve === '@agilo/medusa-analytics-plugin',
+  const stores = await storeModuleService.listStores(
+    {},
+    { relations: ['supported_currencies'] }
   );
 
-  // TODO: replace with store default currency
+  const store = stores?.[0];
   const currencyCode =
-    typeof pluginConfig === 'string'
-      ? DEFAULT_CURRENCY
-      : pluginConfig?.options?.currency_code || DEFAULT_CURRENCY;
+    store?.supported_currencies?.find((c) => c.is_default)?.currency_code ||
+    DEFAULT_CURRENCY;
 
   // TODO: cache response for 1 day (research caching strategies)
   const response = await fetch(
-    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
+    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
   );
   const exchangeRates = await response.json();
 
@@ -126,7 +125,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     groupBy = 'week';
   }
 
-  const keyRange = generateKeyRange(groupBy, currentFrom, currentTo,);
+  const keyRange = generateKeyRange(groupBy, currentFrom, currentTo);
 
   let regions: Record<string, number> = {};
   let totalSales = 0;
@@ -146,7 +145,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       new Date(order.created_at),
       groupBy,
       currentFrom,
-      currentTo,
+      currentTo
     );
 
     if (!groupedByKey[key]) {

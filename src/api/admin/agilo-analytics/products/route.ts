@@ -12,9 +12,20 @@ export const adminProductAnalyticsQuerySchema = z.object({
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminProductAnalyticsQuerySchema.parse(req.query);
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-
   const productService = req.scope.resolve(Modules.PRODUCT);
   const inventoryService = req.scope.resolve(Modules.INVENTORY);
+  const config = req.scope.resolve(ContainerRegistrationKeys.CONFIG_MODULE);
+
+  const pluginConfig = config.plugins.find((p) =>
+    typeof p === 'string'
+      ? p === '@agilo/medusa-analytics-plugin'
+      : p.resolve === '@agilo/medusa-analytics-plugin'
+  );
+
+  const threshold =
+    typeof pluginConfig === 'string'
+      ? DEFAULT_THRESHOLD
+      : (pluginConfig?.options?.threshold as number) || DEFAULT_THRESHOLD;
 
   const { data: orders } = await query.graph({
     entity: 'order',
@@ -62,7 +73,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const inventoryLevel = await inventoryService.listInventoryLevels(
     {
-      stocked_quantity: { $lte: DEFAULT_THRESHOLD },
+      stocked_quantity: { $lte: threshold },
     },
     { select: ['id', 'inventory_item_id', 'stocked_quantity'] }
   );

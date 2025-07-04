@@ -8,8 +8,8 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import {
   calculateDateRangeMethod,
-  generateKeyRange,
-  getGroupKey,
+  getAllDateGroupingKeys,
+  getDateGroupingKey,
 } from '../../../../utils/orders';
 
 export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
@@ -110,7 +110,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     groupBy = 'week';
   }
 
-  const keyRange = generateKeyRange(groupBy, currentFrom, currentTo);
+  const keyRange = getAllDateGroupingKeys(groupBy, currentFrom, currentTo);
 
   let regions: Record<string, number> = {};
   let totalSales = 0;
@@ -126,7 +126,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
 
-    const key = getGroupKey(
+    const key = getDateGroupingKey(
       new Date(order.created_at),
       groupBy,
       currentFrom,

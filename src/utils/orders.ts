@@ -14,13 +14,9 @@ import {
 type DateRange = { start: Date; end: Date };
 
 /**
- * `calculateDateRangeMethod` provides functions to calculate date ranges
- * for different presets (e.g., this month, last month, custom).
- *
- * Each function returns:
- * - `current`: the current date range (start and end)
- * - `previous`: the previous date range for comparison
- * - `days`: number of days in the current range
+ * Preset functions to calculate current and previous date ranges.
+ * @param query Query object containing optional date_from, date_to, and preset name.
+ * @returns Object with current date range, previous date range, and number of days in current range.
  */
 export const calculateDateRangeMethod: Record<
   'custom' | 'this-month' | 'last-month' | 'last-3-months',
@@ -102,7 +98,16 @@ export const calculateDateRangeMethod: Record<
   },
 };
 
-export function generateWeekKey(
+/**
+ * Returns a formatted key representing the week range in which a given date falls,
+ * based on a provided overall date range.
+ *
+ * @param date The date to check.
+ * @param dateFrom The start date of the overall range (in ISO string format).
+ * @param dateTo The end date of the overall range (in ISO string format).
+ * @returns A string key in the format 'dd.MM-dd.MM' or fallback 'yyyy-MM-dd' if no range is found.
+ */
+export function getWeekRangeKeyForDate(
   date: Date,
   dateFrom: string,
   dateTo: string
@@ -128,7 +133,14 @@ export function generateWeekKey(
   return format(date, 'yyyy-MM-dd');
 }
 
-export function generateWeekRanges(start: Date, end: Date): string[] {
+/**
+ * Generates a list of week range keys (formatted as 'dd.MM-dd.MM') between the given start and end dates.
+ *
+ * @param start The start date of the overall range.
+ * @param end The end date of the overall range.
+ * @returns An array of strings representing week ranges.
+ */
+export function getAllWeekRangeKeys(start: Date, end: Date): string[] {
   const weeks: string[] = [];
   let current = start;
 
@@ -144,7 +156,16 @@ export function generateWeekRanges(start: Date, end: Date): string[] {
   return weeks;
 }
 
-export function getGroupKey(
+/**
+ * Generates a grouping key for a given date depending on the selected grouping mode (day, week, or month).
+ *
+ * @param date The date for which to generate the key.
+ * @param groupBy Grouping mode: 'day', 'week', or 'month'.
+ * @param dateFrom Optional start date of the range (required for 'week' grouping).
+ * @param dateTo Optional end date of the range (required for 'week' grouping).
+ * @returns A string key used for grouping data.
+ */
+export function getDateGroupingKey(
   date: Date,
   groupBy: 'day' | 'week' | 'month',
   dateFrom?: string,
@@ -154,12 +175,20 @@ export function getGroupKey(
     return format(startOfMonth(date), 'yyyy-MM');
   }
   if (groupBy === 'week' && dateFrom && dateTo) {
-    return generateWeekKey(date, dateFrom, dateTo);
+    return getWeekRangeKeyForDate(date, dateFrom, dateTo);
   }
   return format(date, 'yyyy-MM-dd');
 }
 
-export function generateKeyRange(
+/**
+ * Generates a list of grouping keys for all periods between two dates, depending on the selected grouping mode.
+ *
+ * @param groupBy Grouping mode: 'day', 'week', or 'month'.
+ * @param dateFrom Start date of the range (in ISO string format).
+ * @param dateTo End date of the range (in ISO string format).
+ * @returns An array of strings representing keys for each grouped period.
+ */
+export function getAllDateGroupingKeys(
   groupBy: 'day' | 'week' | 'month',
   dateFrom: string,
   dateTo: string
@@ -177,5 +206,5 @@ export function generateKeyRange(
     return eachMonthOfInterval({ start, end }).map((d) => format(d, 'yyyy-MM'));
   }
 
-  return generateWeekRanges(start, end);
+  return getAllWeekRangeKeys(start, end);
 }

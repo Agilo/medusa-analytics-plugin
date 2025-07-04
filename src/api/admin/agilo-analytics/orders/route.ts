@@ -11,6 +11,7 @@ import {
   getAllDateGroupingKeys,
   getDateGroupingKey,
 } from '../../../../utils/orders';
+import { DateTime } from "luxon";
 
 export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
   z.object({
@@ -39,6 +40,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
+  const cacheModuleService = req.scope.resolve(Modules.CACHE);
 
   const fetchOrders = async (dateRange: { from: string; to: string }) => {
     const { data: orders } = await query.graph({
@@ -77,11 +79,26 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     store?.supported_currencies?.find((c) => c.is_default)?.currency_code ||
     DEFAULT_CURRENCY;
 
-  // TODO: cache response for 1 day (research caching strategies)
-  const response = await fetch(
-    `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
-  );
-  const exchangeRates = await response.json();
+  const cacheKey = `exchange_rates_${currencyCode}`;
+
+  let exchangeRates : {rates : Record<string, any>} | null= await cacheModuleService.get(cacheKey);
+
+  if (!exchangeRates) {
+    const response = await fetch(
+      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
+    );
+    exchangeRates = await response.json();
+
+    const now = DateTime.now().setZone('Europe/Berlin');
+    let expireAt = now.set({ hour: 16, minute: 0, second: 0, millisecond: 0 });
+    if (now >= expireAt) {
+      expireAt = expireAt.plus({ days: 1 });
+    }
+
+    const ttl = Math.floor(expireAt.diff(now, 'seconds').seconds);
+
+    await cacheModuleService.set(cacheKey, exchangeRates, ttl);
+  }
 
   const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
 
@@ -122,7 +139,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of orders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates.rates[order.currency_code.toUpperCase()]
+        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
 
@@ -156,7 +173,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of prevRangeOrders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates.rates[order.currency_code.toUpperCase()]
+        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     prevTotalSales += orderTotal;

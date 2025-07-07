@@ -42,7 +42,7 @@ export const LineChart: React.FC<LineChartProps> = ({
           </p>
         </div>
         <ResponsiveContainer aspect={16 / 9}>
-          <RechartsBarChart data={data}>
+          <RechartsBarChart data={data} margin={{ left: 20 }}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? '#374151' : '#E5E7EB'}
@@ -52,6 +52,7 @@ export const LineChart: React.FC<LineChartProps> = ({
               tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
               axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
               tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+              tickMargin={10}
             />
             <YAxis
               tickFormatter={yAxisTickFormatter}
@@ -99,7 +100,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   // Regular line chart for multiple data points
   return (
     <ResponsiveContainer aspect={16 / 9}>
-      <RechartsLineChart data={data}>
+      <RechartsLineChart data={data} margin={{ left: 20 }}>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={isDark ? '#374151' : '#E5E7EB'}
@@ -109,6 +110,7 @@ export const LineChart: React.FC<LineChartProps> = ({
           tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
           axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
           tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+          tickMargin={10}
         />
         <YAxis
           tickFormatter={yAxisTickFormatter}

@@ -362,7 +362,6 @@ const AnalyticsPage = () => {
                         lineColor="#82ca9d"
                         yAxisTickFormatter={(value: number) =>
                           new Intl.NumberFormat('en-US', {
-                            style: 'currency',
                             currency: orders.currency_code,
                             maximumFractionDigits: 0,
                           }).format(value)
@@ -400,7 +399,6 @@ const AnalyticsPage = () => {
                         colorKeyField="name"
                         yAxisTickFormatter={(value: number) =>
                           new Intl.NumberFormat('en-US', {
-                            style: 'currency',
                             currency: orders.currency_code,
                             maximumFractionDigits: 0,
                           }).format(value)

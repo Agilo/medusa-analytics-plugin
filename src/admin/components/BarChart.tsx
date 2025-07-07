@@ -43,7 +43,7 @@ export const BarChart = <T extends Record<string, unknown>>({
 
   return (
     <ResponsiveContainer aspect={16 / 9}>
-      <RechartsBarChart data={data}>
+      <RechartsBarChart data={data} margin={{ left: 20 }}>
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={isDark ? '#374151' : '#E5E7EB'}
@@ -53,6 +53,7 @@ export const BarChart = <T extends Record<string, unknown>>({
           tick={{ fill: isDark ? '#D1D5DB' : '#6B7280' }}
           axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
           tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
+          tickMargin={10}
         />
         <YAxis
           tickFormatter={yAxisTickFormatter}

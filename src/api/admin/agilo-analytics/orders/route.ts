@@ -11,7 +11,7 @@ import {
   getAllDateGroupingKeys,
   getDateGroupingKey,
 } from '../../../../utils/orders';
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon';
 
 export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
   z.object({
@@ -76,12 +76,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const store = stores?.[0];
   const currencyCode =
-    store?.supported_currencies?.find((c) => c.is_default)?.currency_code ||
-    DEFAULT_CURRENCY;
+    store?.supported_currencies
+      ?.find((c) => c.is_default)
+      ?.currency_code?.toUpperCase() || DEFAULT_CURRENCY;
 
   const cacheKey = `exchange_rates_${currencyCode}`;
 
-  let exchangeRates : {rates : Record<string, any>} | null= await cacheModuleService.get(cacheKey);
+  let exchangeRates: { rates: Record<string, any> } | null =
+    await cacheModuleService.get(cacheKey);
 
   if (!exchangeRates) {
     const response = await fetch(

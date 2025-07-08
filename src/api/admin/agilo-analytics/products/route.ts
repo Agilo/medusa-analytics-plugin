@@ -25,7 +25,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const threshold =
     typeof pluginConfig === 'string'
       ? DEFAULT_THRESHOLD
-      : (pluginConfig?.options?.threshold as number) || DEFAULT_THRESHOLD;
+      : (pluginConfig?.options?.stock_threshold as number) || DEFAULT_THRESHOLD;
 
   const { data: orders } = await query.graph({
     entity: 'order',
@@ -89,7 +89,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         .map((i) => i.sku)
         .filter((i) => i !== undefined && i !== null),
     },
-    { select: ['id', 'title', 'sku'] }
+    { select: ['id', 'title', 'sku', 'product_id'] }
   );
 
   const quantityByItemId: Record<string, number> = {};
@@ -108,6 +108,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     sku: string;
     variantName: string;
     inventoryQuantity: number;
+    variantId: string;
+    productId: string;
   }[] = [];
 
   productVariants.forEach((variant) => {
@@ -116,6 +118,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         sku: variant.sku,
         inventoryQuantity: quantityBySku[variant.sku],
         variantName: variant.title,
+        productId: variant.product_id || '',
+        variantId: variant.id,
       });
     }
   });

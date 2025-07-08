@@ -8,6 +8,8 @@ export type ProductAnalyticsResponse = {
     sku: string;
     inventoryQuantity: number;
     variantName: string;
+    variantId: string;
+    productId:string
   }[];
   variantQuantitySold: {
     title: string;

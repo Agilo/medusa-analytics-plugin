@@ -8,12 +8,15 @@ import {
 } from '@medusajs/ui';
 
 import { cn } from '../lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 type ProductsTableProps = {
   products: {
     sku: string;
     variantName: string;
     inventoryQuantity: number;
+    variantId: string;
+    productId: string;
   }[];
 };
 
@@ -67,6 +70,8 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
     null
   );
 
+  const navigate = useNavigate();
+
   const shownProducts = React.useMemo(() => {
     let filtered = products.filter(
       (product) =>
@@ -112,6 +117,10 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
     sorting: {
       state: sorting,
       onSortingChange: setSorting,
+    },
+    onRowClick: (_, row) => {
+      // @ts-expect-error
+      navigate(`/products/${row.original.productId}/variants/${row.original.variantId}`);
     },
   });
 

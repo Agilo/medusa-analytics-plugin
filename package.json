@@ -30,7 +30,8 @@
   "scripts": {
     "build": "medusa plugin:build",
     "dev": "medusa plugin:develop",
-    "prepublishOnly": "medusa plugin:build"
+    "prepublishOnly": "medusa plugin:build",
+    "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit"
   },
   "devDependencies": {
     "@medusajs/admin-sdk": "2.8.3",
@@ -38,7 +39,7 @@
     "@medusajs/framework": "2.8.3",
     "@medusajs/icons": "2.8.3",
     "@medusajs/medusa": "2.8.3",
-    "@medusajs/test-utils": "2.8.3",
+    "@medusajs/test-utils": "^2.8.3",
     "@medusajs/ui": "^4.0.13",
     "@mikro-orm/cli": "6.4.3",
     "@mikro-orm/core": "6.4.3",
@@ -46,15 +47,19 @@
     "@mikro-orm/migrations": "6.4.3",
     "@mikro-orm/postgresql": "6.4.3",
     "@swc/core": "1.5.7",
+    "@swc/jest": "^0.2.38",
+    "@types/jest": "^30.0.0",
     "@types/luxon": "^3.6.2",
     "@types/node": "^22.15.29",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
     "awilix": "^8.0.1",
+    "jest": "^30.0.4",
     "pg": "^8.16.0",
     "prop-types": "^15.8.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^5.4.19",

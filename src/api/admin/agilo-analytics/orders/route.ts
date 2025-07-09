@@ -2,6 +2,7 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
   BigNumber,
   ContainerRegistrationKeys,
+  MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
@@ -37,7 +38,15 @@ function getPercentChange(current: number, previous: number) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const validatedQuery = adminOrdersListQuerySchema.parse(req.query);
+  const result = adminOrdersListQuerySchema.safeParse(req.query);
+  if (!result.success) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      result.error.errors.map((err) => err.message).join(', ')
+    );
+  }
+  const validatedQuery = result.data;
+
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
   const cacheModuleService = req.scope.resolve(Modules.CACHE);
@@ -105,7 +114,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
 
   if (!calculateDateRange) {
-    throw new Error('Invalid preset value');
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      'Invalid preset value'
+    );
   }
 
   const { current, previous, days } = calculateDateRange(validatedQuery);

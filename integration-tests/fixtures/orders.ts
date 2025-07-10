@@ -77,7 +77,7 @@ export async function createOrderSeeder({
   const region = (
     await api.post(
       '/admin/regions',
-      { name: 'Test region', currency_code: 'usd' },
+      { name: 'Test region', currency_code: 'eur' },
       adminHeaders
     )
   ).data.region;
@@ -159,7 +159,7 @@ export async function createOrderSeeder({
               ],
               prices: [
                 {
-                  currency_code: 'usd',
+                  currency_code: 'eur',
                   amount: 100,
                 },
               ],
@@ -221,7 +221,7 @@ export async function createOrderSeeder({
               code: 'test-code',
             },
             prices: [
-              { currency_code: 'usd', amount: 1000 },
+              { currency_code: 'eur', amount: 1000 },
               { region_id: region.id, amount: 1100 },
             ],
             rules: [],
@@ -238,7 +238,7 @@ export async function createOrderSeeder({
     await api.post(
       `/store/carts`,
       {
-        currency_code: 'usd',
+        currency_code: 'eur',
         email: 'tony@stark-industries.com',
         region_id: region.id,
         shipping_address: {

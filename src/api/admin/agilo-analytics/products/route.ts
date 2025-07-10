@@ -1,5 +1,9 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
 import { z } from 'zod';
 
 const DEFAULT_THRESHOLD = 5;
@@ -10,7 +14,14 @@ export const adminProductAnalyticsQuerySchema = z.object({
 });
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const validatedQuery = adminProductAnalyticsQuerySchema.parse(req.query);
+  const result = adminProductAnalyticsQuerySchema.safeParse(req.query);
+  if (!result.success) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      result.error.errors.map((err) => err.message).join(', ')
+    );
+  }
+  const validatedQuery = result.data;
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const productService = req.scope.resolve(Modules.PRODUCT);
   const inventoryService = req.scope.resolve(Modules.INVENTORY);

@@ -72,9 +72,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
           title: i.product?.title + ' ' + i.variant.title,
           quantity: 0,
         };
-      } else if (i?.variant?.id) {
-        variantQuantitySold[i.variant.id].quantity += i.quantity;
       }
+      variantQuantitySold[i.variant.id].quantity += i.quantity;
     });
   });
 

@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import jwt from 'jsonwebtoken';
 import { createOrderSeeder } from '../fixtures/orders';
+import { createProductVariant } from '../fixtures/products';
 
 jest.setTimeout(30000);
 
@@ -14,7 +15,16 @@ medusaIntegrationTestRunner({
   testSuite: ({ getContainer, api }) => {
     describe('/admin/agilo-analytics', () => {
       const headers: Record<string, string> = {};
-      let order, seeder;
+      let order,
+        seeder,
+        salesChannel,
+        stockLocation,
+        product,
+        inventoryItem,
+        shippingProfile,
+        fulfillmentSet,
+        fulfillmentSets,
+        region;
 
       beforeEach(async () => {
         const container = getContainer();
@@ -57,6 +67,14 @@ medusaIntegrationTestRunner({
           adminHeaders: { headers },
         });
         order = seeder.order;
+        salesChannel = seeder.salesChannel;
+        stockLocation = seeder.stockLocation;
+        product = seeder.product;
+        inventoryItem = seeder.inventoryItem;
+        shippingProfile = seeder.shippingProfile;
+        fulfillmentSet = seeder.fulfillmentSet;
+        fulfillmentSets = seeder.fulfillmentSets;
+        region=seeder.region
       });
 
       describe('/orders', () => {
@@ -227,6 +245,34 @@ medusaIntegrationTestRunner({
 
           expect(res.data.currency_code).toBe('EUR');
         });
+        it('should correctly aggregate data with multiple orders', async () => {
+          for (let i = 0; i < 5; i++) {
+            await createOrderSeeder({
+              api,
+              container: getContainer(),
+              adminHeaders: { headers },
+              productOverride: product,
+              stockChannelOverride: stockLocation,
+              inventoryItemOverride: inventoryItem,
+              salesChannelOverride: salesChannel,
+              shippingProfileOverride: shippingProfile,
+              fulfillmentSetOverride: fulfillmentSet,
+              fulfillmentSetsOverride: fulfillmentSets,
+              regionOverride:region
+            });
+          }
+
+          const res = await api.get(
+            '/admin/agilo-analytics/orders?preset=this-month',
+            {
+              headers,
+            }
+          );
+
+          expect(res.status).toEqual(200);
+          expect(res.data.total_orders).toBeGreaterThanOrEqual(6);
+          expect(res.data.total_sales).toBeGreaterThanOrEqual(order.total*6);
+        });
       });
       describe('/products', () => {
         it('should return 401 if no authorization header', async () => {
@@ -310,6 +356,75 @@ medusaIntegrationTestRunner({
 
           expect(res.data.lowStockVariants.length).toBe(0);
           expect(res.data.variantQuantitySold.length).toBe(0);
+        });
+        it('should return correct product variant in variantQuantitySold from seeded order', async () => {
+          const lineItem = order.items[0];
+          const variantTitle =
+            lineItem.product_title + ' ' + lineItem.variant_title;
+          const quantity = lineItem.quantity;
+
+          const start = addDays(new Date(), -7);
+          const end = addDays(new Date(), 0);
+
+          const res = await api.get(
+            `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
+            { headers }
+          );
+
+          expect(res.status).toEqual(200);
+          expect(Array.isArray(res.data.variantQuantitySold)).toBe(true);
+
+          const foundVariant = res.data.variantQuantitySold.find((v) => {
+            return v.title === variantTitle;
+          });
+
+          expect(foundVariant).toBeDefined();
+          expect(foundVariant.quantity).toBeGreaterThanOrEqual(quantity);
+
+          if (foundVariant.title) {
+            expect(typeof foundVariant.title).toBe('string');
+          }
+        });
+        it('should return empty lowStockVariants when no low stock variants exist', async () => {
+          const start = addDays(new Date(), -7);
+          const end = addDays(new Date(), 0);
+
+          const res = await api.get(
+            `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
+            { headers }
+          );
+
+          expect(res.status).toEqual(200);
+          expect(res.data.lowStockVariants).toEqual([]);
+        });
+        it('should return lowStockVariants', async () => {
+          const start = addDays(new Date(), -7);
+          const end = addDays(new Date(), 0);
+
+          const { product } = await createProductVariant({
+            api,
+            stockLocation,
+            salesChannel,
+            adminHeaders: { headers },
+          });
+
+          const res = await api.get(
+            `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
+            { headers }
+          );
+          const variant = product.variants[0];
+
+          expect(res.status).toEqual(200);
+
+          const lowStockVariants = res.data.lowStockVariants;
+
+          const foundVariant = lowStockVariants.find(
+            (v) => v.sku === variant.sku
+          );
+
+          expect(foundVariant).toBeDefined();
+          expect(foundVariant.sku).toBe(variant.sku);
+          expect(foundVariant.inventoryQuantity).toBe(0);
         });
       });
     });

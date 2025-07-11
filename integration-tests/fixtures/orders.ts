@@ -4,8 +4,11 @@ import {
   PUBLISHABLE_KEY_HEADER,
 } from '@medusajs/framework/utils';
 import {
+  AdminFulfillmentSet,
   AdminInventoryItem,
   AdminProduct,
+  AdminRegion,
+  AdminSalesChannel,
   AdminShippingProfile,
   AdminStockLocation,
   ApiKeyDTO,
@@ -45,21 +48,29 @@ export async function createOrderSeeder({
   productOverride,
   additionalProducts,
   stockChannelOverride,
+  salesChannelOverride,
   inventoryItemOverride,
   shippingProfileOverride,
   withoutShipping,
   adminHeaders,
+  fulfillmentSetOverride,
+  fulfillmentSetsOverride,
+  regionOverride,
 }: {
   api: any;
   container: MedusaContainer;
   storeHeaderOverride?: any;
   productOverride?: AdminProduct;
   stockChannelOverride?: AdminStockLocation;
+  fulfillmentSetOverride?: AdminFulfillmentSet;
+  fulfillmentSetsOverride?: AdminFulfillmentSet[];
+  salesChannelOverride?: AdminSalesChannel;
   additionalProducts?: { variant_id: string; quantity: number }[];
   inventoryItemOverride?: AdminInventoryItem;
   shippingProfileOverride?: AdminShippingProfile | AdminShippingProfile[];
   withoutShipping?: boolean;
   adminHeaders: {};
+  regionOverride?: AdminRegion;
 }) {
   const publishableKey = await generatePublishableKey(container);
 
@@ -74,21 +85,26 @@ export async function createOrderSeeder({
     generateStoreHeaders({
       publishableKey,
     });
-  const region = (
-    await api.post(
-      '/admin/regions',
-      { name: 'Test region', currency_code: 'eur' },
-      adminHeaders
-    )
-  ).data.region;
 
-  const salesChannel = (
-    await api.post(
-      '/admin/sales-channels',
-      { name: 'first channel', description: 'channel' },
-      adminHeaders
-    )
-  ).data.sales_channel;
+  const region =
+    regionOverride ??
+    (
+      await api.post(
+        '/admin/regions',
+        { name: 'Test region', currency_code: 'eur' },
+        adminHeaders
+      )
+    ).data.region;
+
+  const salesChannel =
+    salesChannelOverride ??
+    (
+      await api.post(
+        '/admin/sales-channels',
+        { name: 'first channel', description: 'channel' },
+        adminHeaders
+      )
+    ).data.sales_channel;
 
   const stockLocation =
     stockChannelOverride ??
@@ -109,21 +125,23 @@ export async function createOrderSeeder({
         adminHeaders
       )
     ).data.inventory_item;
-
-  await api.post(
-    `/admin/inventory-items/${inventoryItem.id}/location-levels`,
-    {
-      location_id: stockLocation.id,
-      stocked_quantity: 10,
-    },
-    adminHeaders
-  );
-
-  await api.post(
-    `/admin/stock-locations/${stockLocation.id}/sales-channels`,
-    { add: [salesChannel.id] },
-    adminHeaders
-  );
+  if (!inventoryItemOverride) {
+    await api.post(
+      `/admin/inventory-items/${inventoryItem.id}/location-levels`,
+      {
+        location_id: stockLocation.id,
+        stocked_quantity: 10,
+      },
+      adminHeaders
+    );
+  }
+  if (!stockChannelOverride) {
+    await api.post(
+      `/admin/stock-locations/${stockLocation.id}/sales-channels`,
+      { add: [salesChannel.id] },
+      adminHeaders
+    );
+  }
 
   const shippingProfile =
     shippingProfileOverrideArray?.[0] ??
@@ -174,33 +192,39 @@ export async function createOrderSeeder({
       )
     ).data.product;
 
-  const fulfillmentSets = (
-    await api.post(
-      `/admin/stock-locations/${stockLocation.id}/fulfillment-sets?fields=*fulfillment_sets`,
-      {
-        name: `Test-${shippingProfile.id}`,
-        type: 'test-type',
-      },
-      adminHeaders
-    )
-  ).data.stock_location.fulfillment_sets;
+  const fulfillmentSets =
+    fulfillmentSetsOverride ??
+    (
+      await api.post(
+        `/admin/stock-locations/${stockLocation.id}/fulfillment-sets?fields=*fulfillment_sets`,
+        {
+          name: `Test-${shippingProfile.id}`,
+          type: 'test-type',
+        },
+        adminHeaders
+      )
+    ).data.stock_location.fulfillment_sets;
 
-  const fulfillmentSet = (
-    await api.post(
-      `/admin/fulfillment-sets/${fulfillmentSets[0].id}/service-zones`,
-      {
-        name: `Test-${shippingProfile.id}`,
-        geo_zones: [{ type: 'country', country_code: 'us' }],
-      },
-      adminHeaders
-    )
-  ).data.fulfillment_set;
+  const fulfillmentSet =
+    fulfillmentSetOverride ??
+    (
+      await api.post(
+        `/admin/fulfillment-sets/${fulfillmentSets[0].id}/service-zones`,
+        {
+          name: `Test-${shippingProfile.id}`,
+          geo_zones: [{ type: 'country', country_code: 'us' }],
+        },
+        adminHeaders
+      )
+    ).data.fulfillment_set;
 
-  await api.post(
-    `/admin/stock-locations/${stockLocation.id}/fulfillment-providers`,
-    { add: ['manual_test-provider'] },
-    adminHeaders
-  );
+  if (!stockChannelOverride) {
+    await api.post(
+      `/admin/stock-locations/${stockLocation.id}/fulfillment-providers`,
+      { add: ['manual_test-provider'] },
+      adminHeaders
+    );
+  }
   /**
    * Create shipping options for each shipping profile provided
    */
@@ -239,7 +263,7 @@ export async function createOrderSeeder({
       `/store/carts`,
       {
         currency_code: 'eur',
-        email: 'tony@stark-industries.com',
+        email: 'test@test.com',
         region_id: region.id,
         shipping_address: {
           address_1: 'test address 1',

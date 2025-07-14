@@ -67,13 +67,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   orders.forEach((o) => {
     o.items?.forEach((i) => {
-      if (i?.variant?.id && !variantQuantitySold[i?.variant?.id]) {
-        variantQuantitySold[i?.variant.id] = {
-          title: i.product?.title + ' ' + i.variant.title,
-          quantity: 0,
-        };
+      if (i?.variant?.id) {
+        if (!variantQuantitySold[i?.variant?.id]) {
+          variantQuantitySold[i?.variant.id] = {
+            title: i.product?.title + ' ' + i.variant.title,
+            quantity: 0,
+          };
+        }
+        variantQuantitySold[i.variant.id].quantity += i.quantity;
       }
-      variantQuantitySold[i.variant.id].quantity += i.quantity;
     });
   });
 

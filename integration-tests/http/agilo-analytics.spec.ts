@@ -1,4 +1,14 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
+import {
+  AdminFulfillmentSet,
+  AdminInventoryItem,
+  AdminOrder,
+  AdminProduct,
+  AdminRegion,
+  AdminSalesChannel,
+  AdminShippingProfile,
+  AdminStockLocation,
+} from '@medusajs/framework/types';
 import jwt from 'jsonwebtoken';
 import { createOrderSeeder } from '../fixtures/orders';
 import { createProductVariant } from '../fixtures/products';
@@ -15,16 +25,16 @@ medusaIntegrationTestRunner({
   testSuite: ({ getContainer, api }) => {
     describe('/admin/agilo-analytics', () => {
       const headers: Record<string, string> = {};
-      let order,
+      let order: AdminOrder,
         seeder,
-        salesChannel,
-        stockLocation,
-        product,
-        inventoryItem,
-        shippingProfile,
-        fulfillmentSet,
-        fulfillmentSets,
-        region;
+        salesChannel: AdminSalesChannel,
+        stockLocation: AdminStockLocation,
+        product: AdminProduct,
+        inventoryItem: AdminInventoryItem,
+        shippingProfile: AdminShippingProfile,
+        fulfillmentSet: AdminFulfillmentSet,
+        fulfillmentSets: AdminFulfillmentSet[],
+        region: AdminRegion;
 
       beforeEach(async () => {
         const container = getContainer();
@@ -74,7 +84,7 @@ medusaIntegrationTestRunner({
         shippingProfile = seeder.shippingProfile;
         fulfillmentSet = seeder.fulfillmentSet;
         fulfillmentSets = seeder.fulfillmentSets;
-        region=seeder.region
+        region = seeder.region;
       });
 
       describe('/orders', () => {
@@ -235,9 +245,10 @@ medusaIntegrationTestRunner({
 
           expect(res.data.total_orders).toBeGreaterThanOrEqual(1);
 
-          const expectedTotal = order.total / 100;
+          const expectedTotal = (order?.total || 0) / 100;
 
           expect(res.data.total_sales).toBeGreaterThanOrEqual(expectedTotal);
+
           const anySalesAboveZero = res.data.order_sales.some(
             (d) => d.sales > 0
           );
@@ -258,7 +269,7 @@ medusaIntegrationTestRunner({
               shippingProfileOverride: shippingProfile,
               fulfillmentSetOverride: fulfillmentSet,
               fulfillmentSetsOverride: fulfillmentSets,
-              regionOverride:region
+              regionOverride: region,
             });
           }
 
@@ -271,7 +282,9 @@ medusaIntegrationTestRunner({
 
           expect(res.status).toEqual(200);
           expect(res.data.total_orders).toBeGreaterThanOrEqual(6);
-          expect(res.data.total_sales).toBeGreaterThanOrEqual(order.total*6);
+          expect(res.data.total_sales).toBeGreaterThanOrEqual(
+            (order?.total || 0) * 6
+          );
         });
       });
       describe('/products', () => {
@@ -358,10 +371,10 @@ medusaIntegrationTestRunner({
           expect(res.data.variantQuantitySold.length).toBe(0);
         });
         it('should return correct product variant in variantQuantitySold from seeded order', async () => {
-          const lineItem = order.items[0];
+          const lineItem = order?.items[0];
           const variantTitle =
-            lineItem.product_title + ' ' + lineItem.variant_title;
-          const quantity = lineItem.quantity;
+            lineItem?.product_title + ' ' + lineItem?.variant_title;
+          const quantity = lineItem?.quantity || 0;
 
           const start = addDays(new Date(), -7);
           const end = addDays(new Date(), 0);

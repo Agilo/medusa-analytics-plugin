@@ -52,7 +52,7 @@ function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
     date.getFullYear(),
     date.getMonth() + 1,
-    date.getDate(),
+    date.getDate()
   );
 }
 
@@ -66,7 +66,7 @@ function calendarDateToDate(calendarDate: DateValue): Date {
 }
 
 function dateRangeToRangeValue(
-  dateRange: DateRange | undefined,
+  dateRange: DateRange | undefined
 ): RangeValue<DateValue> | null {
   if (!dateRange?.from) return null;
   return {
@@ -78,7 +78,7 @@ function dateRangeToRangeValue(
 }
 
 function rangeValueToDateRange(
-  rangeValue: RangeValue<DateValue> | null,
+  rangeValue: RangeValue<DateValue> | null
 ): DateRange | undefined {
   if (!rangeValue) return undefined;
   return {
@@ -103,53 +103,61 @@ const AnalyticsPage = () => {
   );
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
-    (item) => item.count > 0,
+    (item) => item.count > 0
   );
 
   const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
-    (item) => item.sales > 0,
+    (item) => item.sales > 0
   );
 
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
 
-  // Handle date range changes and automatically switch to custom
-  const handleDateRangeChange = (value: RangeValue<DateValue> | null) => {
-    const newDateRange = rangeValueToDateRange(value);
-    setDate(newDateRange);
-    // Only switch to custom if the value is different from preset values
-    if (selectValue !== 'custom') {
-      setSelectValue('custom');
-    }
-  };
-
-  React.useEffect(() => {
+  const updateDatePreset = React.useCallback((preset: string) => {
     const today = new Date();
 
-    switch (selectValue) {
+    switch (preset) {
       case 'this-month':
         setDate({
           from: startOfMonth(today),
           to: today,
         });
+        setSelectValue('this-month');
         break;
       case 'last-month':
         setDate({
           from: startOfMonth(subMonths(today, 1)),
           to: endOfMonth(subMonths(today, 1)),
         });
+        setSelectValue('last-month');
         break;
       case 'last-3-months':
         setDate({
           from: startOfMonth(subMonths(today, 3)),
           to: endOfMonth(subMonths(today, 1)),
         });
+        setSelectValue('last-3-months');
         break;
       case 'custom':
+      default:
         // Keep the current date when switching to custom
+        setSelectValue('custom');
         break;
     }
-  }, [selectValue]);
+  }, []);
+
+  // Handle date range changes and automatically switch to custom
+  const handleDateRangeChange = React.useCallback(
+    (value: RangeValue<DateValue> | null) => {
+      const newDateRange = rangeValueToDateRange(value);
+      setDate(newDateRange);
+      // Only switch to custom if the value is different from preset values
+      if (selectValue !== 'custom') {
+        setSelectValue('custom');
+      }
+    },
+    []
+  );
 
   return (
     <Container className="divide-y p-0">
@@ -162,7 +170,7 @@ const AnalyticsPage = () => {
               disabled={isLoadingOrders || isLoadingProducts}
               defaultValue="this-month"
               value={selectValue}
-              onValueChange={setSelectValue}
+              onValueChange={updateDatePreset}
             >
               <Select.Trigger>
                 <Select.Value />
@@ -478,7 +486,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity === 0,
+                          (product) => product.inventoryQuantity === 0
                         ) || []
                       }
                     />
@@ -497,7 +505,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity > 0,
+                          (product) => product.inventoryQuantity > 0
                         ) || []
                       }
                     />

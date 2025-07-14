@@ -1,6 +1,4 @@
 const { defineConfig, Modules } = require('@medusajs/utils');
-const os = require('os');
-const path = require('path');
 
 const DB_URL = `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:/medusa-analytics-test`;
 process.env.DATABASE_URL = DB_URL;

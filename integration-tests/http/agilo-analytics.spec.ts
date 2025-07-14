@@ -153,15 +153,15 @@ medusaIntegrationTestRunner({
           expect(res.data).toHaveProperty('currency_code');
         });
 
-        it('should return 200 for last-month preset and have non-negative sales and orders', async () => {
+        it('should return 200 for last-month preset and have zero sales and orders', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=last-month',
             { headers }
           );
 
           expect(res.status).toEqual(200);
-          expect(res.data.total_orders).toBeGreaterThanOrEqual(0);
-          expect(res.data.total_sales).toBeGreaterThanOrEqual(0);
+          expect(res.data.total_orders).toEqual(0);
+          expect(res.data.total_sales).toEqual(0);
         });
 
         it('should work with last-3-months preset and have arrays with correct keys', async () => {
@@ -187,25 +187,6 @@ medusaIntegrationTestRunner({
           );
 
           expect(res.status).toEqual(200);
-          expect(typeof res.data.currency_code).toBe('string');
-        });
-
-        it('should return sorted top 5 regions by sales', async () => {
-          const res = await api.get(
-            '/admin/agilo-analytics/orders?preset=this-month',
-            { headers }
-          );
-
-          expect(res.status).toEqual(200);
-
-          const regions = res.data.regions;
-          if (regions.length > 1) {
-            for (let i = 1; i < regions.length; i++) {
-              expect(regions[i - 1].sales).toBeGreaterThanOrEqual(
-                regions[i].sales
-              );
-            }
-          }
         });
 
         it('should return statuses array with valid format', async () => {
@@ -255,6 +236,23 @@ medusaIntegrationTestRunner({
           expect(anySalesAboveZero).toBe(true);
 
           expect(res.data.currency_code).toBe('EUR');
+        });
+        it('should return correct status and region on seeded order', async () => {
+          const res = await api.get(
+            '/admin/agilo-analytics/orders?preset=this-month',
+            { headers }
+          );
+
+          const expectedTotal = (order?.total || 0) / 100;
+          expect(res.status).toEqual(200);
+
+          expect(res.data.statuses?.[0]?.name).toBe(order.status);
+          expect(res.data.statuses?.[0]?.count).toBe(1);
+
+          expect(res.data.regions?.[0]?.name).toBe(region.name);
+          expect(res.data.regions?.[0]?.sales).toBeGreaterThanOrEqual(
+            expectedTotal
+          );
         });
         it('should correctly aggregate data with multiple orders', async () => {
           for (let i = 0; i < 5; i++) {

@@ -26,7 +26,7 @@ medusaIntegrationTestRunner({
     describe('/admin/agilo-analytics', () => {
       const headers: Record<string, string> = {};
       let order: AdminOrder,
-        seeder,
+        seeder: Awaited<ReturnType<typeof createOrderSeeder>>,
         salesChannel: AdminSalesChannel,
         stockLocation: AdminStockLocation,
         product: AdminProduct,
@@ -89,50 +89,51 @@ medusaIntegrationTestRunner({
 
       describe('/orders', () => {
         it('should return 401 if no authorization header', async () => {
-          const error = await api
-            .get('/admin/agilo-analytics/orders?preset=last-month')
-            .catch((e) => e);
-
-          expect(error.response.status).toEqual(401);
+          await expect(
+            api.get('/admin/agilo-analytics/orders?preset=last-month')
+          ).rejects.toMatchObject({
+            response: { status: 401 },
+          });
         });
 
-        it('should return 400 or 422 for invalid preset', async () => {
-          const error = await api
-            .get('/admin/agilo-analytics/orders?preset=nonexistent', {
+        it('should return 400 for invalid preset', async () => {
+          await expect(
+            api.get('/admin/agilo-analytics/orders?preset=nonexistent', {
               headers,
             })
-            .catch((e) => e);
-
-          expect([400, 422]).toContain(error.response.status);
+          ).rejects.toMatchObject({
+            response: { status: 400 },
+          });
         });
 
-        it('should return 400 or 422 when custom preset is missing date_from or date_to', async () => {
-          const err1 = await api
-            .get(
+        it('should return 400 when custom preset is missing date_from or date_to', async () => {
+          await expect(
+            api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_from=2024-01-01',
               { headers }
             )
-            .catch((e) => e);
-          const err2 = await api
-            .get(
+          ).rejects.toMatchObject({
+            response: { status: 400 },
+          });
+          await expect(
+            api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_to=2024-01-31',
               { headers }
             )
-            .catch((e) => e);
-
-          expect([400, 422]).toContain(err1.response.status);
-          expect([400, 422]).toContain(err2.response.status);
+          ).rejects.toMatchObject({
+            response: { status: 400 },
+          });
         });
 
         it('should return 500 for invalid date format', async () => {
-          const error = await api
-            .get(
+          await expect(
+            api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_from=not-a-date&date_to=2024-01-31',
               { headers }
             )
-            .catch((e) => e);
-
-          expect(error.response.status).toEqual(500);
+          ).rejects.toMatchObject({
+            response: { status: 500 },
+          });
         });
 
         it('should return 200 and include expected keys', async () => {
@@ -287,37 +288,38 @@ medusaIntegrationTestRunner({
       });
       describe('/products', () => {
         it('should return 401 if no authorization header', async () => {
-          const error = await api
-            .get('/admin/agilo-analytics/products?preset=last-month')
-            .catch((e) => e);
-
-          expect(error.response.status).toEqual(401);
+          await expect(
+            api.get('/admin/agilo-analytics/products?preset=last-month')
+          ).rejects.toMatchObject({
+            response: { status: 401 },
+          });
         });
 
-        it('should return 400 or 422 when custom preset is missing date_from or date_to', async () => {
-          const err1 = await api
-            .get('/admin/agilo-analytics/products?date_from=2024-01-01', {
+        it('should return 400 when custom preset is missing date_from or date_to', async () => {
+          await expect(
+            api.get('/admin/agilo-analytics/products?date_from=2024-01-01', {
               headers,
             })
-            .catch((e) => e);
-          const err2 = await api
-            .get('/admin/agilo-analytics/orders?date_to=2024-01-31', {
+          ).rejects.toMatchObject({
+            response: { status: 400 },
+          });
+          await expect(
+            api.get('/admin/agilo-analytics/orders?date_to=2024-01-31', {
               headers,
             })
-            .catch((e) => e);
-
-          expect([400, 422]).toContain(err1.response.status);
-          expect([400, 422]).toContain(err2.response.status);
+          ).rejects.toMatchObject({
+            response: { status: 400 },
+          });
         });
         it('should return 500 for invalid date format', async () => {
-          const error = await api
-            .get(
+          await expect(
+            api.get(
               '/admin/agilo-analytics/products?date_from=not-a-date&date_to=2024-01-31',
               { headers }
             )
-            .catch((e) => e);
-
-          expect(error.response.status).toEqual(500);
+          ).rejects.toMatchObject({
+            response: { status: 500 },
+          });
         });
         it('should return 200 and expected keys', async () => {
           const start = addDays(new Date(), -7);

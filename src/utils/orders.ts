@@ -9,6 +9,7 @@ import {
   differenceInCalendarDays,
   endOfMonth,
   subMonths,
+  startOfDay,
 } from 'date-fns';
 
 type DateRange = { start: Date; end: Date };
@@ -112,8 +113,9 @@ export function getWeekRangeKeyForDate(
   dateFrom: string,
   dateTo: string
 ): string {
-  const start = parseISO(dateFrom);
-  const end = parseISO(dateTo);
+  const start = startOfDay(parseISO(dateFrom));
+  const end = startOfDay(parseISO(dateTo));
+  const targetDate = startOfDay(date);
 
   let current = start;
 
@@ -123,14 +125,14 @@ export function getWeekRangeKeyForDate(
       ? end
       : addDays(current, 6);
 
-    if (date >= weekStart && date <= weekEnd) {
+    if (targetDate >= weekStart && targetDate <= weekEnd) {
       return `${format(weekStart, 'dd.MM')}-${format(weekEnd, 'dd.MM')}`;
     }
 
     current = addDays(weekEnd, 1);
   }
 
-  return format(date, 'yyyy-MM-dd');
+  return format(targetDate, 'yyyy-MM-dd');
 }
 
 /**

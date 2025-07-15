@@ -356,7 +356,8 @@ const AnalyticsPage = () => {
                       Sales Over Time
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Total sales in the selected period
+                      Total sales in the selected period (
+                      {orders?.currency_code})
                     </Text>
                     {isLoadingOrders ? (
                       <LineChartSkeleton />

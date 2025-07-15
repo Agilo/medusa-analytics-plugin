@@ -44,7 +44,7 @@ export const PieChart: React.FC<PieChartProps> = ({ data, dataKey }) => {
       <RechartsPieChart>
         <Pie
           data={data}
-          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+          label={({ percent }) => `${((percent || 0) * 100).toFixed(0)}%`}
           dataKey={dataKey}
         >
           {data &&

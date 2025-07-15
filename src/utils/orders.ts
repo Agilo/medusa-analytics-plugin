@@ -10,6 +10,7 @@ import {
   endOfMonth,
   subMonths,
   startOfDay,
+  endOfDay,
 } from 'date-fns';
 
 type DateRange = { start: Date; end: Date };
@@ -31,9 +32,9 @@ export const calculateDateRangeMethod: Record<
     if (!query.date_from || !query.date_to) {
       throw new Error('No date range provided');
     }
+
     const start = parseISO(query.date_from);
     const end = parseISO(query.date_to);
-
     const days = differenceInCalendarDays(end, start) + 1;
     const prevEnd = new Date(start);
     prevEnd.setDate(start.getDate() - 1);
@@ -41,7 +42,10 @@ export const calculateDateRangeMethod: Record<
     prevStart.setDate(prevEnd.getDate() - (days - 1));
 
     return {
-      current: { start, end },
+      current: {
+        start: new Date(query.date_from),
+        end: new Date(query.date_to),
+      },
       previous: { start: prevStart, end: prevEnd },
       days,
     };
@@ -114,7 +118,7 @@ export function getWeekRangeKeyForDate(
   dateTo: string
 ): string {
   const start = startOfDay(parseISO(dateFrom));
-  const end = startOfDay(parseISO(dateTo));
+  const end = endOfDay(parseISO(dateTo));
   const targetDate = startOfDay(date);
 
   let current = start;
@@ -174,12 +178,30 @@ export function getDateGroupingKey(
   dateTo?: string
 ) {
   if (groupBy === 'month') {
-    return format(startOfMonth(date), 'yyyy-MM');
+    return format(
+      startOfMonth(
+        new Date(
+          Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+        )
+      ),
+      'yyyy-MM'
+    );
   }
   if (groupBy === 'week' && dateFrom && dateTo) {
-    return getWeekRangeKeyForDate(date, dateFrom, dateTo);
+    return getWeekRangeKeyForDate(
+      new Date(
+        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+      ),
+      dateFrom,
+      dateTo
+    );
   }
-  return format(date, 'yyyy-MM-dd');
+  return format(
+    new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    ),
+    'yyyy-MM-dd'
+  );
 }
 
 /**

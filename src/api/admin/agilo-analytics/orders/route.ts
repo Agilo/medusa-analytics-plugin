@@ -127,7 +127,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const previousFrom = format(previous.start, 'yyyy-MM-dd');
   const previousTo = format(previous.end, 'yyyy-MM-dd');
 
-  const orders = await fetchOrders({ from: currentFrom, to: currentTo });
+  const orders = await fetchOrders({
+    from: currentFrom,
+    to: currentTo,
+  });
 
   const prevRangeOrders = await fetchOrders({
     from: previousFrom,

@@ -1,5 +1,6 @@
 import {
   ApiKeyType,
+  ContainerRegistrationKeys,
   Modules,
   PUBLISHABLE_KEY_HEADER,
 } from '@medusajs/framework/utils';
@@ -56,6 +57,7 @@ export async function createOrderSeeder({
   fulfillmentSetOverride,
   fulfillmentSetsOverride,
   regionOverride,
+  createdAt,
 }: {
   api: any;
   container: MedusaContainer;
@@ -71,9 +73,10 @@ export async function createOrderSeeder({
   withoutShipping?: boolean;
   adminHeaders: {};
   regionOverride?: AdminRegion;
+  createdAt?: string;
 }) {
+  const repo = container.resolve(ContainerRegistrationKeys.PG_CONNECTION);
   const publishableKey = await generatePublishableKey(container);
-
   const shippingProfileOverrideArray = !shippingProfileOverride
     ? undefined
     : Array.isArray(shippingProfileOverride)
@@ -130,7 +133,7 @@ export async function createOrderSeeder({
       `/admin/inventory-items/${inventoryItem.id}/location-levels`,
       {
         location_id: stockLocation.id,
-        stocked_quantity: 10,
+        stocked_quantity: 100,
       },
       adminHeaders
     );
@@ -324,8 +327,14 @@ export async function createOrderSeeder({
     await api.post(`/store/carts/${cart.id}/complete`, {}, storeHeaders)
   ).data.order;
 
-  order = (await api.get(`/admin/orders/${order.id}`, adminHeaders)).data.order;
+  if (createdAt) {
+    await repo
+      .from('order')
+      .update({ created_at: createdAt })
+      .where({ id: order.id });
+  }
 
+  order = (await api.get(`/admin/orders/${order.id}`, adminHeaders)).data.order;
   return {
     order,
     region,
@@ -337,7 +346,5 @@ export async function createOrderSeeder({
     fulfillmentSets,
     fulfillmentSet,
     shippingOption,
-    cart,
-    paymentCollection,
   };
 }

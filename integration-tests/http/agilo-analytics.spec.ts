@@ -12,6 +12,7 @@ import {
 import jwt from 'jsonwebtoken';
 import { createOrderSeeder } from '../fixtures/orders';
 import { createProductVariant } from '../fixtures/products';
+import { endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 
 jest.setTimeout(30000);
 
@@ -227,7 +228,7 @@ medusaIntegrationTestRunner({
 
           expect(res.data.total_orders).toBeGreaterThanOrEqual(1);
 
-          const expectedTotal = (order?.total || 0) / 100;
+          const expectedTotal = order?.total || 0;
 
           expect(res.data.total_sales).toBeGreaterThanOrEqual(expectedTotal);
 
@@ -284,6 +285,121 @@ medusaIntegrationTestRunner({
           expect(res.data.total_sales).toBeGreaterThanOrEqual(
             (order?.total || 0) * 6
           );
+        });
+        it('should correctly handle orders with different created_at dates in different months', async () => {
+          const prevMonth = subMonths(new Date(), 1);
+          const dates: string[] = [];
+          dates.push(
+            format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z'
+          );
+          dates.push(
+            format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+          );
+          dates.push(
+            format(startOfMonth(new Date()), 'yyyy-MM-dd') + 'T00:00:00Z'
+          );
+          dates.push(
+            format(endOfMonth(new Date()), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+          );
+          await Promise.all(
+            dates.map(async (d) => {
+              return createOrderSeeder({
+                api,
+                container: getContainer(),
+                adminHeaders: { headers },
+                createdAt: d,
+                productOverride: product,
+                stockChannelOverride: stockLocation,
+                inventoryItemOverride: inventoryItem,
+                salesChannelOverride: salesChannel,
+                shippingProfileOverride: shippingProfile,
+                fulfillmentSetOverride: fulfillmentSet,
+                fulfillmentSetsOverride: fulfillmentSets,
+                regionOverride: region,
+              });
+            })
+          );
+          const res1 = await api.get(
+            `/admin/agilo-analytics/orders?preset=this-month`,
+            { headers }
+          );
+          const res2 = await api.get(
+            `/admin/agilo-analytics/orders?preset=last-month`,
+            { headers }
+          );
+          const expectedTotal1 = order?.total * 3 || 0;
+          const expectedTotal2 = order?.total * 2 || 0;
+          const sales1 = res1.data.order_sales.reduce((acc, curr) => {
+            acc += curr.sales;
+            return acc;
+          }, 0);
+          const sales2 = res2.data.order_sales.reduce((acc, curr) => {
+            acc += curr.sales;
+            return acc;
+          }, 0);
+
+          expect(res1.status).toEqual(200);
+          expect(res1.data.total_orders).toEqual(3);
+          expect(res1.data.total_sales).toEqual(expectedTotal1);
+          expect(sales1).toEqual(expectedTotal1);
+
+          expect(res2.status).toEqual(200);
+          expect(res2.data.total_orders).toEqual(2);
+          expect(res2.data.total_sales).toEqual(expectedTotal2);
+          expect(sales2).toEqual(expectedTotal2);
+        });
+        it('should correctly handle orders in month format', async () => {
+          const dates: string[] = [];
+          for (let i = 0; i < 6; i++) {
+            const prevMonth = subMonths(new Date(), i + 1);
+            dates.push(
+              format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+            );
+            dates.push(
+              format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z'
+            );
+          }
+
+          await Promise.all(
+            dates.map(async (d) => {
+              return createOrderSeeder({
+                api,
+                container: getContainer(),
+                adminHeaders: { headers },
+                createdAt: d,
+                productOverride: product,
+                stockChannelOverride: stockLocation,
+                inventoryItemOverride: inventoryItem,
+                salesChannelOverride: salesChannel,
+                shippingProfileOverride: shippingProfile,
+                fulfillmentSetOverride: fulfillmentSet,
+                fulfillmentSetsOverride: fulfillmentSets,
+                regionOverride: region,
+              });
+            })
+          );
+          const res = await api.get(
+            `/admin/agilo-analytics/orders?preset=custom&date_from=${
+              dates[dates.length - 1]
+            }&date_to=${dates[0]}`,
+            { headers }
+          );
+
+          const expectedTotal = order?.total * 12 || 0;
+          const sales = res.data.order_sales.reduce((acc, curr) => {
+            acc += curr.sales;
+            return acc;
+          }, 0);
+          const count = res.data.order_count.reduce((acc, curr) => {
+            acc += curr.count;
+            return acc;
+          }, 0);
+
+          expect(res.status).toEqual(200);
+          expect(res.data.total_orders).toEqual(12);
+          expect(count).toEqual(12);
+          expect(res.data.total_sales).toEqual(expectedTotal);
+          expect(sales).toEqual(expectedTotal);
         });
       });
       describe('/products', () => {

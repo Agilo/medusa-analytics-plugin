@@ -45,7 +45,7 @@ describe('date utils', () => {
         '2024-04-29',
         '2024-05-30'
       );
-      expect(key).toBe('29.4-5.5'); 
+      expect(key).toBe('29.4-5.5');
     });
   });
 
@@ -132,7 +132,7 @@ describe('date utils', () => {
 
     it('returns week keys for range', () => {
       const result = getAllDateGroupingKeys('week', '2024-06-01', '2024-06-15');
-      const expectResult = ['1.-7.6', '8.-14.6', '15.-15.6'];
+      const expectResult = ['1.-7.6', '8.-14.6', '15.6'];
       result.forEach((r, i) => {
         expect(r).toBe(expectResult[i]);
       });

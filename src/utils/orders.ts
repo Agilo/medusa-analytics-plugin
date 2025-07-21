@@ -134,6 +134,12 @@ export function getWeekRangeKeyForDate(
       const endMonth = weekEnd.getMonth();
 
       if (startMonth === endMonth) {
+        const startDay = weekStart.getDate();
+        const endDay = weekEnd.getDate();
+        if (startDay === endDay) {
+          return `${format(weekStart, 'd.M')}`;
+        }
+
         return `${format(weekStart, 'd.')}-${format(weekEnd, 'd.M')}`;
       } else {
         return `${format(weekStart, 'd.M')}-${format(weekEnd, 'd.M')}`;
@@ -167,7 +173,13 @@ export function getAllWeekRangeKeys(start: Date, end: Date): string[] {
     const endMonth = weekEnd.getMonth();
 
     if (startMonth === endMonth) {
-      weeks.push(`${format(weekStart, 'd.')}-${format(weekEnd, 'd.M')}`);
+      const startDay = weekStart.getDate();
+      const endDay = weekEnd.getDate();
+      if (startDay === endDay) {
+        weeks.push(`${format(weekStart, 'd.M')}`);
+      } else {
+        weeks.push(`${format(weekStart, 'd.')}-${format(weekEnd, 'd.M')}`);
+      }
     } else {
       weeks.push(`${format(weekStart, 'd.M')}-${format(weekEnd, 'd.M')}`);
     }

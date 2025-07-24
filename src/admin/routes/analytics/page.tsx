@@ -312,11 +312,13 @@ const AnalyticsPage = () => {
                     ) : orders?.order_count &&
                       orders?.order_count?.length > 0 &&
                       someOrderCountsGreaterThanZero ? (
-                      <LineChart
-                        data={orders?.order_count}
-                        xAxisDataKey="name"
-                        yAxisDataKey="count"
-                      />
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <LineChart
+                          data={orders?.order_count}
+                          xAxisDataKey="name"
+                          yAxisDataKey="count"
+                        />
+                      </div>
                     ) : (
                       <Text
                         size="small"
@@ -364,18 +366,20 @@ const AnalyticsPage = () => {
                     ) : orders?.order_sales &&
                       orders?.order_sales?.length > 0 &&
                       someOrderSalesGreaterThanZero ? (
-                      <LineChart
-                        data={orders?.order_sales}
-                        xAxisDataKey="name"
-                        yAxisDataKey="sales"
-                        lineColor="#82ca9d"
-                        yAxisTickFormatter={(value: number) =>
-                          new Intl.NumberFormat('en-US', {
-                            currency: orders.currency_code,
-                            maximumFractionDigits: 0,
-                          }).format(value)
-                        }
-                      />
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <LineChart
+                          data={orders.order_sales}
+                          xAxisDataKey="name"
+                          yAxisDataKey="sales"
+                          lineColor="#82ca9d"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat('en-US', {
+                              currency: orders.currency_code,
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
                     ) : (
                       <Text
                         size="small"
@@ -399,20 +403,22 @@ const AnalyticsPage = () => {
                     {isLoadingOrders ? (
                       <BarChartSkeleton />
                     ) : orders?.regions && orders?.regions?.length > 0 ? (
-                      <BarChart
-                        data={orders.regions}
-                        xAxisDataKey="name"
-                        yAxisDataKey="sales"
-                        lineColor="#82ca9d"
-                        useStableColors={true}
-                        colorKeyField="name"
-                        yAxisTickFormatter={(value: number) =>
-                          new Intl.NumberFormat('en-US', {
-                            currency: orders.currency_code,
-                            maximumFractionDigits: 0,
-                          }).format(value)
-                        }
-                      />
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <BarChart
+                          data={orders.regions}
+                          xAxisDataKey="name"
+                          yAxisDataKey="sales"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat('en-US', {
+                              currency: orders.currency_code,
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
                     ) : (
                       <Text
                         size="small"
@@ -434,7 +440,9 @@ const AnalyticsPage = () => {
                     {isLoadingOrders ? (
                       <PieChartSkeleton />
                     ) : orders?.statuses && orders?.statuses?.length > 0 ? (
-                      <PieChart data={orders?.statuses} dataKey="count" />
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <PieChart data={orders?.statuses} dataKey="count" />
+                      </div>
                     ) : (
                       <Text
                         size="small"
@@ -459,14 +467,16 @@ const AnalyticsPage = () => {
                   <BarChartSkeleton />
                 ) : products?.variantQuantitySold &&
                   someTopSellingProductsGreaterThanZero ? (
-                  <BarChart
-                    data={products.variantQuantitySold}
-                    xAxisDataKey="title"
-                    yAxisDataKey="quantity"
-                    lineColor="#82ca9d"
-                    useStableColors={true}
-                    colorKeyField="title"
-                  />
+                  <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                    <BarChart
+                      data={products.variantQuantitySold}
+                      xAxisDataKey="title"
+                      yAxisDataKey="quantity"
+                      lineColor="#82ca9d"
+                      useStableColors={true}
+                      colorKeyField="title"
+                    />
+                  </div>
                 ) : (
                   <Text size="small" className="text-ui-fg-muted text-center">
                     No data available for the selected period.

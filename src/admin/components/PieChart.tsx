@@ -40,7 +40,7 @@ export const PieChart: React.FC<PieChartProps> = ({ data, dataKey }) => {
   const colors = isDark ? DARK_COLORS : COLORS;
 
   return (
-    <ResponsiveContainer aspect={1} maxHeight={400}>
+    <ResponsiveContainer aspect={16 / 9} maxHeight={400}>
       <RechartsPieChart>
         <Pie
           data={data}

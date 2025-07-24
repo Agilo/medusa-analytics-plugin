@@ -31,8 +31,7 @@
     "build": "medusa plugin:build",
     "dev": "medusa plugin:develop",
     "prepublishOnly": "medusa plugin:build",
-    "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit"
+    "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit"
   },
   "devDependencies": {
     "@medusajs/admin-sdk": "2.8.3",
@@ -96,7 +95,7 @@
     "luxon": "^3.6.1",
     "react-aria-components": "^1.10.1",
     "react-day-picker": "^9.7.0",
-    "recharts": "^2.15.3",
+    "recharts": "^3.1.0",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.8",
     "tw-animate-css": "^1.3.4"

@@ -2,7 +2,7 @@ import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { OrderAnalyticsResponse } from '../../hooks/order-analytics';
 
-const BACKEND_URL = 'http://localhost:9000';
+const BACKEND_URL = window.location.origin;
 
 export async function retrieveOrderAnalytics(
   preset: string,

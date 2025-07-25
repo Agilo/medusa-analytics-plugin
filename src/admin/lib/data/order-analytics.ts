@@ -23,3 +23,31 @@ export async function retrieveOrderAnalytics(
   const orderAnalytics = (await data.json()) as OrderAnalyticsResponse;
   return orderAnalytics;
 }
+
+export async function retrieveOrderAnalyticsCSV(
+  preset: string,
+  date?: DateRange
+) {
+  let url = `${BACKEND_URL}/admin/agilo-analytics/orders/csv?preset=${preset}`;
+
+  if (date?.from && date?.to) {
+    const dateFrom = format(date.from, 'yyyy-MM-dd');
+    const dateTo = format(date.to, 'yyyy-MM-dd');
+    url = `${BACKEND_URL}/admin/agilo-analytics/orders/csv?date_from=${dateFrom}&date_to=${dateTo}&preset=${preset}`;
+  }
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error("Failed to download ZIP");
+  }
+
+  const blob = await res.blob();
+  const urlObject = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = urlObject;
+  a.download = "order-analytics.zip";
+  a.click();
+  window.URL.revokeObjectURL(urlObject);
+}
+

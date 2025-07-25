@@ -64,11 +64,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     .sort((a, b) => b.quantity - a.quantity);
 
   const csvHeader = 'Variant,Quantity Sold';
-  const csvRows = sortedVariants.map(
-    (v) => `"${v.title.replace(/"/g, '""')}",${v.quantity}`
-  );
+  const csvRows = sortedVariants.map((v) => `${v.title},${v.quantity}`);
 
-  const csv = [csvHeader, ...csvRows].join('\n');
+  const csv = '\uFEFF' + [csvHeader, ...csvRows].join('\n');
 
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader(

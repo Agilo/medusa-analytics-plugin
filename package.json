@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A simple analytics plugin for Medusa",
   "author": "Ante Primorac <ante@agilo.com>",
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "files": [
     ".medusa/server"

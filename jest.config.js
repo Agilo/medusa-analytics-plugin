@@ -13,13 +13,15 @@ module.exports = {
     ],
   },
   testEnvironment: 'node',
+  testTimeout: 10000,
   moduleFileExtensions: ['js', 'ts', 'json'],
   modulePathIgnorePatterns: ['dist/'],
-  setupFiles: ['./integration-tests/setup.js'],
+  setupFiles: ['<rootDir>/integration-tests/setup-env.js'],
+  setupFilesAfterEnv: ['<rootDir>/integration-tests/setup.js'],
+  testMatch:
+    process.env.TEST_TYPE === 'integration:http'
+      ? ['<rootDir>/integration-tests/http/*.spec.[jt]s']
+      : process.env.TEST_TYPE === 'unit'
+      ? ['<rootDir>/unit-tests/**/*.spec.[jt]s']
+      : undefined,
 };
-
-if (process.env.TEST_TYPE === 'integration:http') {
-  module.exports.testMatch = ['**/integration-tests/http/*.spec.[jt]s'];
-} else if (process.env.TEST_TYPE === 'unit') {
-  module.exports.testMatch = ['**/unit-tests/**/*.spec.[jt]s'];
-}

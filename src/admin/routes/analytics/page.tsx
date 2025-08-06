@@ -119,6 +119,8 @@ const AnalyticsPage = () => {
   const updateDatePreset = React.useCallback(
     (preset: string) => {
       const today = new Date();
+      const params = new URLSearchParams(searchParams.toString());
+
       switch (preset) {
         case 'this-month':
           setDate({
@@ -126,10 +128,10 @@ const AnalyticsPage = () => {
             to: today,
           });
           setSelectValue('this-month');
-          searchParams.set('preset', 'this-month');
-          if (searchParams.get('date_from') && searchParams.get('date_to')) {
-            searchParams.delete('date_from');
-            searchParams.delete('date_to');
+          params.set('preset', 'this-month');
+          if (params.get('date_from') && params.get('date_to')) {
+            params.delete('date_from');
+            params.delete('date_to');
           }
           break;
         case 'last-month':
@@ -138,10 +140,10 @@ const AnalyticsPage = () => {
             to: endOfMonth(subMonths(today, 1)),
           });
           setSelectValue('last-month');
-          searchParams.set('preset', 'last-month');
-          if (searchParams.get('date_from') && searchParams.get('date_to')) {
-            searchParams.delete('date_from');
-            searchParams.delete('date_to');
+          params.set('preset', 'last-month');
+          if (params.get('date_from') && params.get('date_to')) {
+            params.delete('date_from');
+            params.delete('date_to');
           }
           break;
         case 'last-3-months':
@@ -150,38 +152,39 @@ const AnalyticsPage = () => {
             to: endOfMonth(subMonths(today, 1)),
           });
           setSelectValue('last-3-months');
-          searchParams.set('preset', 'last-3-months');
-          if (searchParams.get('date_from') && searchParams.get('date_to')) {
-            searchParams.delete('date_from');
-            searchParams.delete('date_to');
+          params.set('preset', 'last-3-months');
+          if (params.get('date_from') && params.get('date_to')) {
+            params.delete('date_from');
+            params.delete('date_to');
           }
           break;
         case 'custom':
         default:
           // Keep the current date when switching to custom
           setSelectValue('custom');
-          if (searchParams.get('preset')) {
-            searchParams.delete('preset');
+          if (params.get('preset')) {
+            params.delete('preset');
           }
           break;
       }
-      setSearchParams(searchParams);
+      setSearchParams(params);
     },
-    [searchParams]
+    [searchParams.toString()]
   );
 
   const updateUrlParams = React.useCallback(
     (value?: DateRange) => {
+      const params = new URLSearchParams(searchParams.toString());
       if (value?.from && value?.to) {
-        searchParams.set('date_from', format(value.from, 'yyyy-MM-dd'));
-        searchParams.set('date_to', format(value.to, 'yyyy-MM-dd'));
-        if (searchParams.get('preset')) {
-          searchParams.delete('preset');
+        params.set('date_from', format(value.from, 'yyyy-MM-dd'));
+        params.set('date_to', format(value.to, 'yyyy-MM-dd'));
+        if (params.get('preset')) {
+          params.delete('preset');
         }
       }
-      setSearchParams(searchParams);
+      setSearchParams(params);
     },
-    [searchParams]
+    [searchParams.toString()]
   );
 
   // Handle date range changes and automatically switch to custom
@@ -323,8 +326,9 @@ const AnalyticsPage = () => {
         <Tabs
           value={searchParams.get('tab') || 'orders'}
           onValueChange={(value) => {
-            searchParams.set('tab', value);
-            setSearchParams(searchParams);
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('tab', value);
+            setSearchParams(params);
           }}
         >
           <Tabs.List>

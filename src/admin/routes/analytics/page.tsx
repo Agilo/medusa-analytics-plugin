@@ -34,6 +34,7 @@ import {
 } from 'react-aria-components';
 import { CalendarDate } from '@internationalized/date';
 import type { RangeValue } from '@react-types/shared';
+import { useSearchParams } from 'react-router-dom';
 
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
@@ -88,6 +89,8 @@ function rangeValueToDateRange(
 }
 
 const AnalyticsPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
@@ -263,7 +266,13 @@ const AnalyticsPage = () => {
         </div>
       </div>
       <div className="px-6 py-4">
-        <Tabs defaultValue="orders">
+        <Tabs
+          value={searchParams.get('tab') || 'orders'}
+          onValueChange={(value) => {
+            searchParams.set('tab', value);
+            setSearchParams(searchParams);
+          }}
+        >
           <Tabs.List>
             <Tabs.Trigger
               value="orders"

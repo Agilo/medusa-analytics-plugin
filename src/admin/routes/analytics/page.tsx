@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
-import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subMonths, startOfMonth, endOfMonth, format } from 'date-fns';
 import {
   Button,
   CalendarCell,
@@ -127,6 +127,10 @@ const AnalyticsPage = () => {
           });
           setSelectValue('this-month');
           searchParams.set('preset', 'this-month');
+          if (searchParams.get('date_from') && searchParams.get('date_to')) {
+            searchParams.delete('date_from');
+            searchParams.delete('date_to');
+          }
           break;
         case 'last-month':
           setDate({
@@ -135,6 +139,10 @@ const AnalyticsPage = () => {
           });
           setSelectValue('last-month');
           searchParams.set('preset', 'last-month');
+          if (searchParams.get('date_from') && searchParams.get('date_to')) {
+            searchParams.delete('date_from');
+            searchParams.delete('date_to');
+          }
           break;
         case 'last-3-months':
           setDate({
@@ -143,6 +151,10 @@ const AnalyticsPage = () => {
           });
           setSelectValue('last-3-months');
           searchParams.set('preset', 'last-3-months');
+          if (searchParams.get('date_from') && searchParams.get('date_to')) {
+            searchParams.delete('date_from');
+            searchParams.delete('date_to');
+          }
           break;
         case 'custom':
         default:
@@ -158,11 +170,26 @@ const AnalyticsPage = () => {
     [searchParams]
   );
 
+  const updateUrlParams = React.useCallback(
+    (value?: DateRange) => {
+      if (value?.from && value?.to) {
+        searchParams.set('date_from', format(value.from, 'yyyy-MM-dd'));
+        searchParams.set('date_to', format(value.to, 'yyyy-MM-dd'));
+        if (searchParams.get('preset')) {
+          searchParams.delete('preset');
+        }
+      }
+      setSearchParams(searchParams);
+    },
+    [searchParams]
+  );
+
   // Handle date range changes and automatically switch to custom
   const handleDateRangeChange = React.useCallback(
     (value: RangeValue<DateValue> | null) => {
       const newDateRange = rangeValueToDateRange(value);
       setDate(newDateRange);
+      updateUrlParams(newDateRange);
       // Only switch to custom if the value is different from preset values
       if (selectValue !== 'custom') {
         setSelectValue('custom');
@@ -173,11 +200,19 @@ const AnalyticsPage = () => {
 
   React.useEffect(() => {
     const preset = searchParams.get('preset');
+    const dateFrom = searchParams.get('date_from');
+    const dateTo = searchParams.get('date_to');
     if (
       preset &&
       ['this-month', 'last-month', 'last-3-months'].includes(preset)
     ) {
       updateDatePreset(preset);
+    } else if (dateFrom && dateTo) {
+      setDate({
+        from: new Date(dateFrom),
+        to: new Date(dateTo),
+      });
+      setSelectValue('custom');
     }
   }, []);
 

@@ -116,38 +116,47 @@ const AnalyticsPage = () => {
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
 
-  const updateDatePreset = React.useCallback((preset: string) => {
-    const today = new Date();
-
-    switch (preset) {
-      case 'this-month':
-        setDate({
-          from: startOfMonth(today),
-          to: today,
-        });
-        setSelectValue('this-month');
-        break;
-      case 'last-month':
-        setDate({
-          from: startOfMonth(subMonths(today, 1)),
-          to: endOfMonth(subMonths(today, 1)),
-        });
-        setSelectValue('last-month');
-        break;
-      case 'last-3-months':
-        setDate({
-          from: startOfMonth(subMonths(today, 3)),
-          to: endOfMonth(subMonths(today, 1)),
-        });
-        setSelectValue('last-3-months');
-        break;
-      case 'custom':
-      default:
-        // Keep the current date when switching to custom
-        setSelectValue('custom');
-        break;
-    }
-  }, []);
+  const updateDatePreset = React.useCallback(
+    (preset: string) => {
+      const today = new Date();
+      switch (preset) {
+        case 'this-month':
+          setDate({
+            from: startOfMonth(today),
+            to: today,
+          });
+          setSelectValue('this-month');
+          searchParams.set('preset', 'this-month');
+          break;
+        case 'last-month':
+          setDate({
+            from: startOfMonth(subMonths(today, 1)),
+            to: endOfMonth(subMonths(today, 1)),
+          });
+          setSelectValue('last-month');
+          searchParams.set('preset', 'last-month');
+          break;
+        case 'last-3-months':
+          setDate({
+            from: startOfMonth(subMonths(today, 3)),
+            to: endOfMonth(subMonths(today, 1)),
+          });
+          setSelectValue('last-3-months');
+          searchParams.set('preset', 'last-3-months');
+          break;
+        case 'custom':
+        default:
+          // Keep the current date when switching to custom
+          setSelectValue('custom');
+          if (searchParams.get('preset')) {
+            searchParams.delete('preset');
+          }
+          break;
+      }
+      setSearchParams(searchParams);
+    },
+    [searchParams]
+  );
 
   // Handle date range changes and automatically switch to custom
   const handleDateRangeChange = React.useCallback(
@@ -161,6 +170,16 @@ const AnalyticsPage = () => {
     },
     []
   );
+
+  React.useEffect(() => {
+    const preset = searchParams.get('preset');
+    if (
+      preset &&
+      ['this-month', 'last-month', 'last-3-months'].includes(preset)
+    ) {
+      updateDatePreset(preset);
+    }
+  }, []);
 
   return (
     <Container className="divide-y p-0">

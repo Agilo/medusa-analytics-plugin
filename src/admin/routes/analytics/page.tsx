@@ -192,11 +192,11 @@ const AnalyticsPage = () => {
     (value: RangeValue<DateValue> | null) => {
       const newDateRange = rangeValueToDateRange(value);
       setDate(newDateRange);
-      updateUrlParams(newDateRange);
       // Only switch to custom if the value is different from preset values
       if (selectValue !== 'custom') {
         setSelectValue('custom');
       }
+      updateUrlParams(newDateRange);
     },
     []
   );

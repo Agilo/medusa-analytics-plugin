@@ -1,8 +1,7 @@
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { ProductAnalyticsResponse } from '../../hooks/product-analytics';
-
-const BACKEND_URL = window.location.origin;
+const BACKEND_URL = __BACKEND_URL__ === '/' ? '' : __BACKEND_URL__;
 
 export async function retrieveProductAnalytics(date: DateRange | undefined) {
   if (!date || !date.from || !date?.to) {

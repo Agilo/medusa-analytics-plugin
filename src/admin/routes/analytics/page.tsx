@@ -198,7 +198,7 @@ const AnalyticsPage = () => {
       }
       updateUrlParams(newDateRange);
     },
-    []
+    [updateUrlParams]
   );
 
   React.useEffect(() => {

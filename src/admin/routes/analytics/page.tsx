@@ -90,7 +90,7 @@ function rangeValueToDateRange(
 const AnalyticsPage = () => {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
+    to: new Date(),
   });
   const [selectValue, setSelectValue] = React.useState<string>('this-month');
 

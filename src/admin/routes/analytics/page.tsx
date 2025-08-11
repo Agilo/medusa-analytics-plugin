@@ -88,20 +88,53 @@ function rangeValueToDateRange(
   };
 }
 
+function presetToDateRange(preset: string): DateRange {
+  const today = new Date();
+  switch (preset) {
+    case 'this-month':
+      return { from: startOfMonth(today), to: today };
+    case 'last-month':
+      return {
+        from: startOfMonth(subMonths(today, 1)),
+        to: endOfMonth(subMonths(today, 1)),
+      };
+    case 'last-3-months':
+      return {
+        from: startOfMonth(subMonths(today, 3)),
+        to: endOfMonth(subMonths(today, 1)),
+      };
+    default:
+      return { from: startOfMonth(today), to: today };
+  }
+}
+
 const AnalyticsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
-  });
-  const [selectValue, setSelectValue] = React.useState<string>('this-month');
+  const rangeParam = searchParams.get('range') || 'this-month';
+
+  const date: DateRange | undefined = React.useMemo(() => {
+    if (['this-month', 'last-month', 'last-3-months'].includes(rangeParam)) {
+      return presetToDateRange(rangeParam);
+    }
+
+    const parts = rangeParam.split('-');
+    if (parts.length === 6) {
+      const from = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
+      const to = new Date(`${parts[3]}-${parts[4]}-${parts[5]}`);
+      return { from, to };
+    }
+
+    return undefined;
+  }, [rangeParam]);
 
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
 
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
-    selectValue,
+    ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
+      ? rangeParam
+      : 'custom',
     date
   );
 
@@ -118,53 +151,29 @@ const AnalyticsPage = () => {
 
   const updateDatePreset = React.useCallback(
     (preset: string) => {
-      const today = new Date();
       const params = new URLSearchParams(searchParams.toString());
 
       switch (preset) {
         case 'this-month':
-          setDate({
-            from: startOfMonth(today),
-            to: today,
-          });
-          setSelectValue('this-month');
-          params.set('preset', 'this-month');
-          if (params.get('date_from') && params.get('date_to')) {
-            params.delete('date_from');
-            params.delete('date_to');
-          }
+          params.set('range', 'this-month');
+
           break;
         case 'last-month':
-          setDate({
-            from: startOfMonth(subMonths(today, 1)),
-            to: endOfMonth(subMonths(today, 1)),
-          });
-          setSelectValue('last-month');
-          params.set('preset', 'last-month');
-          if (params.get('date_from') && params.get('date_to')) {
-            params.delete('date_from');
-            params.delete('date_to');
-          }
+          params.set('range', 'last-month');
           break;
         case 'last-3-months':
-          setDate({
-            from: startOfMonth(subMonths(today, 3)),
-            to: endOfMonth(subMonths(today, 1)),
-          });
-          setSelectValue('last-3-months');
-          params.set('preset', 'last-3-months');
-          if (params.get('date_from') && params.get('date_to')) {
-            params.delete('date_from');
-            params.delete('date_to');
-          }
+          params.set('range', 'last-3-months');
           break;
         case 'custom':
         default:
-          // Keep the current date when switching to custom
-          setSelectValue('custom');
-          if (params.get('preset')) {
-            params.delete('preset');
-          }
+          const currentDate = presetToDateRange(rangeParam);
+          params.set(
+            'range',
+            `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
+              currentDate.to || new Date(),
+              'yyyy-MM-dd'
+            )}`
+          );
           break;
       }
       setSearchParams(params);
@@ -176,11 +185,13 @@ const AnalyticsPage = () => {
     (value?: DateRange) => {
       const params = new URLSearchParams(searchParams.toString());
       if (value?.from && value?.to) {
-        params.set('date_from', format(value.from, 'yyyy-MM-dd'));
-        params.set('date_to', format(value.to, 'yyyy-MM-dd'));
-        if (params.get('preset')) {
-          params.delete('preset');
-        }
+        params.set(
+          'range',
+          `${format(value.from, 'yyyy-MM-dd')}-${format(
+            value.to,
+            'yyyy-MM-dd'
+          )}`
+        );
       }
       setSearchParams(params);
     },
@@ -191,33 +202,10 @@ const AnalyticsPage = () => {
   const handleDateRangeChange = React.useCallback(
     (value: RangeValue<DateValue> | null) => {
       const newDateRange = rangeValueToDateRange(value);
-      setDate(newDateRange);
-      // Only switch to custom if the value is different from preset values
-      if (selectValue !== 'custom') {
-        setSelectValue('custom');
-      }
       updateUrlParams(newDateRange);
     },
     [updateUrlParams]
   );
-
-  React.useEffect(() => {
-    const preset = searchParams.get('preset');
-    const dateFrom = searchParams.get('date_from');
-    const dateTo = searchParams.get('date_to');
-    if (
-      preset &&
-      ['this-month', 'last-month', 'last-3-months'].includes(preset)
-    ) {
-      updateDatePreset(preset);
-    } else if (dateFrom && dateTo) {
-      setDate({
-        from: new Date(dateFrom),
-        to: new Date(dateTo),
-      });
-      setSelectValue('custom');
-    }
-  }, []);
 
   return (
     <Container className="divide-y p-0">
@@ -229,7 +217,13 @@ const AnalyticsPage = () => {
             <Select
               disabled={isLoadingOrders || isLoadingProducts}
               defaultValue="this-month"
-              value={selectValue}
+              value={
+                ['this-month', 'last-month', 'last-3-months'].includes(
+                  rangeParam
+                )
+                  ? rangeParam
+                  : 'custom'
+              }
               onValueChange={updateDatePreset}
             >
               <Select.Trigger>

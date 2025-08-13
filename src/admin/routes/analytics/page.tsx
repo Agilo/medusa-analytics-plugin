@@ -88,24 +88,21 @@ function rangeValueToDateRange(
   };
 }
 
-function presetToDateRange(preset: string): DateRange {
+function presetToDateRange(
+  preset: 'this-month' | 'last-month' | 'last-3-months'
+): DateRange {
   const today = new Date();
-  switch (preset) {
-    case 'this-month':
-      return { from: startOfMonth(today), to: today };
-    case 'last-month':
-      return {
-        from: startOfMonth(subMonths(today, 1)),
-        to: endOfMonth(subMonths(today, 1)),
-      };
-    case 'last-3-months':
-      return {
-        from: startOfMonth(subMonths(today, 3)),
-        to: endOfMonth(subMonths(today, 1)),
-      };
-    default:
-      return { from: startOfMonth(today), to: today };
-  }
+  if (preset === 'this-month') return { from: startOfMonth(today), to: today };
+  if (preset === 'last-month')
+    return {
+      from: startOfMonth(subMonths(today, 1)),
+      to: endOfMonth(subMonths(today, 1)),
+    };
+  else
+    return {
+      from: startOfMonth(subMonths(today, 3)),
+      to: endOfMonth(subMonths(today, 1)),
+    };
 }
 
 const AnalyticsPage = () => {
@@ -113,7 +110,11 @@ const AnalyticsPage = () => {
   const rangeParam = searchParams.get('range') || 'this-month';
 
   const date: DateRange | undefined = React.useMemo(() => {
-    if (['this-month', 'last-month', 'last-3-months'].includes(rangeParam)) {
+    if (
+      rangeParam === 'this-month' ||
+      rangeParam === 'last-month' ||
+      rangeParam === 'last-3-months'
+    ) {
       return presetToDateRange(rangeParam);
     }
 
@@ -165,11 +166,12 @@ const AnalyticsPage = () => {
           break;
         case 'custom':
         default:
-          const currentDate = presetToDateRange(rangeParam);
+          const today = new Date();
+          const currentDate = { from: startOfMonth(today), to: today };
           params.set(
             'range',
-            `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
-              currentDate.to || new Date(),
+            `${format(currentDate.from, 'yyyy-MM-dd')}-${format(
+              currentDate.to,
               'yyyy-MM-dd'
             )}`
           );

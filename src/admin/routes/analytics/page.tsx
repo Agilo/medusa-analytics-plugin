@@ -184,7 +184,7 @@ const AnalyticsPage = () => {
       }
       setSearchParams(params);
     },
-    [searchParams.toString()]
+    [searchParams]
   );
 
   const updateUrlParams = React.useCallback(
@@ -201,7 +201,7 @@ const AnalyticsPage = () => {
       }
       setSearchParams(params);
     },
-    [searchParams.toString()]
+    [searchParams]
   );
 
   // Handle date range changes and automatically switch to custom

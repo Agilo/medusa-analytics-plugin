@@ -166,15 +166,20 @@ const AnalyticsPage = () => {
           break;
         case 'custom':
         default:
-          const today = new Date();
-          const currentDate = { from: startOfMonth(today), to: today };
-          params.set(
-            'range',
-            `${format(currentDate.from, 'yyyy-MM-dd')}-${format(
-              currentDate.to,
-              'yyyy-MM-dd'
-            )}`
-          );
+          if (
+            rangeParam === 'this-month' ||
+            rangeParam === 'last-month' ||
+            rangeParam === 'last-3-months'
+          ) {
+            const currentDate = presetToDateRange(rangeParam);
+            params.set(
+              'range',
+              `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
+                currentDate.to || new Date(),
+                'yyyy-MM-dd'
+              )}`
+            );
+          }
           break;
       }
       setSearchParams(params);

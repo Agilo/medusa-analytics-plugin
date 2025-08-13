@@ -98,11 +98,11 @@ function presetToDateRange(
       from: startOfMonth(subMonths(today, 1)),
       to: endOfMonth(subMonths(today, 1)),
     };
-  else
-    return {
-      from: startOfMonth(subMonths(today, 3)),
-      to: endOfMonth(subMonths(today, 1)),
-    };
+
+  return {
+    from: startOfMonth(subMonths(today, 3)),
+    to: endOfMonth(subMonths(today, 1)),
+  };
 }
 
 const AnalyticsPage = () => {

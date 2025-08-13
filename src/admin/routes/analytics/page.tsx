@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
-import { subMonths, startOfMonth, endOfMonth, format } from 'date-fns';
+import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
 import {
   Button,
   CalendarCell,
@@ -118,10 +118,10 @@ const AnalyticsPage = () => {
       return presetToDateRange(rangeParam);
     }
 
-    const parts = rangeParam.split('-');
-    if (parts.length === 6) {
-      const from = new Date(`${parts[0]}-${parts[1]}-${parts[2]}`);
-      const to = new Date(`${parts[3]}-${parts[4]}-${parts[5]}`);
+    const dates = rangeParam.match(/^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/);
+    if (dates) {
+      const from = parse(dates[1], 'yyyy-MM-dd', new Date());
+      const to = parse(dates[2], 'yyyy-MM-dd', new Date());
       return { from, to };
     }
 

@@ -110,7 +110,6 @@ function presetToDateRange(preset: string): DateRange {
 
 const AnalyticsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const rangeParam = searchParams.get('range') || 'this-month';
 
   const date: DateRange | undefined = React.useMemo(() => {

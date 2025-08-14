@@ -36,11 +36,6 @@ export const LineChart: React.FC<LineChartProps> = ({
   if (isSingleDataPoint) {
     return (
       <div className="space-y-2">
-        <div className="text-center">
-          <p className="text-xs text-ui-fg-muted mb-2">
-            Single day selected - showing as bar chart for better visibility
-          </p>
-        </div>
         <ResponsiveContainer aspect={16 / 9}>
           <RechartsBarChart data={data} margin={{ left: 20 }}>
             <CartesianGrid

@@ -25,8 +25,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     fields: ['id', 'created_at', 'customer.*', 'customer.orders.*'],
     filters: {
       created_at: {
-        $gte: result.data.date_from,
-        $lte: result.data.date_to,
+        $gte: result.data.date_from + 'T00:00:00Z',
+        $lte: result.data.date_to + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft', 'canceled'] },
     },
@@ -41,8 +41,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }, {})
   );
 
+  const newCustomers = customers.filter((customer) =>
+    //@ts-ignore
+    customer?.orders?.every(
+      (order) => order.created_at >= result.data.date_from
+    )
+  );
+
   const customerData = {
     total_customers: customers.length,
+    new_customers: newCustomers.length,
   };
 
   res.json(customerData);

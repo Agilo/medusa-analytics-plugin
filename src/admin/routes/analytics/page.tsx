@@ -105,6 +105,8 @@ function presetToDateRange(
   };
 }
 
+const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
+
 const AnalyticsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const rangeParam = searchParams.get('range') || 'this-month';
@@ -118,7 +120,7 @@ const AnalyticsPage = () => {
       return presetToDateRange(rangeParam);
     }
 
-    const dates = rangeParam.match(/^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/);
+    const dates = rangeParam.match(DATE_RANGE_REGEX);
     if (dates) {
       const from = parse(dates[1], 'yyyy-MM-dd', new Date());
       const to = parse(dates[2], 'yyyy-MM-dd', new Date());
@@ -184,7 +186,7 @@ const AnalyticsPage = () => {
       }
       setSearchParams(params);
     },
-    [searchParams]
+    [searchParams, rangeParam, setSearchParams]
   );
 
   const updateUrlParams = React.useCallback(
@@ -201,7 +203,7 @@ const AnalyticsPage = () => {
       }
       setSearchParams(params);
     },
-    [searchParams]
+    [searchParams, setSearchParams]
   );
 
   // Handle date range changes and automatically switch to custom

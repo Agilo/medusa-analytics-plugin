@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
-import { subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
 import {
   Button,
   CalendarCell,
@@ -34,6 +34,7 @@ import {
 } from 'react-aria-components';
 import { CalendarDate } from '@internationalized/date';
 import type { RangeValue } from '@react-types/shared';
+import { useSearchParams } from 'react-router-dom';
 
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
@@ -87,18 +88,55 @@ function rangeValueToDateRange(
   };
 }
 
+function presetToDateRange(
+  preset: 'this-month' | 'last-month' | 'last-3-months'
+): DateRange {
+  const today = new Date();
+  if (preset === 'this-month') return { from: startOfMonth(today), to: today };
+  if (preset === 'last-month')
+    return {
+      from: startOfMonth(subMonths(today, 1)),
+      to: endOfMonth(subMonths(today, 1)),
+    };
+
+  return {
+    from: startOfMonth(subMonths(today, 3)),
+    to: endOfMonth(subMonths(today, 1)),
+  };
+}
+
+const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
+
 const AnalyticsPage = () => {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: startOfMonth(new Date()),
-    to: new Date(),
-  });
-  const [selectValue, setSelectValue] = React.useState<string>('this-month');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rangeParam = searchParams.get('range') || 'this-month';
+
+  const date: DateRange | undefined = React.useMemo(() => {
+    if (
+      rangeParam === 'this-month' ||
+      rangeParam === 'last-month' ||
+      rangeParam === 'last-3-months'
+    ) {
+      return presetToDateRange(rangeParam);
+    }
+
+    const dates = rangeParam.match(DATE_RANGE_REGEX);
+    if (dates) {
+      const from = parse(dates[1], 'yyyy-MM-dd', new Date());
+      const to = parse(dates[2], 'yyyy-MM-dd', new Date());
+      return { from, to };
+    }
+
+    return undefined;
+  }, [rangeParam]);
 
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
 
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
-    selectValue,
+    ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
+      ? rangeParam
+      : 'custom',
     date
   );
 
@@ -113,50 +151,68 @@ const AnalyticsPage = () => {
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
 
-  const updateDatePreset = React.useCallback((preset: string) => {
-    const today = new Date();
+  const updateDatePreset = React.useCallback(
+    (preset: string) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    switch (preset) {
-      case 'this-month':
-        setDate({
-          from: startOfMonth(today),
-          to: today,
-        });
-        setSelectValue('this-month');
-        break;
-      case 'last-month':
-        setDate({
-          from: startOfMonth(subMonths(today, 1)),
-          to: endOfMonth(subMonths(today, 1)),
-        });
-        setSelectValue('last-month');
-        break;
-      case 'last-3-months':
-        setDate({
-          from: startOfMonth(subMonths(today, 3)),
-          to: endOfMonth(subMonths(today, 1)),
-        });
-        setSelectValue('last-3-months');
-        break;
-      case 'custom':
-      default:
-        // Keep the current date when switching to custom
-        setSelectValue('custom');
-        break;
-    }
-  }, []);
+      switch (preset) {
+        case 'this-month':
+          params.set('range', 'this-month');
+
+          break;
+        case 'last-month':
+          params.set('range', 'last-month');
+          break;
+        case 'last-3-months':
+          params.set('range', 'last-3-months');
+          break;
+        case 'custom':
+        default:
+          if (
+            rangeParam === 'this-month' ||
+            rangeParam === 'last-month' ||
+            rangeParam === 'last-3-months'
+          ) {
+            const currentDate = presetToDateRange(rangeParam);
+            params.set(
+              'range',
+              `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
+                currentDate.to || new Date(),
+                'yyyy-MM-dd'
+              )}`
+            );
+          }
+          break;
+      }
+      setSearchParams(params);
+    },
+    [searchParams, rangeParam, setSearchParams]
+  );
+
+  const updateUrlParams = React.useCallback(
+    (value?: DateRange) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value?.from && value?.to) {
+        params.set(
+          'range',
+          `${format(value.from, 'yyyy-MM-dd')}-${format(
+            value.to,
+            'yyyy-MM-dd'
+          )}`
+        );
+      }
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
 
   // Handle date range changes and automatically switch to custom
   const handleDateRangeChange = React.useCallback(
     (value: RangeValue<DateValue> | null) => {
       const newDateRange = rangeValueToDateRange(value);
-      setDate(newDateRange);
-      // Only switch to custom if the value is different from preset values
-      if (selectValue !== 'custom') {
-        setSelectValue('custom');
-      }
+      updateUrlParams(newDateRange);
     },
-    []
+    [updateUrlParams]
   );
 
   return (
@@ -169,7 +225,13 @@ const AnalyticsPage = () => {
             <Select
               disabled={isLoadingOrders || isLoadingProducts}
               defaultValue="this-month"
-              value={selectValue}
+              value={
+                ['this-month', 'last-month', 'last-3-months'].includes(
+                  rangeParam
+                )
+                  ? rangeParam
+                  : 'custom'
+              }
               onValueChange={updateDatePreset}
             >
               <Select.Trigger>
@@ -263,7 +325,14 @@ const AnalyticsPage = () => {
         </div>
       </div>
       <div className="px-6 py-4">
-        <Tabs defaultValue="orders">
+        <Tabs
+          value={searchParams.get('tab') || 'orders'}
+          onValueChange={(value) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('tab', value);
+            setSearchParams(params);
+          }}
+        >
           <Tabs.List>
             <Tabs.Trigger
               value="orders"

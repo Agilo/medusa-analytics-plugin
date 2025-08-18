@@ -2,6 +2,8 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
 import {
   ContainerRegistrationKeys,
   MedusaError,
+  Modules,
+  BigNumber,
 } from '@medusajs/framework/utils';
 import { format } from 'date-fns';
 import { z } from 'zod';
@@ -11,15 +13,52 @@ import {
   getAllDateGroupingKeys,
   getDateGroupingKey,
 } from '../../../../utils/orders';
+import { DateTime } from 'luxon';
 
 export const adminCustomerAnalyticsQuerySchema = z.object({
   date_from: z.string(),
   date_to: z.string(),
 });
 
+const DEFAULT_CURRENCY = 'EUR';
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const result = adminCustomerAnalyticsQuerySchema.safeParse(req.query);
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const storeModuleService = req.scope.resolve(Modules.STORE);
+  const cacheModuleService = req.scope.resolve(Modules.CACHE);
+  const stores = await storeModuleService.listStores(
+    {},
+    { relations: ['supported_currencies'] }
+  );
+
+  const store = stores?.[0];
+  const currencyCode =
+    store?.supported_currencies
+      ?.find((c) => c.is_default)
+      ?.currency_code?.toUpperCase() || DEFAULT_CURRENCY;
+
+  const cacheKey = `exchange_rates_${currencyCode}`;
+
+  let exchangeRates: { rates: Record<string, any> } | null =
+    await cacheModuleService.get(cacheKey);
+
+  if (!exchangeRates) {
+    const response = await fetch(
+      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
+    );
+    exchangeRates = await response.json();
+
+    const now = DateTime.now().setZone('Europe/Berlin');
+    let expireAt = now.set({ hour: 16, minute: 0, second: 0, millisecond: 0 });
+    if (now >= expireAt) {
+      expireAt = expireAt.plus({ days: 1 });
+    }
+
+    const ttl = Math.floor(expireAt.diff(now, 'seconds').seconds);
+
+    await cacheModuleService.set(cacheKey, exchangeRates, ttl);
+  }
 
   if (!result.success) {
     throw new MedusaError(
@@ -29,7 +68,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
   const { data: orders } = await query.graph({
     entity: 'order',
-    fields: ['id', 'created_at', 'customer.*', 'customer.orders.*'],
+    fields: [
+      'id',
+      'created_at',
+      'customer.*',
+      'customer.orders.*',
+      'currency_code',
+      'customer.groups.*',
+      'total',
+    ],
     filters: {
       created_at: {
         $gte: result.data.date_from + 'T00:00:00Z',
@@ -87,7 +134,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     { returningCustomers: Set<string>; newCustomers: Set<string> }
   > = {};
 
+  const customerGroup: Record<string, number> = {};
+
   for (const order of orders) {
+    const exchangeRate =
+      order.currency_code.toUpperCase() !== currencyCode
+        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        : 1;
+    const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     const key = getDateGroupingKey(
       new Date(order.created_at),
       groupBy,
@@ -107,6 +161,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     } else if (order.customer?.id) {
       groupedByKey[key].returningCustomers.add(order.customer.id);
     }
+
+    if (order.customer?.groups?.length) {
+      for (const group of order.customer.groups) {
+        if (!customerGroup[group.name]) {
+          customerGroup[group.name] = 0;
+        }
+        customerGroup[group.name] += orderTotal;
+      }
+    } else {
+      if (!customerGroup['No Group']) {
+        customerGroup['No Group'] = 0;
+      }
+      customerGroup['No Group'] += orderTotal;
+    }
   }
 
   const customerCountArray = keyRange.map((date) => ({
@@ -115,11 +183,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     new_customers: groupedByKey[date]?.newCustomers.size || 0,
   }));
 
+  const customerGroupArray = Object.entries(customerGroup).map(
+    ([name, total]) => ({
+      name,
+      total,
+    })
+  );
+
   const customerData = {
     total_customers: customers.length,
     new_customers: newCustomers.length,
     returning_customers: customers.length - newCustomers.length,
     customer_count: customerCountArray,
+    customer_group: customerGroupArray,
+    currencyCode,
   };
 
   res.json(customerData);

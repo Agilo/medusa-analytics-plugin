@@ -51,6 +51,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const customerData = {
     total_customers: customers.length,
     new_customers: newCustomers.length,
+    returning_customers: customers.length - newCustomers.length,
   };
 
   res.json(customerData);

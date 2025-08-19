@@ -135,6 +135,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   > = {};
 
   const customerGroup: Record<string, number> = {};
+  const customerSales: Record<
+    string,
+    {
+      sales: number;
+      name: string;
+      groups: string[];
+      count: number;
+      last_order: Date;
+      email: string;
+    }
+  > = {};
 
   for (const order of orders) {
     const exchangeRate =
@@ -175,6 +186,27 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       }
       customerGroup['No Group'] += orderTotal;
     }
+    if (order?.customer?.id && !customerSales[order.customer.id]) {
+      customerSales[order.customer.id] = {
+        sales: 0,
+        name: order.customer?.first_name + ' ' + order.customer?.last_name,
+        groups: order.customer?.groups?.map((g) => g.name) || [],
+        count: 0,
+        last_order: new Date(order.created_at),
+        email: order.customer?.email || '',
+      };
+    }
+    if (order.customer?.id) {
+      customerSales[order.customer.id].sales += orderTotal;
+      customerSales[order.customer.id].count += 1;
+      if (
+        new Date(order.created_at) > customerSales[order.customer.id].last_order
+      ) {
+        customerSales[order.customer.id].last_order = new Date(
+          order.created_at
+        );
+      }
+    }
   }
 
   const customerCountArray = keyRange.map((date) => ({
@@ -190,12 +222,25 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     })
   );
 
+  const customerSalesArray = Object.entries(customerSales)
+    .map(([customerId, customer]) => ({
+      customer_id: customerId,
+      sales: customer.sales,
+      name: customer.name,
+      groups: customer.groups,
+      count: customer.count,
+      last_order: customer.last_order,
+      email: customer.email,
+    }))
+    .sort((a, b) => b.sales - a.sales);
+
   const customerData = {
     total_customers: customers.length,
     new_customers: newCustomers.length,
     returning_customers: customers.length - newCustomers.length,
     customer_count: customerCountArray,
     customer_group: customerGroupArray,
+    customer_sales: customerSalesArray.slice(0, 10),
     currencyCode,
   };
 

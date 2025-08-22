@@ -243,7 +243,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     returning_customers: customers.length - newCustomers.length,
     customer_count: customerCountArray,
     customer_group: customerGroupArray,
-    customer_sales: customerSalesArray.slice(0, 10),
+    customer_sales: customerSalesArray,
     currency_code: currencyCode,
   };
 

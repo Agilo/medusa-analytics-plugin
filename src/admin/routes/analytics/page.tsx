@@ -50,6 +50,8 @@ import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
 import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 import { StackedBarChart } from '../../components/StackedBarChart';
+import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
+import { CustomersTable } from '../../components/CustomersTable';
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -672,7 +674,7 @@ const AnalyticsPage = () => {
                   </Container>
                 </div>
               </div>
-              <div className="flex max-md:flex-col gap-4">
+              <div className="flex max-md:flex-col gap-4 mb-4">
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
@@ -692,7 +694,7 @@ const AnalyticsPage = () => {
                           xAxisDataKey="name"
                           lineColor="#82ca9d"
                           useStableColors={true}
-                          colorKeyField="name"
+                          colorKeyField="returning_customers"
                           dataKeys={['new_customers', 'returning_customers']}
                         />
                       </div>
@@ -744,6 +746,24 @@ const AnalyticsPage = () => {
                     )}
                   </Container>
                 </div>
+              </div>
+              <div className="flex gap-4 max-xl:flex-col">
+                <Container>
+                  <Text size="xlarge" weight="plus">
+                    Top Customers by Sales
+                  </Text>
+                  <Text size="small" className="mb-8 text-ui-fg-muted">
+                    Customers by sales in the selected period
+                  </Text>
+                  {isLoadingCustomers ? (
+                    <CustomersTableSkeleton />
+                  ) : (
+                    <CustomersTable
+                      customers={customers?.customer_sales || []}
+                      currencyCode={customers?.currency_code || 'EUR'}
+                    />
+                  )}
+                </Container>
               </div>
             </Tabs.Content>
           </div>

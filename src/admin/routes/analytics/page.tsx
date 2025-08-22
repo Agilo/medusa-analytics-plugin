@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  User,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
 import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
@@ -47,6 +48,7 @@ import { LineChartSkeleton } from '../../skeletons/LineChartSkeleton';
 import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
 import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
+import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -132,6 +134,9 @@ const AnalyticsPage = () => {
 
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
+
+  const { data: customers, isLoading: isLoadingCustomers } =
+    useCustomerAnalytics(date);
 
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
     ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
@@ -345,6 +350,12 @@ const AnalyticsPage = () => {
               disabled={isLoadingOrders || isLoadingProducts}
             >
               Products
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="customers"
+              disabled={isLoadingOrders || isLoadingProducts}
+            >
+              Customers
             </Tabs.Trigger>
           </Tabs.List>
           <div className="mt-8">
@@ -592,6 +603,73 @@ const AnalyticsPage = () => {
                     />
                   )}
                 </Container>
+              </div>
+            </Tabs.Content>
+            <Tabs.Content value="customers">
+              <div className="flex max-md:flex-col gap-4 mb-4">
+                <div className="space-y-4 flex-1">
+                  <Container className="relative">
+                    <User className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">Total Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.total_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                  <Container className="relative">
+                    <User className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">New Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.new_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                </div>
+
+                <div className="space-y-4 flex-1">
+                  <Container className="relative">
+                    <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
+                    <Text size="small">Returning Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.returning_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                  <Container className="relative">
+                    <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">Average Sales per Customer</Text>
+                    {isLoadingCustomers || isLoadingOrders ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {new Intl.NumberFormat('en-US', {
+                            currency: customers?.currency_code || 'EUR',
+                            style: 'currency',
+                          }).format(
+                            (orders?.total_sales || 0) /
+                              (customers?.total_customers || 0)
+                          )}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                </div>
               </div>
             </Tabs.Content>
           </div>

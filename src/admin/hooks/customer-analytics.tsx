@@ -18,7 +18,7 @@ export type CustomerAnalyticsResponse = {
     last_order: Date;
     email: string;
   }[];
-  currencyCode: string;
+  currency_code: string;
 };
 
 export const useCustomerAnalytics = (

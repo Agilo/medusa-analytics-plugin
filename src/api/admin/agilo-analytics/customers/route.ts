@@ -241,7 +241,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     customer_count: customerCountArray,
     customer_group: customerGroupArray,
     customer_sales: customerSalesArray.slice(0, 10),
-    currencyCode,
+    currency_code: currencyCode,
   };
 
   res.json(customerData);

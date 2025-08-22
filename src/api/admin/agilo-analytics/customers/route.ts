@@ -189,7 +189,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     if (order?.customer?.id && !customerSales[order.customer.id]) {
       customerSales[order.customer.id] = {
         sales: 0,
-        name: order.customer?.first_name + ' ' + order.customer?.last_name,
+        name:
+          (order.customer?.first_name || '') +
+          ' ' +
+          (order.customer?.last_name || ''),
         groups: order.customer?.groups?.map((g) => g.name) || [],
         count: 0,
         last_order: new Date(order.created_at),
@@ -228,7 +231,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       sales: customer.sales,
       name: customer.name,
       groups: customer.groups,
-      count: customer.count,
+      order_count: customer.count,
       last_order: customer.last_order,
       email: customer.email,
     }))

@@ -18,7 +18,7 @@ export type CustomerAnalyticsResponse = {
     sales: number;
     name: string;
     groups: string[];
-    count: number;
+    order_count: number;
     last_order: Date;
     email: string;
   }[];

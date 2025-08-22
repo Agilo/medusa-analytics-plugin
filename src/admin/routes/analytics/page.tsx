@@ -49,6 +49,7 @@ import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
 import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
 import { useCustomerAnalytics } from '../../hooks/customer-analytics';
+import { StackedBarChart } from '../../components/StackedBarChart';
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -667,6 +668,79 @@ const AnalyticsPage = () => {
                           )}
                         </Text>
                       </>
+                    )}
+                  </Container>
+                </div>
+              </div>
+              <div className="flex max-md:flex-col gap-4">
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      New vs. Returning Customers
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Distribution of new and returning customers in the
+                      selected period
+                    </Text>
+                    {isLoadingCustomers ? (
+                      <BarChartSkeleton />
+                    ) : customers?.customer_count &&
+                      customers.customer_count.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <StackedBarChart
+                          data={customers.customer_count}
+                          xAxisDataKey="name"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          dataKeys={['new_customers', 'returning_customers']}
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Top Customer Groups by Sales
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Sales breakdown by customer group in the selected period
+                    </Text>
+                    {isLoadingCustomers ? (
+                      <BarChartSkeleton />
+                    ) : customers?.customer_group &&
+                      customers.customer_group.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <BarChart
+                          data={customers.customer_group}
+                          xAxisDataKey="name"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisDataKey="total"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat('en-US', {
+                              currency: customers.currency_code || 'EUR',
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
                     )}
                   </Container>
                 </div>

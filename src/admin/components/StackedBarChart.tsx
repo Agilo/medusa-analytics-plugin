@@ -83,7 +83,14 @@ export const StackedBarChart = <T extends Record<string, unknown>>({
           }}
         />
         {dataKeys?.map((key, index) => (
-          <Bar key={String(key)} dataKey={String(key)} fill={colors[index]} />
+          <Bar
+            key={String(key)}
+            dataKey={String(key)}
+            stackId="a"
+            fill={
+              useStableColors && colors.length > 0 ? colors[index] : '#3B82F6'
+            }
+          />
         ))}
       </RechartsBarChart>
     </ResponsiveContainer>

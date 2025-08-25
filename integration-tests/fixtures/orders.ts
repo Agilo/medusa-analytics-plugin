@@ -58,6 +58,7 @@ export async function createOrderSeeder({
   fulfillmentSetsOverride,
   regionOverride,
   createdAt,
+  customerEmail
 }: {
   api: any;
   container: MedusaContainer;
@@ -74,6 +75,7 @@ export async function createOrderSeeder({
   adminHeaders: {};
   regionOverride?: AdminRegion;
   createdAt?: string;
+  customerEmail?: string;
 }) {
   const repo = container.resolve(ContainerRegistrationKeys.PG_CONNECTION);
   const publishableKey = await generatePublishableKey(container);
@@ -266,7 +268,7 @@ export async function createOrderSeeder({
       `/store/carts`,
       {
         currency_code: 'eur',
-        email: 'test@test.com',
+        email: customerEmail || 'test@test.com',
         region_id: region.id,
         shipping_address: {
           address_1: 'test address 1',

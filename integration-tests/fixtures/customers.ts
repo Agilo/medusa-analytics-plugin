@@ -25,3 +25,45 @@ export async function createTestCustomer({
 
   return response.data.customer;
 }
+
+export async function createCustomerGroup({
+  api,
+  name,
+  adminHeaders,
+}: {
+  api: any;
+  name?: string;
+  adminHeaders: {};
+}) {
+  const response = await api.post(
+    '/admin/customer-groups',
+    {
+      name: name || 'Test Group',
+    },
+    adminHeaders
+  );
+
+  return response.data.customer_group;
+}
+
+export async function addCustomerToGroup({
+  api,
+  customerId,
+  groupId,
+  adminHeaders,
+}: {
+  api: any;
+  customerId: string;
+  groupId: string[];
+  adminHeaders: {};
+}) {
+  const response = await api.post(
+    `/admin/customers/${customerId}/customer-groups`,
+    {
+      add: groupId,
+    },
+    adminHeaders
+  );
+
+  return response.data;
+}

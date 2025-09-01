@@ -95,13 +95,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }, {})
   );
 
-  const newCustomers = customers.filter((customer) =>
-    //@ts-ignore
-    customer?.orders?.every(
-      (order) =>
-        new Date(order.created_at) >=
-        new Date(result.data.date_from + 'T00:00:00Z')
-    )
+  const newCustomers = customers.filter(
+    (customer) =>
+      customer &&
+      typeof customer === 'object' &&
+      'orders' in customer &&
+      Array.isArray(customer.orders) &&
+      customer?.orders?.every(
+        (order) =>
+          new Date(order.created_at) >=
+          new Date(result.data.date_from + 'T00:00:00Z')
+      )
   );
 
   const calculateDateRange = calculateDateRangeMethod['custom'];
@@ -165,11 +169,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         newCustomers: new Set<string>(),
       };
     }
-    //@ts-ignore
-    if (newCustomers.some((c) => c?.id === order.customer?.id)) {
-      groupedByKey[key].newCustomers.add(order.customer?.id);
-      //@ts-ignore
-    } else if (order.customer?.id) {
+    if (
+      order.customer &&
+      order.customer.id &&
+      newCustomers.some(
+        (c) =>
+          c && typeof c === 'object' && 'id' in c && c.id === order.customer.id
+      )
+    ) {
+      groupedByKey[key].newCustomers.add(order.customer.id);
+    } else if (order.customer && order.customer.id) {
       groupedByKey[key].returningCustomers.add(order.customer.id);
     }
 

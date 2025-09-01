@@ -3,6 +3,8 @@ on:
     types: [published]
 
 name: Publish Package
+permissions:
+  contents: read
 
 jobs:
   unit-tests:

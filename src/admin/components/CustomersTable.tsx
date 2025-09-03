@@ -54,16 +54,16 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
     if (sorting && sorting.id) {
       filtered = filtered.slice().sort((a, b) => {
-        // @ts-expect-error - TypeScript does not know the type of sorting.id
-        const aVal = a[sorting.id];
-        // @ts-expect-error - TypeScript does not know the type of sorting.id
-        const bVal = b[sorting.id];
-        if (aVal < bVal) {
-          return sorting.desc ? 1 : -1;
-        }
-        if (aVal > bVal) {
-          return sorting.desc ? -1 : 1;
-        }
+        const aVal = a[sorting.id as keyof typeof a];
+
+        const bVal = b[sorting.id as keyof typeof b];
+        if (!aVal && !bVal) return 0;
+
+        if (!aVal) return sorting.desc ? 1 : -1;
+        if (!bVal) return sorting.desc ? -1 : 1;
+
+        if (aVal < bVal) return sorting.desc ? 1 : -1;
+        if (aVal > bVal) return sorting.desc ? -1 : 1;
         return 0;
       });
     }

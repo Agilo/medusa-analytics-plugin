@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  User,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
 import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
@@ -47,13 +48,17 @@ import { LineChartSkeleton } from '../../skeletons/LineChartSkeleton';
 import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
 import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
+import { useCustomerAnalytics } from '../../hooks/customer-analytics';
+import { StackedBarChart } from '../../components/StackedBarChart';
+import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
+import { CustomersTable } from '../../components/CustomersTable';
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
     date.getFullYear(),
     date.getMonth() + 1,
-    date.getDate()
+    date.getDate(),
   );
 }
 
@@ -67,7 +72,7 @@ function calendarDateToDate(calendarDate: DateValue): Date {
 }
 
 function dateRangeToRangeValue(
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
 ): RangeValue<DateValue> | null {
   if (!dateRange?.from) return null;
   return {
@@ -79,7 +84,7 @@ function dateRangeToRangeValue(
 }
 
 function rangeValueToDateRange(
-  rangeValue: RangeValue<DateValue> | null
+  rangeValue: RangeValue<DateValue> | null,
 ): DateRange | undefined {
   if (!rangeValue) return undefined;
   return {
@@ -89,7 +94,7 @@ function rangeValueToDateRange(
 }
 
 function presetToDateRange(
-  preset: 'this-month' | 'last-month' | 'last-3-months'
+  preset: 'this-month' | 'last-month' | 'last-3-months',
 ): DateRange {
   const today = new Date();
   if (preset === 'this-month') return { from: startOfMonth(today), to: today };
@@ -133,23 +138,31 @@ const AnalyticsPage = () => {
   const { data: products, isLoading: isLoadingProducts } =
     useProductAnalytics(date);
 
+  const { data: customers, isLoading: isLoadingCustomers } =
+    useCustomerAnalytics(date);
+
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
     ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
       ? rangeParam
       : 'custom',
-    date
+    date,
   );
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
-    (item) => item.count > 0
+    (item) => item.count > 0,
   );
 
   const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
-    (item) => item.sales > 0
+    (item) => item.sales > 0,
   );
 
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
+
+  const someCustomerCountsGreaterThanZero = customers?.customer_count?.some(
+    (item) =>
+      (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0,
+  );
 
   const updateDatePreset = React.useCallback(
     (preset: string) => {
@@ -178,15 +191,15 @@ const AnalyticsPage = () => {
               'range',
               `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
                 currentDate.to || new Date(),
-                'yyyy-MM-dd'
-              )}`
+                'yyyy-MM-dd',
+              )}`,
             );
           }
           break;
       }
       setSearchParams(params);
     },
-    [searchParams, rangeParam, setSearchParams]
+    [searchParams, rangeParam, setSearchParams],
   );
 
   const updateUrlParams = React.useCallback(
@@ -197,13 +210,13 @@ const AnalyticsPage = () => {
           'range',
           `${format(value.from, 'yyyy-MM-dd')}-${format(
             value.to,
-            'yyyy-MM-dd'
-          )}`
+            'yyyy-MM-dd',
+          )}`,
         );
       }
       setSearchParams(params);
     },
-    [searchParams, setSearchParams]
+    [searchParams, setSearchParams],
   );
 
   // Handle date range changes and automatically switch to custom
@@ -212,7 +225,7 @@ const AnalyticsPage = () => {
       const newDateRange = rangeValueToDateRange(value);
       updateUrlParams(newDateRange);
     },
-    [updateUrlParams]
+    [updateUrlParams],
   );
 
   return (
@@ -227,7 +240,7 @@ const AnalyticsPage = () => {
               defaultValue="this-month"
               value={
                 ['this-month', 'last-month', 'last-3-months'].includes(
-                  rangeParam
+                  rangeParam,
                 )
                   ? rangeParam
                   : 'custom'
@@ -345,6 +358,12 @@ const AnalyticsPage = () => {
               disabled={isLoadingOrders || isLoadingProducts}
             >
               Products
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="customers"
+              disabled={isLoadingOrders || isLoadingProducts}
+            >
+              Customers
             </Tabs.Trigger>
           </Tabs.List>
           <div className="mt-8">
@@ -567,7 +586,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity === 0
+                          (product) => product.inventoryQuantity === 0,
                         ) || []
                       }
                     />
@@ -586,9 +605,171 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity > 0
+                          (product) => product.inventoryQuantity > 0,
                         ) || []
                       }
+                    />
+                  )}
+                </Container>
+              </div>
+            </Tabs.Content>
+            <Tabs.Content value="customers">
+              <div className="flex max-md:flex-col gap-4 mb-4">
+                <div className="space-y-4 flex-1">
+                  <Container className="relative">
+                    <User className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">Total Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.total_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                  <Container className="relative">
+                    <User className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">New Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.new_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                </div>
+
+                <div className="space-y-4 flex-1">
+                  <Container className="relative">
+                    <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
+                    <Text size="small">Returning Customers</Text>
+                    {isLoadingCustomers ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {customers?.returning_customers || 0}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                  <Container className="relative">
+                    <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">Average Sales per Customer</Text>
+                    {isLoadingCustomers || isLoadingOrders ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {new Intl.NumberFormat('en-US', {
+                            currency: customers?.currency_code || 'EUR',
+                            style: 'currency',
+                          }).format(
+                            customers?.total_customers &&
+                              customers.total_customers > 0
+                              ? (orders?.total_sales || 0) /
+                                  customers.total_customers
+                              : 0,
+                          )}
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+                </div>
+              </div>
+              <div className="flex max-md:flex-col gap-4 mb-4">
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      New vs. Returning Customers
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Distribution of new and returning customers in the
+                      selected period
+                    </Text>
+                    {isLoadingCustomers ? (
+                      <BarChartSkeleton />
+                    ) : customers?.customer_count &&
+                      customers.customer_count.length > 0 &&
+                      someCustomerCountsGreaterThanZero ? (
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <StackedBarChart
+                          data={customers.customer_count}
+                          xAxisDataKey="name"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="returning_customers"
+                          dataKeys={['new_customers', 'returning_customers']}
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Top Customer Groups by Sales
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Sales breakdown by customer group in the selected period
+                    </Text>
+                    {isLoadingCustomers ? (
+                      <BarChartSkeleton />
+                    ) : customers?.customer_group &&
+                      customers.customer_group.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <BarChart
+                          data={customers.customer_group}
+                          xAxisDataKey="name"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisDataKey="total"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat('en-US', {
+                              currency: customers.currency_code || 'EUR',
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+              </div>
+              <div className="flex gap-4 max-xl:flex-col">
+                <Container>
+                  <Text size="xlarge" weight="plus">
+                    Top Customers by Sales
+                  </Text>
+                  <Text size="small" className="mb-8 text-ui-fg-muted">
+                    Customers by sales in the selected period
+                  </Text>
+                  {isLoadingCustomers ? (
+                    <CustomersTableSkeleton />
+                  ) : (
+                    <CustomersTable
+                      customers={customers?.customer_sales || []}
+                      currencyCode={customers?.currency_code || 'EUR'}
                     />
                   )}
                 </Container>

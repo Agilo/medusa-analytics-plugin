@@ -1,3 +1,4 @@
+import Medusa from '@medusajs/js-sdk';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -42,3 +43,10 @@ export function generateColorsForData<T extends Record<string, any>>(
     generateStableColor(String(item[keyField]), saturation, lightness),
   );
 }
+
+export const sdk = new Medusa({
+  baseUrl: __BACKEND_URL__ || '/',
+  auth: {
+    type: 'session',
+  },
+});

@@ -9,42 +9,42 @@ import { Skeleton } from '../components/Skeleton';
 
 const dummyData = [
   {
-    a: 'a',
+    a: 'a1',
     b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: 'a',
+    a: 'a2',
     b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: 'a',
+    a: 'a3',
     b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: 'a',
+    a: 'a4',
     b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: 'a',
+    a: 'a5',
     b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: 'a',
+    a: 'a6',
     b: 'b',
     c: 0,
     d: 0,

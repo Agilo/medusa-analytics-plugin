@@ -1,6 +1,6 @@
 {
   "name": "@agilo/medusa-analytics-plugin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple analytics plugin for Medusa",
   "author": "Ante Primorac <ante@agilo.com>",
   "publishConfig": {

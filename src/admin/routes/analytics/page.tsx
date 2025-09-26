@@ -58,7 +58,7 @@ function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
     date.getFullYear(),
     date.getMonth() + 1,
-    date.getDate()
+    date.getDate(),
   );
 }
 
@@ -72,7 +72,7 @@ function calendarDateToDate(calendarDate: DateValue): Date {
 }
 
 function dateRangeToRangeValue(
-  dateRange: DateRange | undefined
+  dateRange: DateRange | undefined,
 ): RangeValue<DateValue> | null {
   if (!dateRange?.from) return null;
   return {
@@ -84,7 +84,7 @@ function dateRangeToRangeValue(
 }
 
 function rangeValueToDateRange(
-  rangeValue: RangeValue<DateValue> | null
+  rangeValue: RangeValue<DateValue> | null,
 ): DateRange | undefined {
   if (!rangeValue) return undefined;
   return {
@@ -94,7 +94,7 @@ function rangeValueToDateRange(
 }
 
 function presetToDateRange(
-  preset: 'this-month' | 'last-month' | 'last-3-months'
+  preset: 'this-month' | 'last-month' | 'last-3-months',
 ): DateRange {
   const today = new Date();
   if (preset === 'this-month') return { from: startOfMonth(today), to: today };
@@ -145,19 +145,24 @@ const AnalyticsPage = () => {
     ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
       ? rangeParam
       : 'custom',
-    date
+    date,
   );
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
-    (item) => item.count > 0
+    (item) => item.count > 0,
   );
 
   const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
-    (item) => item.sales > 0
+    (item) => item.sales > 0,
   );
 
   const someTopSellingProductsGreaterThanZero =
     products?.variantQuantitySold?.some((item) => item.quantity > 0);
+
+  const someCustomerCountsGreaterThanZero = customers?.customer_count?.some(
+    (item) =>
+      (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0,
+  );
 
   const updateDatePreset = React.useCallback(
     (preset: string) => {
@@ -186,15 +191,15 @@ const AnalyticsPage = () => {
               'range',
               `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
                 currentDate.to || new Date(),
-                'yyyy-MM-dd'
-              )}`
+                'yyyy-MM-dd',
+              )}`,
             );
           }
           break;
       }
       setSearchParams(params);
     },
-    [searchParams, rangeParam, setSearchParams]
+    [searchParams, rangeParam, setSearchParams],
   );
 
   const updateUrlParams = React.useCallback(
@@ -205,13 +210,13 @@ const AnalyticsPage = () => {
           'range',
           `${format(value.from, 'yyyy-MM-dd')}-${format(
             value.to,
-            'yyyy-MM-dd'
-          )}`
+            'yyyy-MM-dd',
+          )}`,
         );
       }
       setSearchParams(params);
     },
-    [searchParams, setSearchParams]
+    [searchParams, setSearchParams],
   );
 
   // Handle date range changes and automatically switch to custom
@@ -220,7 +225,7 @@ const AnalyticsPage = () => {
       const newDateRange = rangeValueToDateRange(value);
       updateUrlParams(newDateRange);
     },
-    [updateUrlParams]
+    [updateUrlParams],
   );
 
   return (
@@ -235,7 +240,7 @@ const AnalyticsPage = () => {
               defaultValue="this-month"
               value={
                 ['this-month', 'last-month', 'last-3-months'].includes(
-                  rangeParam
+                  rangeParam,
                 )
                   ? rangeParam
                   : 'custom'
@@ -581,7 +586,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity === 0
+                          (product) => product.inventoryQuantity === 0,
                         ) || []
                       }
                     />
@@ -600,7 +605,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity > 0
+                          (product) => product.inventoryQuantity > 0,
                         ) || []
                       }
                     />
@@ -665,8 +670,11 @@ const AnalyticsPage = () => {
                             currency: customers?.currency_code || 'EUR',
                             style: 'currency',
                           }).format(
-                            (orders?.total_sales || 0) /
-                              (customers?.total_customers || 0)
+                            customers?.total_customers &&
+                              customers.total_customers > 0
+                              ? (orders?.total_sales || 0) /
+                                  customers.total_customers
+                              : 0,
                           )}
                         </Text>
                       </>
@@ -687,7 +695,8 @@ const AnalyticsPage = () => {
                     {isLoadingCustomers ? (
                       <BarChartSkeleton />
                     ) : customers?.customer_count &&
-                      customers.customer_count.length > 0 ? (
+                      customers.customer_count.length > 0 &&
+                      someCustomerCountsGreaterThanZero ? (
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <StackedBarChart
                           data={customers.customer_count}

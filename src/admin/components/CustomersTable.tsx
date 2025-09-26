@@ -24,7 +24,7 @@ type CustomersTableProps = {
 };
 
 const columnHelper =
-  createDataTableColumnHelper<CustomersTableProps['customers'][0]>();
+  createDataTableColumnHelper<CustomersTableProps['customers'][number]>();
 
 const PAGE_SIZE = 10;
 
@@ -40,7 +40,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
   const [search, setSearch] = React.useState<string>('');
 
   const [sorting, setSorting] = React.useState<DataTableSortingState | null>(
-    null
+    null,
   );
 
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
     let filtered = customers.filter(
       (customer) =>
         customer.name.toLowerCase().includes(search.toLowerCase()) ||
-        customer.email.toLowerCase().includes(search.toLowerCase())
+        customer.email.toLowerCase().includes(search.toLowerCase()),
     );
 
     if (sorting && sorting.id) {
@@ -70,7 +70,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
     return filtered.slice(
       pagination.pageIndex * pagination.pageSize,
-      (pagination.pageIndex + 1) * pagination.pageSize
+      (pagination.pageIndex + 1) * pagination.pageSize,
     );
   }, [customers, search, sorting, pagination]);
 
@@ -138,7 +138,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
         },
       }),
     ],
-    [currencyCode]
+    [currencyCode],
   );
 
   const table = useDataTable({

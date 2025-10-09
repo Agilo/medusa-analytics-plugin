@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { defineRouteConfig } from '@medusajs/admin-sdk';
+import * as React from "react";
+import { defineRouteConfig } from "@medusajs/admin-sdk";
 import {
   Container,
   DateRange,
@@ -7,7 +7,7 @@ import {
   Select,
   Tabs,
   Text,
-} from '@medusajs/ui';
+} from "@medusajs/ui";
 import {
   ChartBar,
   ShoppingCart,
@@ -16,9 +16,9 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-} from '@medusajs/icons';
-import { ChartNoAxesCombined } from 'lucide-react';
-import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
+} from "@medusajs/icons";
+import { ChartNoAxesCombined } from "lucide-react";
+import { subMonths, startOfMonth, endOfMonth, format, parse } from "date-fns";
 import {
   Button,
   CalendarCell,
@@ -32,47 +32,47 @@ import {
   Popover,
   RangeCalendar,
   DateValue,
-} from 'react-aria-components';
-import { CalendarDate } from '@internationalized/date';
-import type { RangeValue } from '@react-types/shared';
-import { useSearchParams } from 'react-router-dom';
+} from "react-aria-components";
+import { CalendarDate } from "@internationalized/date";
+import type { RangeValue } from "@react-types/shared";
+import { useSearchParams } from "react-router-dom";
 
-import { LineChart } from '../../components/LineChart';
-import { BarChart } from '../../components/BarChart';
-import { PieChart } from '../../components/PieChart';
-import { ProductsTable } from '../../components/ProductsTable';
-import { useProductAnalytics } from '../../hooks/product-analytics';
-import { useOrderAnalytics } from '../../hooks/order-analytics';
-import { SmallCardSkeleton } from '../../skeletons/SmallCardSkeleton';
-import { LineChartSkeleton } from '../../skeletons/LineChartSkeleton';
-import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
-import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
-import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
-import { useCustomerAnalytics } from '../../hooks/customer-analytics';
-import { StackedBarChart } from '../../components/StackedBarChart';
-import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
-import { CustomersTable } from '../../components/CustomersTable';
+import { LineChart } from "../../components/LineChart";
+import { BarChart } from "../../components/BarChart";
+import { PieChart } from "../../components/PieChart";
+import { ProductsTable } from "../../components/ProductsTable";
+import { useProductAnalytics } from "../../hooks/product-analytics";
+import { useOrderAnalytics } from "../../hooks/order-analytics";
+import { SmallCardSkeleton } from "../../skeletons/SmallCardSkeleton";
+import { LineChartSkeleton } from "../../skeletons/LineChartSkeleton";
+import { BarChartSkeleton } from "../../skeletons/BarChartSkeleton";
+import { PieChartSkeleton } from "../../skeletons/PieChartSkeleton";
+import { ProductsTableSkeleton } from "../../skeletons/ProductsTableSkeleton";
+import { useCustomerAnalytics } from "../../hooks/customer-analytics";
+import { StackedBarChart } from "../../components/StackedBarChart";
+import { CustomersTableSkeleton } from "../../skeletons/CustomerTableSkeleton";
+import { CustomersTable } from "../../components/CustomersTable";
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
     date.getFullYear(),
     date.getMonth() + 1,
-    date.getDate(),
+    date.getDate()
   );
 }
 
 function calendarDateToDate(calendarDate: DateValue): Date {
   const year =
-    'year' in calendarDate ? calendarDate.year : new Date().getFullYear();
+    "year" in calendarDate ? calendarDate.year : new Date().getFullYear();
   const month =
-    'month' in calendarDate ? calendarDate.month : new Date().getMonth() + 1;
-  const day = 'day' in calendarDate ? calendarDate.day : new Date().getDate();
+    "month" in calendarDate ? calendarDate.month : new Date().getMonth() + 1;
+  const day = "day" in calendarDate ? calendarDate.day : new Date().getDate();
   return new Date(year, month - 1, day);
 }
 
 function dateRangeToRangeValue(
-  dateRange: DateRange | undefined,
+  dateRange: DateRange | undefined
 ): RangeValue<DateValue> | null {
   if (!dateRange?.from) return null;
   return {
@@ -84,7 +84,7 @@ function dateRangeToRangeValue(
 }
 
 function rangeValueToDateRange(
-  rangeValue: RangeValue<DateValue> | null,
+  rangeValue: RangeValue<DateValue> | null
 ): DateRange | undefined {
   if (!rangeValue) return undefined;
   return {
@@ -94,11 +94,11 @@ function rangeValueToDateRange(
 }
 
 function presetToDateRange(
-  preset: 'this-month' | 'last-month' | 'last-3-months',
+  preset: "this-month" | "last-month" | "last-3-months"
 ): DateRange {
   const today = new Date();
-  if (preset === 'this-month') return { from: startOfMonth(today), to: today };
-  if (preset === 'last-month')
+  if (preset === "this-month") return { from: startOfMonth(today), to: today };
+  if (preset === "last-month")
     return {
       from: startOfMonth(subMonths(today, 1)),
       to: endOfMonth(subMonths(today, 1)),
@@ -114,21 +114,21 @@ const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
 
 const AnalyticsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const rangeParam = searchParams.get('range') || 'this-month';
+  const rangeParam = searchParams.get("range") || "this-month";
 
   const date: DateRange | undefined = React.useMemo(() => {
     if (
-      rangeParam === 'this-month' ||
-      rangeParam === 'last-month' ||
-      rangeParam === 'last-3-months'
+      rangeParam === "this-month" ||
+      rangeParam === "last-month" ||
+      rangeParam === "last-3-months"
     ) {
       return presetToDateRange(rangeParam);
     }
 
     const dates = rangeParam.match(DATE_RANGE_REGEX);
     if (dates) {
-      const from = parse(dates[1], 'yyyy-MM-dd', new Date());
-      const to = parse(dates[2], 'yyyy-MM-dd', new Date());
+      const from = parse(dates[1], "yyyy-MM-dd", new Date());
+      const to = parse(dates[2], "yyyy-MM-dd", new Date());
       return { from, to };
     }
 
@@ -142,18 +142,18 @@ const AnalyticsPage = () => {
     useCustomerAnalytics(date);
 
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
-    ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
+    ["this-month", "last-month", "last-3-months"].includes(rangeParam)
       ? rangeParam
-      : 'custom',
-    date,
+      : "custom",
+    date
   );
 
   const someOrderCountsGreaterThanZero = orders?.order_count?.some(
-    (item) => item.count > 0,
+    (item) => item.count > 0
   );
 
   const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
-    (item) => item.sales > 0,
+    (item) => item.sales > 0
   );
 
   const someTopSellingProductsGreaterThanZero =
@@ -161,7 +161,7 @@ const AnalyticsPage = () => {
 
   const someCustomerCountsGreaterThanZero = customers?.customer_count?.some(
     (item) =>
-      (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0,
+      (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0
   );
 
   const updateDatePreset = React.useCallback(
@@ -169,37 +169,37 @@ const AnalyticsPage = () => {
       const params = new URLSearchParams(searchParams.toString());
 
       switch (preset) {
-        case 'this-month':
-          params.set('range', 'this-month');
+        case "this-month":
+          params.set("range", "this-month");
 
           break;
-        case 'last-month':
-          params.set('range', 'last-month');
+        case "last-month":
+          params.set("range", "last-month");
           break;
-        case 'last-3-months':
-          params.set('range', 'last-3-months');
+        case "last-3-months":
+          params.set("range", "last-3-months");
           break;
-        case 'custom':
+        case "custom":
         default:
           if (
-            rangeParam === 'this-month' ||
-            rangeParam === 'last-month' ||
-            rangeParam === 'last-3-months'
+            rangeParam === "this-month" ||
+            rangeParam === "last-month" ||
+            rangeParam === "last-3-months"
           ) {
             const currentDate = presetToDateRange(rangeParam);
             params.set(
-              'range',
-              `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
+              "range",
+              `${format(currentDate.from || new Date(), "yyyy-MM-dd")}-${format(
                 currentDate.to || new Date(),
-                'yyyy-MM-dd',
-              )}`,
+                "yyyy-MM-dd"
+              )}`
             );
           }
           break;
       }
       setSearchParams(params);
     },
-    [searchParams, rangeParam, setSearchParams],
+    [searchParams, rangeParam, setSearchParams]
   );
 
   const updateUrlParams = React.useCallback(
@@ -207,16 +207,16 @@ const AnalyticsPage = () => {
       const params = new URLSearchParams(searchParams.toString());
       if (value?.from && value?.to) {
         params.set(
-          'range',
-          `${format(value.from, 'yyyy-MM-dd')}-${format(
+          "range",
+          `${format(value.from, "yyyy-MM-dd")}-${format(
             value.to,
-            'yyyy-MM-dd',
-          )}`,
+            "yyyy-MM-dd"
+          )}`
         );
       }
       setSearchParams(params);
     },
-    [searchParams, setSearchParams],
+    [searchParams, setSearchParams]
   );
 
   // Handle date range changes and automatically switch to custom
@@ -225,7 +225,7 @@ const AnalyticsPage = () => {
       const newDateRange = rangeValueToDateRange(value);
       updateUrlParams(newDateRange);
     },
-    [updateUrlParams],
+    [updateUrlParams]
   );
 
   return (
@@ -239,11 +239,11 @@ const AnalyticsPage = () => {
               disabled={isLoadingOrders || isLoadingProducts}
               defaultValue="this-month"
               value={
-                ['this-month', 'last-month', 'last-3-months'].includes(
-                  rangeParam,
+                ["this-month", "last-month", "last-3-months"].includes(
+                  rangeParam
                 )
                   ? rangeParam
-                  : 'custom'
+                  : "custom"
               }
               onValueChange={updateDatePreset}
             >
@@ -339,10 +339,10 @@ const AnalyticsPage = () => {
       </div>
       <div className="px-6 py-4">
         <Tabs
-          value={searchParams.get('tab') || 'orders'}
+          value={searchParams.get("tab") || "orders"}
           onValueChange={(value) => {
             const params = new URLSearchParams(searchParams.toString());
-            params.set('tab', value);
+            params.set("tab", value);
             setSearchParams(params);
           }}
         >
@@ -381,7 +381,7 @@ const AnalyticsPage = () => {
                           {orders?.total_orders || 0}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_orders_percent || 0) > 0 && '+'}
+                          {(orders?.prev_orders_percent || 0) > 0 && "+"}
                           {orders?.prev_orders_percent || 0}% from previous
                           period
                         </Text>
@@ -401,7 +401,7 @@ const AnalyticsPage = () => {
                     ) : orders?.order_count &&
                       orders?.order_count?.length > 0 &&
                       someOrderCountsGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <LineChart
                           data={orders?.order_count}
                           xAxisDataKey="name"
@@ -428,13 +428,13 @@ const AnalyticsPage = () => {
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: orders?.currency_code || 'EUR',
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: orders?.currency_code || "EUR",
                           }).format(orders?.total_sales || 0)}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_sales_percent || 0) > 0 && '+'}
+                          {(orders?.prev_sales_percent || 0) > 0 && "+"}
                           {orders?.prev_sales_percent || 0}% from previous
                           period
                         </Text>
@@ -455,14 +455,14 @@ const AnalyticsPage = () => {
                     ) : orders?.order_sales &&
                       orders?.order_sales?.length > 0 &&
                       someOrderSalesGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <LineChart
                           data={orders.order_sales}
                           xAxisDataKey="name"
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
                           yAxisTickFormatter={(value: number) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat("en-US", {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(value)
@@ -480,7 +480,7 @@ const AnalyticsPage = () => {
                   </Container>
                 </div>
               </div>
-              <div className="flex max-md:flex-col gap-4">
+              <div className="flex max-md:flex-col gap-4 mb-4">
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
@@ -492,7 +492,7 @@ const AnalyticsPage = () => {
                     {isLoadingOrders ? (
                       <BarChartSkeleton />
                     ) : orders?.regions && orders?.regions?.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <BarChart
                           data={orders.regions}
                           xAxisDataKey="name"
@@ -501,7 +501,7 @@ const AnalyticsPage = () => {
                           useStableColors={true}
                           colorKeyField="name"
                           yAxisTickFormatter={(value: number) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat("en-US", {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(value)
@@ -529,8 +529,109 @@ const AnalyticsPage = () => {
                     {isLoadingOrders ? (
                       <PieChartSkeleton />
                     ) : orders?.statuses && orders?.statuses?.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <PieChart data={orders?.statuses} dataKey="count" />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+              </div>
+
+              <div className="flex max-md:flex-col gap-4">
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Sales Summary
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Total sales and orders in the last 30 days
+                    </Text>
+                    {isLoadingOrders ? (
+                      <BarChartSkeleton />
+                    ) : orders?.regions && orders?.regions?.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
+                        <BarChart
+                          data={orders.regions}
+                          xAxisDataKey="name"
+                          yAxisDataKey="sales"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat("en-US", {
+                              currency: orders.currency_code,
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Orders Over Time
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Distribution of successful orders in certain time
+                    </Text>
+                    {isLoadingOrders ? (
+                      <PieChartSkeleton />
+                    ) : orders?.statuses && orders?.statuses?.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
+                        <PieChart data={orders?.statuses} dataKey="count" />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
+                </div>
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Best performers
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Top 3 regions by sales
+                    </Text>
+                    {isLoadingOrders ? (
+                      <BarChartSkeleton />
+                    ) : orders?.regions && orders?.regions?.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
+                        <BarChart
+                          data={orders.regions.slice(0, 3)}
+                          xAxisDataKey="name"
+                          yAxisDataKey="sales"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat("en-US", {
+                              currency: orders.currency_code,
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
                       </div>
                     ) : (
                       <Text
@@ -556,7 +657,7 @@ const AnalyticsPage = () => {
                   <BarChartSkeleton />
                 ) : products?.variantQuantitySold &&
                   someTopSellingProductsGreaterThanZero ? (
-                  <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                  <div className="w-full" style={{ aspectRatio: "16/9" }}>
                     <BarChart
                       data={products.variantQuantitySold}
                       xAxisDataKey="title"
@@ -586,7 +687,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity === 0,
+                          (product) => product.inventoryQuantity === 0
                         ) || []
                       }
                     />
@@ -605,7 +706,7 @@ const AnalyticsPage = () => {
                     <ProductsTable
                       products={
                         products?.lowStockVariants?.filter(
-                          (product) => product.inventoryQuantity > 0,
+                          (product) => product.inventoryQuantity > 0
                         ) || []
                       }
                     />
@@ -666,15 +767,15 @@ const AnalyticsPage = () => {
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
-                            currency: customers?.currency_code || 'EUR',
-                            style: 'currency',
+                          {new Intl.NumberFormat("en-US", {
+                            currency: customers?.currency_code || "EUR",
+                            style: "currency",
                           }).format(
                             customers?.total_customers &&
                               customers.total_customers > 0
                               ? (orders?.total_sales || 0) /
                                   customers.total_customers
-                              : 0,
+                              : 0
                           )}
                         </Text>
                       </>
@@ -697,14 +798,14 @@ const AnalyticsPage = () => {
                     ) : customers?.customer_count &&
                       customers.customer_count.length > 0 &&
                       someCustomerCountsGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <StackedBarChart
                           data={customers.customer_count}
                           xAxisDataKey="name"
                           lineColor="#82ca9d"
                           useStableColors={true}
                           colorKeyField="returning_customers"
-                          dataKeys={['new_customers', 'returning_customers']}
+                          dataKeys={["new_customers", "returning_customers"]}
                         />
                       </div>
                     ) : (
@@ -729,7 +830,7 @@ const AnalyticsPage = () => {
                       <BarChartSkeleton />
                     ) : customers?.customer_group &&
                       customers.customer_group.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <BarChart
                           data={customers.customer_group}
                           xAxisDataKey="name"
@@ -738,8 +839,8 @@ const AnalyticsPage = () => {
                           colorKeyField="name"
                           yAxisDataKey="total"
                           yAxisTickFormatter={(value: number) =>
-                            new Intl.NumberFormat('en-US', {
-                              currency: customers.currency_code || 'EUR',
+                            new Intl.NumberFormat("en-US", {
+                              currency: customers.currency_code || "EUR",
                               maximumFractionDigits: 0,
                             }).format(value)
                           }
@@ -769,7 +870,7 @@ const AnalyticsPage = () => {
                   ) : (
                     <CustomersTable
                       customers={customers?.customer_sales || []}
-                      currencyCode={customers?.currency_code || 'EUR'}
+                      currencyCode={customers?.currency_code || "EUR"}
                     />
                   )}
                 </Container>
@@ -783,7 +884,7 @@ const AnalyticsPage = () => {
 };
 
 export const config = defineRouteConfig({
-  label: 'Analytics',
+  label: "Analytics",
   icon: ChartBar,
 });
 

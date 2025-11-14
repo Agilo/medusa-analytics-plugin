@@ -1,6 +1,6 @@
 import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { Container, Text } from "@medusajs/ui";
+import { Button, Container, Text } from "@medusajs/ui";
 import { PieChartSkeleton } from "../skeletons/PieChartSkeleton";
 import { PieChart } from "../components/PieChart";
 import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
@@ -10,6 +10,7 @@ import {
   useOrderAnalytics,
 } from "../hooks/order-analytics";
 import { startOfMonth } from "date-fns";
+import { ArrowUp, ArrowUpDown } from "lucide-react";
 
 const today = new Date();
 const OrderWidget = () => {
@@ -18,12 +19,12 @@ const OrderWidget = () => {
     to: today,
   });
 
-  if (!orders || isPending) return; // Add skeletons
+  if (!orders || isPending) return; // TODO: Add skeletons
   return (
     <div className="flex max-md:flex-col gap-4">
       <SalesSummary sales={orders.order_sales} />
-      <OrdersOverTime />
-      <BestPerformers />
+      <OrdersOverTime orders={orders.order_count} />
+      <BestPerformers regions={orders.regions} />
     </div>
   );
 };
@@ -31,15 +32,26 @@ const OrderWidget = () => {
 const SalesSummary: React.FC<{
   sales: OrderAnalyticsResponse["regions"];
 }> = ({ sales }) => {
+  const [interval, setInterval] = React.useState<"this-month" | "last-month">(
+    "this-month"
+  );
   return (
     <div className="flex-1">
       <Container className="min-h-[9.375rem]">
-        <Text size="xlarge" weight="plus">
-          Sales Summary
-        </Text>
-        <Text size="small" className="mb-6 text-ui-fg-muted">
-          Total sales and orders in the last 30 days
-        </Text>
+        <div className="flex justify-between">
+          <div>
+            <Text size="xlarge" weight="plus">
+              Sales Summary
+            </Text>
+            <Text size="small" className="mb-6 text-ui-fg-muted">
+              Total sales and orders{" "}
+              {interval === "this-month" ? "for this month" : "for last month"}
+            </Text>
+          </div>
+          <Button variant="secondary" className="p-2.5 size-9">
+            {interval === "this-month" ? <ArrowUpDown /> : <ArrowUp />}
+          </Button>
+        </div>
         {false ? (
           <BarChartSkeleton />
         ) : true ? (
@@ -69,21 +81,28 @@ const SalesSummary: React.FC<{
   );
 };
 
-const OrdersOverTime = () => {
+const OrdersOverTime: React.FC<{
+  orders: OrderAnalyticsResponse["order_count"];
+}> = ({ orders }) => {
   return (
     <div className="flex-1">
       <Container className="min-h-[9.375rem]">
-        <Text size="xlarge" weight="plus">
-          Orders Over Time
-        </Text>
-        <Text size="small" className="mb-6 text-ui-fg-muted">
-          Distribution of successful orders
-        </Text>
+        <div className="flex justify-between">
+          <div>
+            <Text size="xlarge" weight="plus">
+              Orders Over Time
+            </Text>
+            <Text size="small" className="mb-6 text-ui-fg-muted">
+              Distribution of successful orders for this month
+            </Text>
+          </div>
+          <Button>View more</Button>
+        </div>
         {false ? (
           <PieChartSkeleton />
         ) : true ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
-            <PieChart data={[]} dataKey="count" />
+            <PieChart data={orders} dataKey="count" />
           </div>
         ) : (
           <Text size="small" className="text-ui-fg-muted text-center">
@@ -95,7 +114,9 @@ const OrdersOverTime = () => {
   );
 };
 
-const BestPerformers = () => {
+const BestPerformers: React.FC<{
+  regions: OrderAnalyticsResponse["regions"];
+}> = ({ regions }) => {
   return (
     <div className="flex-1">
       <Container className="min-h-[9.375rem]">
@@ -105,12 +126,14 @@ const BestPerformers = () => {
         <Text size="small" className="mb-6 text-ui-fg-muted">
           Top 3 regions by sales
         </Text>
+
         {false ? (
           <BarChartSkeleton />
         ) : true ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
+            {/* TODO: Make horizontal bar chart */}
             <BarChart
-              data={[]}
+              data={regions}
               xAxisDataKey="name"
               yAxisDataKey="sales"
               lineColor="#82ca9d"
@@ -133,6 +156,7 @@ const BestPerformers = () => {
     </div>
   );
 };
+
 export const config = defineWidgetConfig({
   zone: "order.list.before",
 });

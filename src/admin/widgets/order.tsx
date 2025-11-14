@@ -1,19 +1,36 @@
+import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { Container, Text } from "@medusajs/ui";
 import { PieChartSkeleton } from "../skeletons/PieChartSkeleton";
 import { PieChart } from "../components/PieChart";
 import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
 import { BarChart } from "../components/BarChart";
+import {
+  OrderAnalyticsResponse,
+  useOrderAnalytics,
+} from "../hooks/order-analytics";
+import { startOfMonth } from "date-fns";
 
-const OrderWidget = () => (
-  <div className="flex max-md:flex-col gap-4">
-    <SalesSummary />
-    <OrdersOverTime />
-    <BestPerformers />
-  </div>
-);
+const today = new Date();
+const OrderWidget = () => {
+  const { data: orders, isPending } = useOrderAnalytics("this-month", {
+    from: startOfMonth(today),
+    to: today,
+  });
 
-const SalesSummary = () => {
+  if (!orders || isPending) return; // Add skeletons
+  return (
+    <div className="flex max-md:flex-col gap-4">
+      <SalesSummary sales={orders.order_sales} />
+      <OrdersOverTime />
+      <BestPerformers />
+    </div>
+  );
+};
+
+const SalesSummary: React.FC<{
+  sales: OrderAnalyticsResponse["regions"];
+}> = ({ sales }) => {
   return (
     <div className="flex-1">
       <Container className="min-h-[9.375rem]">
@@ -28,7 +45,7 @@ const SalesSummary = () => {
         ) : true ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
             <BarChart
-              data={[]}
+              data={sales}
               xAxisDataKey="name"
               yAxisDataKey="sales"
               lineColor="#82ca9d"

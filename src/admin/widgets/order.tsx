@@ -8,80 +8,125 @@ import {
   OrderAnalyticsResponse,
   useOrderAnalytics,
 } from "../hooks/order-analytics";
-import { startOfMonth } from "date-fns";
-import { ArrowUp, ArrowUpDown } from "lucide-react";
+import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import {
+  ArrowUp,
+  ArrowUpDown,
+  ChartNoAxesColumn,
+  ChartNoAxesCombined,
+  ShoppingCart,
+} from "lucide-react";
+import { LineChart } from "../components/LineChart";
+import { SmallCardSkeleton } from "../skeletons/SmallCardSkeleton";
 
 const today = new Date();
 const OrderWidget = () => {
-  const { data: orders, isPending } = useOrderAnalytics("this-month", {
+  const [interval, setInterval] = React.useState("this-month");
+  const [range, setRange] = React.useState({
     from: startOfMonth(today),
     to: today,
   });
+  const { data: orders, isPending } = useOrderAnalytics(interval, range);
 
-  if (isPending) {
-    return (
-      <div className="flex gap-4">
-        {[...Array(3)].map((_, idx) => (
-          <BarChartSkeleton key={idx} />
-        ))}
-      </div>
-    );
-  }
-
+  console.log(orders);
   return (
-    <div className="flex max-md:flex-col gap-4">
-      <SalesSummary sales={orders?.order_sales} />
-      <OrdersOverTime orders={orders?.order_count} />
-      <BestPerformers regions={orders?.regions} />
-    </div>
+    <>
+      <div className="flex justify-between items-baseline w-full my-6">
+        <h1 className="xl:text-3xl text-2xl">Order insights</h1>
+        <Button
+          variant="secondary"
+          className="p-2.5 size-9"
+          onClick={() => {
+            if (interval === "this-month") {
+              setInterval("last-month");
+              setRange({
+                from: startOfMonth(subMonths(today, 1)),
+                to: endOfMonth(subMonths(today, 1)),
+              });
+              return;
+            }
+            setInterval("this-month");
+            setRange({
+              from: startOfMonth(today),
+              to: today,
+            });
+          }}
+        >
+          {interval === "this-month" ? <ArrowUpDown /> : <ArrowUp />}
+        </Button>
+      </div>
+      {isPending ? (
+        <>
+          <div className="flex gap-4 mb-4">
+            {[...Array(3)].map((_, idx) => (
+              <SmallCardSkeleton key={idx} />
+            ))}
+          </div>
+          <div className="flex gap-4 mt-4">
+            {[...Array(2)].map((_, idx) => (
+              <BarChartSkeleton key={idx} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <KPIs orders={orders} />
+          <div className="flex max-md:flex-col gap-4">
+            <OrdersOverTime orders={orders?.order_count} />
+            <BestPerformers regions={orders?.regions} />
+          </div>
+        </>
+      )}
+    </>
   );
 };
 
-const SalesSummary: React.FC<{
-  sales?: OrderAnalyticsResponse["regions"];
-}> = ({ sales }) => {
-  const [interval, setInterval] = React.useState<"this-month" | "last-month">(
-    "this-month"
-  );
+const KPIs: React.FC<{
+  orders?: OrderAnalyticsResponse;
+}> = ({ orders }) => {
+  console.log(orders);
+
+  const totalSales = orders?.total_sales ?? 0;
+  const totalOrders = orders?.total_orders ?? 0;
+  const averageOrderValue =
+    totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
+
   return (
-    <div className="flex-1">
-      <Container className="min-h-[9.375rem]">
-        <div className="flex justify-between">
-          <div>
-            <Text size="xlarge" weight="plus">
-              Sales Summary
-            </Text>
-            <Text size="small" className="mb-6 text-ui-fg-muted">
-              Total sales and orders{" "}
-              {interval === "this-month" ? "for this month" : "for last month"}
-            </Text>
-          </div>
-          <Button variant="secondary" className="p-2.5 size-9">
-            {interval === "this-month" ? <ArrowUpDown /> : <ArrowUp />}
-          </Button>
-        </div>
-        {sales ? (
-          <div className="w-full" style={{ aspectRatio: "16/9" }}>
-            <BarChart
-              data={sales}
-              xAxisDataKey="name"
-              yAxisDataKey="sales"
-              lineColor="#82ca9d"
-              useStableColors={true}
-              colorKeyField="name"
-              yAxisTickFormatter={(value: number) =>
-                new Intl.NumberFormat("en-US", {
-                  // currency: orders.currency_code,
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
-            />
-          </div>
-        ) : (
-          <Text size="small" className="text-ui-fg-muted text-center">
-            No data available for the selected period.
-          </Text>
-        )}
+    <div className="flex gap-4">
+      <Container className="relative">
+        <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
+        <Text size="small">Total Sales</Text>
+        <Text size="xlarge" weight="plus">
+          {totalSales}
+        </Text>
+        <Text size="xsmall" className="text-ui-fg-muted">
+          {(orders?.prev_sales_percent || 0) > 0 && "+"}
+          {orders?.prev_sales_percent || 0}% from previous period
+        </Text>
+      </Container>
+
+      <Container className="relative">
+        <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
+        <Text size="small">Total Orders</Text>
+        <Text size="xlarge" weight="plus">
+          {totalOrders}
+        </Text>
+        <Text size="xsmall" className="text-ui-fg-muted">
+          {(orders?.prev_orders_percent || 0) > 0 && "+"}
+          {orders?.prev_orders_percent || 0}% from previous period
+        </Text>
+      </Container>
+
+      <Container className="relative">
+        <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
+        <Text size="small">Average order value</Text>
+        <Text size="xlarge" weight="plus">
+          {averageOrderValue}%
+        </Text>
+        <Text size="xsmall" className="text-ui-fg-muted">
+          {averageOrderValue > 0 && "+"}
+          {averageOrderValue}% from previous period
+        </Text>
       </Container>
     </div>
   );
@@ -104,12 +149,25 @@ const OrdersOverTime: React.FC<{
           </div>
 
           <a href="/app/analytics">
-            <Button variant="transparent">View more</Button>
+            <Button variant="transparent" className="!text-muted-foreground">
+              View more
+            </Button>
           </a>
         </div>
         {orders ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
-            <PieChart data={orders} dataKey="count" />
+            <LineChart
+              data={orders}
+              xAxisDataKey="name"
+              yAxisDataKey="count"
+              lineColor="#82ca9d"
+              yAxisTickFormatter={(value: number) =>
+                new Intl.NumberFormat("en-US", {
+                  // currency: orders.currency_code,
+                  maximumFractionDigits: 0,
+                }).format(value)
+              }
+            />
           </div>
         ) : (
           <Text size="small" className="text-ui-fg-muted text-center">
@@ -136,7 +194,6 @@ const BestPerformers: React.FC<{
 
         {regions ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
-            {/* TODO: Make horizontal bar chart */}
             <BarChart
               data={regions}
               xAxisDataKey="name"

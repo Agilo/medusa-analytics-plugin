@@ -1,7 +1,6 @@
 import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { Button, Container, Text } from "@medusajs/ui";
-import { PieChart } from "../components/PieChart";
 import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
 import { BarChart } from "../components/BarChart";
 import {
@@ -10,10 +9,10 @@ import {
 } from "../hooks/order-analytics";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import {
-  ArrowUp,
-  ArrowUpDown,
-  ChartNoAxesColumn,
+  ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
   ChartNoAxesCombined,
+  CircleSlash2,
   ShoppingCart,
 } from "lucide-react";
 import { LineChart } from "../components/LineChart";
@@ -28,38 +27,50 @@ const OrderWidget = () => {
   });
   const { data: orders, isPending } = useOrderAnalytics(interval, range);
 
-  console.log(orders);
   return (
     <>
-      <div className="flex justify-between items-baseline w-full my-6">
+      <div className="flex items-center justify-between w-full my-6">
         <h1 className="xl:text-3xl text-2xl">Order insights</h1>
-        <Button
-          variant="secondary"
-          className="p-2.5 size-9"
-          onClick={() => {
-            if (interval === "this-month") {
-              setInterval("last-month");
+
+        <div className="flex items-center gap-3">
+          <p className="ml-auto text-ui-fg-muted text-sm">
+            {interval === "this-month" ? "This Month" : "Last Month"}
+          </p>
+
+          <Button
+            variant="secondary"
+            className="p-2.5 size-9"
+            onClick={() => {
+              if (interval === "this-month") {
+                setInterval("last-month");
+                setRange({
+                  from: startOfMonth(subMonths(today, 1)),
+                  to: endOfMonth(subMonths(today, 1)),
+                });
+                return;
+              }
+              setInterval("this-month");
               setRange({
-                from: startOfMonth(subMonths(today, 1)),
-                to: endOfMonth(subMonths(today, 1)),
+                from: startOfMonth(today),
+                to: today,
               });
-              return;
-            }
-            setInterval("this-month");
-            setRange({
-              from: startOfMonth(today),
-              to: today,
-            });
-          }}
-        >
-          {interval === "this-month" ? <ArrowUpDown /> : <ArrowUp />}
-        </Button>
+            }}
+          >
+            {interval === "this-month" ? (
+              <ArrowDownWideNarrow />
+            ) : (
+              <ArrowUpWideNarrow />
+            )}
+          </Button>
+        </div>
       </div>
       {isPending ? (
         <>
           <div className="flex gap-4 mb-4">
             {[...Array(3)].map((_, idx) => (
-              <SmallCardSkeleton key={idx} />
+              <Container>
+                <SmallCardSkeleton key={idx} />
+              </Container>
             ))}
           </div>
           <div className="flex gap-4 mt-4">
@@ -93,18 +104,19 @@ const KPIs: React.FC<{
 
   return (
     <div className="flex gap-4">
+      {/* Ante: Hoću li razbiti ovo u komponente */}€
       <Container className="relative">
         <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
         <Text size="small">Total Sales</Text>
         <Text size="xlarge" weight="plus">
-          {totalSales}
+          €{totalSales}
         </Text>
         <Text size="xsmall" className="text-ui-fg-muted">
           {(orders?.prev_sales_percent || 0) > 0 && "+"}
           {orders?.prev_sales_percent || 0}% from previous period
         </Text>
       </Container>
-
+      {/* Ante: Hoću li razbiti ovo u komponente */}
       <Container className="relative">
         <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
         <Text size="small">Total Orders</Text>
@@ -116,9 +128,9 @@ const KPIs: React.FC<{
           {orders?.prev_orders_percent || 0}% from previous period
         </Text>
       </Container>
-
+      {/* Ante: Hoću li razbiti ovo u komponente */}
       <Container className="relative">
-        <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
+        <CircleSlash2 className="absolute right-6 top-4 text-ui-fg-muted" />
         <Text size="small">Average order value</Text>
         <Text size="xlarge" weight="plus">
           {averageOrderValue}%
@@ -149,7 +161,7 @@ const OrdersOverTime: React.FC<{
           </div>
 
           <a href="/app/analytics">
-            <Button variant="transparent" className="!text-muted-foreground">
+            <Button variant="transparent" className="text-ui-fg-muted">
               View more
             </Button>
           </a>

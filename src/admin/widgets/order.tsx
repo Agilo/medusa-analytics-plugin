@@ -1,7 +1,6 @@
 import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { Button, Container, Text } from "@medusajs/ui";
-import { PieChartSkeleton } from "../skeletons/PieChartSkeleton";
 import { PieChart } from "../components/PieChart";
 import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
 import { BarChart } from "../components/BarChart";
@@ -19,18 +18,27 @@ const OrderWidget = () => {
     to: today,
   });
 
-  if (!orders || isPending) return; // TODO: Add skeletons
+  if (isPending) {
+    return (
+      <div className="flex gap-4">
+        {[...Array(3)].map((_, idx) => (
+          <BarChartSkeleton key={idx} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="flex max-md:flex-col gap-4">
-      <SalesSummary sales={orders.order_sales} />
-      <OrdersOverTime orders={orders.order_count} />
-      <BestPerformers regions={orders.regions} />
+      <SalesSummary sales={orders?.order_sales} />
+      <OrdersOverTime orders={orders?.order_count} />
+      <BestPerformers regions={orders?.regions} />
     </div>
   );
 };
 
 const SalesSummary: React.FC<{
-  sales: OrderAnalyticsResponse["regions"];
+  sales?: OrderAnalyticsResponse["regions"];
 }> = ({ sales }) => {
   const [interval, setInterval] = React.useState<"this-month" | "last-month">(
     "this-month"
@@ -52,9 +60,7 @@ const SalesSummary: React.FC<{
             {interval === "this-month" ? <ArrowUpDown /> : <ArrowUp />}
           </Button>
         </div>
-        {false ? (
-          <BarChartSkeleton />
-        ) : true ? (
+        {sales ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
             <BarChart
               data={sales}
@@ -82,7 +88,7 @@ const SalesSummary: React.FC<{
 };
 
 const OrdersOverTime: React.FC<{
-  orders: OrderAnalyticsResponse["order_count"];
+  orders?: OrderAnalyticsResponse["order_count"];
 }> = ({ orders }) => {
   return (
     <div className="flex-1">
@@ -96,11 +102,12 @@ const OrdersOverTime: React.FC<{
               Distribution of successful orders for this month
             </Text>
           </div>
-          <Button>View more</Button>
+
+          <a href="/app/analytics">
+            <Button variant="transparent">View more</Button>
+          </a>
         </div>
-        {false ? (
-          <PieChartSkeleton />
-        ) : true ? (
+        {orders ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
             <PieChart data={orders} dataKey="count" />
           </div>
@@ -115,7 +122,7 @@ const OrdersOverTime: React.FC<{
 };
 
 const BestPerformers: React.FC<{
-  regions: OrderAnalyticsResponse["regions"];
+  regions?: OrderAnalyticsResponse["regions"];
 }> = ({ regions }) => {
   return (
     <div className="flex-1">
@@ -127,9 +134,7 @@ const BestPerformers: React.FC<{
           Top 3 regions by sales
         </Text>
 
-        {false ? (
-          <BarChartSkeleton />
-        ) : true ? (
+        {regions ? (
           <div className="w-full" style={{ aspectRatio: "16/9" }}>
             {/* TODO: Make horizontal bar chart */}
             <BarChart

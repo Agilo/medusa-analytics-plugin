@@ -19,6 +19,7 @@ import { LineChart } from "../components/LineChart";
 import { SmallCardSkeleton } from "../skeletons/SmallCardSkeleton";
 
 const today = new Date();
+
 const OrderWidget = () => {
   const [interval, setInterval] = React.useState("this-month");
   const [range, setRange] = React.useState({
@@ -104,7 +105,7 @@ const KPIs: React.FC<{
 
   return (
     <div className="flex gap-4">
-      {/* Ante: Hoću li razbiti ovo u komponente */}€
+      {/* Ante: Hoću li razbiti ovo u komponente */}
       <Container className="relative">
         <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
         <Text size="small">Total Sales</Text>
@@ -167,7 +168,7 @@ const OrdersOverTime: React.FC<{
           </a>
         </div>
         {orders ? (
-          <div className="w-full" style={{ aspectRatio: "16/9" }}>
+          <div className="w-full aspect-video">
             <LineChart
               data={orders}
               xAxisDataKey="name"
@@ -205,7 +206,7 @@ const BestPerformers: React.FC<{
         </Text>
 
         {regions ? (
-          <div className="w-full" style={{ aspectRatio: "16/9" }}>
+          <div className="w-full aspect-video">
             <BarChart
               data={regions}
               xAxisDataKey="name"

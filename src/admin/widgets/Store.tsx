@@ -13,7 +13,7 @@ import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
 const today = new Date();
 
 export const StoreWidget = () => {
-  const { data: products, isPending } = useProductAnalytics({
+  const { data: products, isLoading } = useProductAnalytics({
     from: startOfMonth(today),
     to: today,
   });
@@ -24,8 +24,12 @@ export const StoreWidget = () => {
     <>
       <h1 className="xl:text-3xl text-2xl my-6">Product insights</h1>
       <div className="flex items-center gap-4 mb-4">
-        {isPending ? (
-          [...Array(2)].map((_, idx) => <BarChartSkeleton key={idx} />)
+        {isLoading ? (
+          [...Array(2)].map((_, idx) => (
+            <Container key={idx} className="min-h-[9.375rem]">
+              <BarChartSkeleton />
+            </Container>
+          ))
         ) : (
           <>
             <TopSellingProducts products={products} />

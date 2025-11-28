@@ -26,7 +26,7 @@ const OrderWidget = () => {
     from: startOfMonth(today),
     to: today,
   });
-  const { data: orders, isPending } = useOrderAnalytics(interval, range);
+  const { data: orders, isLoading } = useOrderAnalytics(interval, range);
 
   return (
     <>
@@ -65,18 +65,20 @@ const OrderWidget = () => {
           </Button>
         </div>
       </div>
-      {isPending ? (
+      {isLoading ? (
         <>
           <div className="flex gap-4 mb-4">
-            {[...Array(3)].map((_, idx) => (
-              <Container>
-                <SmallCardSkeleton key={idx} />
+            {[...Array(3)].map((_, indx) => (
+              <Container key={indx}>
+                <SmallCardSkeleton />
               </Container>
             ))}
           </div>
           <div className="flex gap-4 mt-4">
-            {[...Array(2)].map((_, idx) => (
-              <BarChartSkeleton key={idx} />
+            {[...Array(2)].map((_, indx) => (
+              <Container key={indx} className="min-h-[9.375rem]">
+                <BarChartSkeleton />
+              </Container>
             ))}
           </div>
         </>

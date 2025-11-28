@@ -52,6 +52,11 @@ import { useCustomerAnalytics } from "../../hooks/customer-analytics";
 import { StackedBarChart } from "../../components/StackedBarChart";
 import { CustomersTableSkeleton } from "../../skeletons/CustomerTableSkeleton";
 import { CustomersTable } from "../../components/CustomersTable";
+import {
+  ReturningCustomers,
+  TotalOrders,
+  TotalSales,
+} from "../../components/KPI";
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -371,25 +376,7 @@ const AnalyticsPage = () => {
             <Tabs.Content value="orders">
               <div className="flex max-md:flex-col gap-4 mb-4">
                 <div className="space-y-4 flex-1">
-                  <Container className="relative">
-                    <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Total Orders</Text>
-                    {isLoadingOrders ? (
-                      <SmallCardSkeleton />
-                    ) : (
-                      <>
-                        <Text size="xlarge" weight="plus">
-                          {orders?.total_orders || 0}
-                        </Text>
-                        <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_orders_percent || 0) > 0 && "+"}
-                          {orders?.prev_orders_percent || 0}% from previous
-                          period
-                        </Text>
-                      </>
-                    )}
-                  </Container>
-
+                  <TotalOrders data={orders} isLoading={isLoadingOrders} />
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Orders Over Time
@@ -421,28 +408,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <Container className="relative">
-                    <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-                    <Text size="small">Total Sales</Text>
-                    {isLoadingOrders ? (
-                      <SmallCardSkeleton />
-                    ) : (
-                      <>
-                        <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: orders?.currency_code || "EUR",
-                          }).format(orders?.total_sales || 0)}
-                        </Text>
-                        <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_sales_percent || 0) > 0 && "+"}
-                          {orders?.prev_sales_percent || 0}% from previous
-                          period
-                        </Text>
-                      </>
-                    )}
-                  </Container>
-
+                  <TotalSales data={orders} isLoading={isLoadingOrders} />
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Sales Over Time
@@ -646,7 +612,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <Container className="relative">
+                  {/* <Container className="relative">
                     <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
                     <Text size="small">Returning Customers</Text>
                     {isLoadingCustomers ? (
@@ -658,7 +624,11 @@ const AnalyticsPage = () => {
                         </Text>
                       </>
                     )}
-                  </Container>
+                  </Container> */}
+                  <ReturningCustomers
+                    data={customers}
+                    isLoading={isLoadingCustomers}
+                  />
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Average Sales per Customer</Text>

@@ -1,26 +1,15 @@
 import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { Button, Container, Text } from "@medusajs/ui";
-import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
-import { BarChart } from "../components/BarChart";
-import {
-  OrderAnalyticsResponse,
-  useOrderAnalytics,
-} from "../hooks/order-analytics";
+import { Button } from "@medusajs/ui";
+import { useOrderAnalytics } from "../hooks/order-analytics";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
-import {
-  ArrowDownWideNarrow,
-  ArrowUpWideNarrow,
-  ChartNoAxesCombined,
-  CircleSlash2,
-  ShoppingCart,
-} from "lucide-react";
-import { LineChart } from "../components/LineChart";
-import { SmallCardSkeleton } from "../skeletons/SmallCardSkeleton";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
+import { AverageOrderValue, TotalOrders, TotalSales } from "../components/KPI";
 
 const today = new Date();
 
 const OrderWidget = () => {
+  // TODO: Handle last 30 days and 60 days as well (not this and previous month)
   const [interval, setInterval] = React.useState("this-month");
   const [range, setRange] = React.useState({
     from: startOfMonth(today),
@@ -30,7 +19,7 @@ const OrderWidget = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full my-6">
+      <div className="flex items-center justify-between w-full mt-6 mb-4">
         <h1 className="xl:text-3xl text-2xl">Order insights</h1>
 
         <div className="flex items-center gap-3">
@@ -65,172 +54,13 @@ const OrderWidget = () => {
           </Button>
         </div>
       </div>
-      {isLoading ? (
-        <>
-          <div className="flex gap-4 mb-4">
-            {[...Array(3)].map((_, indx) => (
-              <Container key={indx}>
-                <SmallCardSkeleton />
-              </Container>
-            ))}
-          </div>
-          <div className="flex gap-4 mt-4">
-            {[...Array(2)].map((_, indx) => (
-              <Container key={indx} className="min-h-[9.375rem]">
-                <BarChartSkeleton />
-              </Container>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <KPIs orders={orders} />
-          <div className="flex max-md:flex-col gap-4">
-            <OrdersOverTime orders={orders?.order_count} />
-            <BestPerformers regions={orders?.regions} />
-          </div>
-        </>
-      )}
+
+      <div className="flex items-center gap-4">
+        <TotalSales data={orders} isLoading={isLoading} />
+        <TotalOrders data={orders} isLoading={isLoading} />
+        <AverageOrderValue data={orders} isLoading={isLoading} />
+      </div>
     </>
-  );
-};
-
-const KPIs: React.FC<{
-  orders?: OrderAnalyticsResponse;
-}> = ({ orders }) => {
-  console.log(orders);
-
-  const totalSales = orders?.total_sales ?? 0;
-  const totalOrders = orders?.total_orders ?? 0;
-  const averageOrderValue =
-    totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
-
-  return (
-    <div className="flex gap-4">
-      {/* Ante: Hoću li razbiti ovo u komponente */}
-      <Container className="relative">
-        <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
-        <Text size="small">Total Sales</Text>
-        <Text size="xlarge" weight="plus">
-          €{totalSales}
-        </Text>
-        <Text size="xsmall" className="text-ui-fg-muted">
-          {(orders?.prev_sales_percent || 0) > 0 && "+"}
-          {orders?.prev_sales_percent || 0}% from previous period
-        </Text>
-      </Container>
-      {/* Ante: Hoću li razbiti ovo u komponente */}
-      <Container className="relative">
-        <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
-        <Text size="small">Total Orders</Text>
-        <Text size="xlarge" weight="plus">
-          {totalOrders}
-        </Text>
-        <Text size="xsmall" className="text-ui-fg-muted">
-          {(orders?.prev_orders_percent || 0) > 0 && "+"}
-          {orders?.prev_orders_percent || 0}% from previous period
-        </Text>
-      </Container>
-      {/* Ante: Hoću li razbiti ovo u komponente */}
-      <Container className="relative">
-        <CircleSlash2 className="absolute right-6 top-4 text-ui-fg-muted" />
-        <Text size="small">Average order value</Text>
-        <Text size="xlarge" weight="plus">
-          {averageOrderValue}%
-        </Text>
-        <Text size="xsmall" className="text-ui-fg-muted">
-          {averageOrderValue > 0 && "+"}
-          {averageOrderValue}% from previous period
-        </Text>
-      </Container>
-    </div>
-  );
-};
-
-const OrdersOverTime: React.FC<{
-  orders?: OrderAnalyticsResponse["order_count"];
-}> = ({ orders }) => {
-  return (
-    <div className="flex-1">
-      <Container className="min-h-[9.375rem]">
-        <div className="flex justify-between">
-          <div>
-            <Text size="xlarge" weight="plus">
-              Orders Over Time
-            </Text>
-            <Text size="small" className="mb-6 text-ui-fg-muted">
-              Distribution of successful orders for this month
-            </Text>
-          </div>
-
-          <a href="/app/analytics">
-            <Button variant="transparent" className="text-ui-fg-muted">
-              View more
-            </Button>
-          </a>
-        </div>
-        {orders ? (
-          <div className="w-full aspect-video">
-            <LineChart
-              data={orders}
-              xAxisDataKey="name"
-              yAxisDataKey="count"
-              lineColor="#82ca9d"
-              yAxisTickFormatter={(value: number) =>
-                new Intl.NumberFormat("en-US", {
-                  // currency: orders.currency_code,
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
-            />
-          </div>
-        ) : (
-          <Text size="small" className="text-ui-fg-muted text-center">
-            No data available for the selected period.
-          </Text>
-        )}
-      </Container>
-    </div>
-  );
-};
-
-const BestPerformers: React.FC<{
-  regions?: OrderAnalyticsResponse["regions"];
-}> = ({ regions }) => {
-  return (
-    <div className="flex-1">
-      <Container className="min-h-[9.375rem]">
-        <Text size="xlarge" weight="plus">
-          Best performers
-        </Text>
-        <Text size="small" className="mb-6 text-ui-fg-muted">
-          Top 3 regions by sales
-        </Text>
-
-        {regions ? (
-          <div className="w-full aspect-video">
-            <BarChart
-              data={regions}
-              xAxisDataKey="name"
-              yAxisDataKey="sales"
-              lineColor="#82ca9d"
-              useStableColors={true}
-              colorKeyField="name"
-              yAxisTickFormatter={(value: number) =>
-                new Intl.NumberFormat("en-US", {
-                  // currency: orders.currency_code,
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
-            />
-          </div>
-        ) : (
-          <Text size="small" className="text-ui-fg-muted text-center">
-            No data available for the selected period.
-          </Text>
-        )}
-      </Container>
-    </div>
   );
 };
 

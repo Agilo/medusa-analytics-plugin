@@ -3,8 +3,8 @@ import { useCustomerAnalytics } from "../hooks/customer-analytics";
 import { startOfMonth } from "date-fns";
 import { Container, Text } from "@medusajs/ui";
 import { PieChart } from "../components/PieChart";
-import { BarChart } from "../components/BarChart";
 import { ReturningCustomers } from "../components/KPI";
+import { TopCustomerGroupBySales } from "../components/Charts";
 
 const today = new Date();
 
@@ -16,12 +16,10 @@ const CustomerWidget = () => {
 
   console.log(customers);
 
-  if (!customers) return;
-
   const pieChartCustomers = [
-    { count: customers.total_customers, name: "Total Customers" },
-    { count: customers.new_customers, name: "New Customers" },
-    { count: customers.returning_customers, name: "Returning Customers" },
+    { count: customers?.total_customers, name: "Total Customers" },
+    { count: customers?.new_customers, name: "New Customers" },
+    { count: customers?.returning_customers, name: "Returning Customers" },
   ];
   console.log("Customer pending", isLoading);
 
@@ -47,36 +45,7 @@ const CustomerWidget = () => {
             </Text>
           )}
         </Container>
-        <Container className="min-h-[9.375rem]">
-          <Text size="xlarge" weight="plus">
-            Top Customer Groups by Sales
-          </Text>
-          <Text size="small" className="mb-8 text-ui-fg-muted">
-            Sales breakdown by customer group in the selected period
-          </Text>
-          {customers.customer_group && customers.customer_group.length > 0 ? (
-            <div className="w-full" style={{ aspectRatio: "16/9" }}>
-              <BarChart
-                data={customers.customer_group}
-                xAxisDataKey="name"
-                lineColor="#82ca9d"
-                useStableColors={true}
-                colorKeyField="name"
-                yAxisDataKey="total"
-                yAxisTickFormatter={(value: number) =>
-                  new Intl.NumberFormat("en-US", {
-                    currency: customers.currency_code || "EUR",
-                    maximumFractionDigits: 0,
-                  }).format(value)
-                }
-              />
-            </div>
-          ) : (
-            <Text size="small" className="text-ui-fg-muted text-center">
-              No data available for the selected period.
-            </Text>
-          )}
-        </Container>
+        <TopCustomerGroupBySales data={customers} isLoading={isLoading} />
       </div>
     </>
   );

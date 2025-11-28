@@ -42,8 +42,8 @@ export const StoreWidget = () => {
 
 const LowStockVariants: React.FC<BarChartTypes> = ({ data, isLoading }) => {
   return (
-    <Container className="mb-4 min-h-[9.375rem] ">
-      <div className="flex justify-between">
+    <Container className="min-h-[9.375rem] flex-1">
+      <div className="flex justify-between w-full">
         <div>
           <Text size="xlarge" weight="plus">
             Low Stock Variants

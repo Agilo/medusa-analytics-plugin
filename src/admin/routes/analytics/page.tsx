@@ -56,7 +56,10 @@ import {
   TotalOrders,
   TotalSales,
 } from "../../components/KPI";
-import { TopSellingProducts } from "../../components/Charts";
+import {
+  TopCustomerGroupBySales,
+  TopSellingProducts,
+} from "../../components/Charts";
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -666,42 +669,10 @@ const AnalyticsPage = () => {
                   </Container>
                 </div>
                 <div className="flex-1">
-                  <Container className="min-h-[9.375rem]">
-                    <Text size="xlarge" weight="plus">
-                      Top Customer Groups by Sales
-                    </Text>
-                    <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Sales breakdown by customer group in the selected period
-                    </Text>
-                    {isLoadingCustomers ? (
-                      <BarChartSkeleton />
-                    ) : customers?.customer_group &&
-                      customers.customer_group.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
-                        <BarChart
-                          data={customers.customer_group}
-                          xAxisDataKey="name"
-                          lineColor="#82ca9d"
-                          useStableColors={true}
-                          colorKeyField="name"
-                          yAxisDataKey="total"
-                          yAxisTickFormatter={(value: number) =>
-                            new Intl.NumberFormat("en-US", {
-                              currency: customers.currency_code || "EUR",
-                              maximumFractionDigits: 0,
-                            }).format(value)
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
-                  </Container>
+                  <TopCustomerGroupBySales
+                    data={customers}
+                    isLoading={isLoadingCustomers}
+                  />
                 </div>
               </div>
               <div className="flex gap-4 max-xl:flex-col">

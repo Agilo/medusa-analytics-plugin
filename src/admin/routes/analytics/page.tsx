@@ -10,7 +10,6 @@ import {
 } from "@medusajs/ui";
 import {
   ChartBar,
-  ShoppingCart,
   Calendar as CalendarIcon,
   ChevronDown,
   ChevronLeft,
@@ -57,6 +56,7 @@ import {
   TotalOrders,
   TotalSales,
 } from "../../components/KPI";
+import { TopSellingProducts } from "../../components/Charts";
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -512,33 +512,10 @@ const AnalyticsPage = () => {
               </div>
             </Tabs.Content>
             <Tabs.Content value="products">
-              <Container className="mb-4 min-h-[9.375rem]">
-                <Text size="xlarge" weight="plus">
-                  Top-Selling Products
-                </Text>
-                <Text size="small" className="mb-8 text-ui-fg-muted">
-                  Products by quantity sold in selected period
-                </Text>
-                {isLoadingProducts ? (
-                  <BarChartSkeleton />
-                ) : products?.variantQuantitySold &&
-                  someTopSellingProductsGreaterThanZero ? (
-                  <div className="w-full" style={{ aspectRatio: "16/9" }}>
-                    <BarChart
-                      data={products.variantQuantitySold}
-                      xAxisDataKey="title"
-                      yAxisDataKey="quantity"
-                      lineColor="#82ca9d"
-                      useStableColors={true}
-                      colorKeyField="title"
-                    />
-                  </div>
-                ) : (
-                  <Text size="small" className="text-ui-fg-muted text-center">
-                    No data available for the selected period.
-                  </Text>
-                )}
-              </Container>
+              <TopSellingProducts
+                data={products}
+                isLoading={isLoadingProducts}
+              />
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">

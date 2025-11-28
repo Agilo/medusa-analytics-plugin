@@ -1,11 +1,9 @@
 import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import {
-  ProductAnalyticsResponse,
-  useProductAnalytics,
-} from "../hooks/product-analytics";
+import { useProductAnalytics } from "../hooks/product-analytics";
 import { startOfMonth } from "date-fns";
 
+import { BarChartTypes, TopSellingProducts } from "../components/Charts";
 import { Button, Container, Text } from "@medusajs/ui";
 import { BarChart } from "../components/BarChart";
 import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
@@ -18,70 +16,33 @@ export const StoreWidget = () => {
     to: today,
   });
 
-  console.log(products);
+  // Getting top 3 selling products
+  const topThreeSellers = products?.variantQuantitySold
+    ?.filter((item) => item.quantity > 0)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3);
 
+  const productsWithTopVariants = products
+    ? { ...products, variantQuantitySold: topThreeSellers ?? [] }
+    : undefined;
   return (
     <>
       <h1 className="xl:text-3xl text-2xl my-6">Product insights</h1>
-      <div className="flex items-center gap-4 mb-4">
-        {isLoading ? (
-          [...Array(2)].map((_, idx) => (
-            <Container key={idx} className="min-h-[9.375rem]">
-              <BarChartSkeleton />
-            </Container>
-          ))
-        ) : (
-          <>
-            <TopSellingProducts products={products} />
-            <LowStockVariants />
-          </>
-        )}
+      <div className="flex items-center gap-4">
+        <TopSellingProducts
+          data={productsWithTopVariants}
+          isLoading={isLoading}
+        />
+
+        <LowStockVariants data={products} isLoading={isLoading} />
       </div>
     </>
   );
 };
 
-const TopSellingProducts: React.FC<{
-  products?: ProductAnalyticsResponse;
-}> = ({ products }) => {
-  const topThreeSelersAboveZero = products?.variantQuantitySold
-    ?.filter((item) => item.quantity > 0)
-    .sort((a, b) => b.quantity - a.quantity)
-    .slice(0, 3);
+const LowStockVariants: React.FC<BarChartTypes> = ({ data, isLoading }) => {
   return (
-    <Container className="min-h-[9.375rem] flex-1 h-full">
-      <Text size="xlarge" weight="plus">
-        Top-Selling Products
-      </Text>
-      <Text size="small" className="mb-8 text-ui-fg-muted">
-        Products by quantity sold in selected period
-      </Text>
-      {topThreeSelersAboveZero && topThreeSelersAboveZero?.length > 0 ? (
-        <div className="w-full aspect-video">
-          <BarChart
-            data={topThreeSelersAboveZero}
-            xAxisDataKey="title"
-            yAxisDataKey="quantity"
-            lineColor="#82ca9d"
-            useStableColors={true}
-            colorKeyField="title"
-          />
-        </div>
-      ) : (
-        <Text size="small" className="text-ui-fg-muted text-center">
-          No data available for the selected period.
-        </Text>
-      )}
-    </Container>
-  );
-};
-
-const LowStockVariants: React.FC<{
-  products?: ProductAnalyticsResponse;
-}> = ({ products }) => {
-  const lowStockVariants = products?.lowStockVariants;
-  return (
-    <Container className="min-h-[9.375rem] flex-1">
+    <Container className="mb-4 min-h-[9.375rem] ">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
@@ -98,10 +59,12 @@ const LowStockVariants: React.FC<{
           </Button>
         </a>
       </div>
-      {lowStockVariants && lowStockVariants?.length > 0 ? (
+      {isLoading ? (
+        <BarChartSkeleton />
+      ) : data?.lowStockVariants && data?.lowStockVariants?.length > 0 ? (
         <div className="w-full">
           <BarChart
-            data={lowStockVariants}
+            data={data?.lowStockVariants}
             xAxisDataKey="variantName"
             yAxisDataKey="inventoryQuantity"
             lineColor="#82ca9d"

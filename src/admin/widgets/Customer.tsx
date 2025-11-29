@@ -42,7 +42,7 @@ const CustomerWidget = () => {
         <ReturningCustomers
           data={customersLast90Days}
           isLoading={isLoadingLast90Days}
-          specificTimeline="last 30 days"
+          specificTimeline="last 90 days"
         />
         <div className="flex gap-4 my-4 flex-col md:flex-row">
           <OrderBreakdownPie

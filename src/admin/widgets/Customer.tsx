@@ -1,32 +1,44 @@
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { useCustomerAnalytics } from "../hooks/customer-analytics";
-import { startOfMonth } from "date-fns";
 import { Container, Text } from "@medusajs/ui";
 import { PieChart } from "../components/PieChart";
 import { ReturningCustomers } from "../components/KPI";
 import { TopCustomerGroupBySales } from "../components/Charts";
 
 const today = new Date();
+const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
+const daysPrior90 = new Date(new Date().setDate(today.getDate() - 90));
 
 const CustomerWidget = () => {
-  const { data: customers, isLoading } = useCustomerAnalytics({
-    from: startOfMonth(today),
-    to: today,
-  });
-
-  console.log(customers);
+  const { data: customersLast30Days, isLoading: isLoadingLast30Days } =
+    useCustomerAnalytics({
+      from: daysPrior30,
+      to: today,
+    });
 
   const pieChartCustomers = [
-    { count: customers?.total_customers, name: "Total Customers" },
-    { count: customers?.new_customers, name: "New Customers" },
-    { count: customers?.returning_customers, name: "Returning Customers" },
+    { count: customersLast30Days?.total_customers, name: "Total Customers" },
+    { count: customersLast30Days?.new_customers, name: "New Customers" },
+    {
+      count: customersLast30Days?.returning_customers,
+      name: "Returning Customers",
+    },
   ];
-  console.log("Customer pending", isLoading);
+
+  //Getting data for the last 90 days for returning customers rate
+  const { data: customersLast90Days, isLoading: isLoadingLast90Days } =
+    useCustomerAnalytics({
+      from: daysPrior90,
+      to: today,
+    });
 
   return (
     <>
       <h1 className="xl:text-3xl text-2xl mt-6 mb-4">Customer insights</h1>
-      <ReturningCustomers data={customers} isLoading={isLoading} />
+      <ReturningCustomers
+        data={customersLast30Days}
+        isLoading={isLoadingLast30Days}
+      />
       <div className="flex gap-4 ">
         <Container className="min-h-[9.375rem]">
           <Text size="xlarge" weight="plus">
@@ -35,7 +47,7 @@ const CustomerWidget = () => {
           <Text size="small" className="mb-8 text-ui-fg-muted">
             Distribution of orders by status in the selected period
           </Text>
-          {customers ? (
+          {customersLast30Days ? (
             <div className="w-full" style={{ aspectRatio: "16/9" }}>
               <PieChart data={pieChartCustomers} dataKey="count" />
             </div>
@@ -45,7 +57,12 @@ const CustomerWidget = () => {
             </Text>
           )}
         </Container>
-        <TopCustomerGroupBySales data={customers} isLoading={isLoading} />
+
+        {/* Defined to be the last 90 days for returning customers */}
+        <TopCustomerGroupBySales
+          data={customersLast90Days}
+          isLoading={isLoadingLast90Days}
+        />
       </div>
     </>
   );

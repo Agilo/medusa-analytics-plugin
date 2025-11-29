@@ -2,17 +2,19 @@ import * as React from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import { Button } from "@medusajs/ui";
 import { useOrderAnalytics } from "../hooks/order-analytics";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
 import { AverageOrderValue, TotalOrders, TotalSales } from "../components/KPI";
 
 const today = new Date();
+const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
+const daysPrior60 = new Date(new Date().setDate(today.getDate() - 60));
 
 const OrderWidget = () => {
-  // TODO: Handle last 30 days and 60 days as well (not this and previous month)
-  const [interval, setInterval] = React.useState("this-month");
+  const [interval, setInterval] = React.useState<"30-days-ago" | "60-days-ago">(
+    "30-days-ago"
+  );
   const [range, setRange] = React.useState({
-    from: startOfMonth(today),
+    from: daysPrior30,
     to: today,
   });
   const { data: orders, isLoading } = useOrderAnalytics(interval, range);
@@ -24,29 +26,29 @@ const OrderWidget = () => {
 
         <div className="flex items-center gap-3">
           <p className="ml-auto text-ui-fg-muted text-sm">
-            {interval === "this-month" ? "This Month" : "Last Month"}
+            {interval === "30-days-ago" ? "Last 30 Days" : "Last 60 Days"}
           </p>
 
           <Button
             variant="secondary"
             className="p-2.5 size-9"
             onClick={() => {
-              if (interval === "this-month") {
-                setInterval("last-month");
+              if (interval === "30-days-ago") {
+                setInterval("60-days-ago");
                 setRange({
-                  from: startOfMonth(subMonths(today, 1)),
-                  to: endOfMonth(subMonths(today, 1)),
+                  from: daysPrior60,
+                  to: today,
                 });
                 return;
               }
-              setInterval("this-month");
+              setInterval("30-days-ago");
               setRange({
-                from: startOfMonth(today),
+                from: daysPrior30,
                 to: today,
               });
             }}
           >
-            {interval === "this-month" ? (
+            {interval === "30-days-ago" ? (
               <ArrowDownWideNarrow />
             ) : (
               <ArrowUpWideNarrow />

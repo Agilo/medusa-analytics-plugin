@@ -8,11 +8,13 @@ import { CustomerAnalyticsResponse } from "../hooks/customer-analytics";
 export type BarChartTypes<T = ProductAnalyticsResponse> = {
   data: T | undefined;
   isLoading: boolean;
+  specificTimeline?: string;
 };
 
 export const TopSellingProducts: React.FC<BarChartTypes> = ({
   data,
   isLoading,
+  specificTimeline,
 }) => {
   return (
     <Container className="min-h-[9.375rem] flex-1 mb-4">
@@ -20,7 +22,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
         Top-Selling Products
       </Text>
       <Text size="small" className="mb-8 text-ui-fg-muted">
-        Products by quantity sold in selected period
+        Products by quantity sold in the {specificTimeline ?? "selected period"}
       </Text>
       {isLoading ? (
         <BarChartSkeleton />
@@ -47,13 +49,14 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
 
 export const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
-> = ({ data, isLoading }) => (
+> = ({ data, isLoading, specificTimeline }) => (
   <Container className="min-h-[9.375rem]">
     <Text size="xlarge" weight="plus">
       Top Customer Groups by Sales
     </Text>
     <Text size="small" className="mb-8 text-ui-fg-muted">
-      Sales breakdown by customer group in the selected period
+      Sales breakdown by customer group in the{" "}
+      {specificTimeline ?? "selected period"}
     </Text>
     {isLoading ? (
       <BarChartSkeleton />

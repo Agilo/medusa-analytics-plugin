@@ -84,12 +84,19 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
 };
 
 export const ReturningCustomers: React.FC<
-  KPIProps<CustomerAnalyticsResponse>
-> = ({ data, isLoading }) => {
+  KPIProps<CustomerAnalyticsResponse> & {
+    specificTimeline?: string;
+  }
+> = ({ data, isLoading, specificTimeline }) => {
   return (
     <Container className="relative">
       <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-      <Text size="small">Returning Customers</Text>
+      <Text size="small">
+        Returning Customers{" "}
+        {specificTimeline && (
+          <span className="text-ui-fg-muted">({specificTimeline})</span>
+        )}
+      </Text>
       {isLoading ? (
         <SmallCardSkeleton />
       ) : (

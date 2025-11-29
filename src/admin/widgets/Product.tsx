@@ -27,20 +27,34 @@ export const ProductWidget = () => {
 
   return (
     <>
-      <h1 className="xl:text-3xl text-2xl mt-6 mb-4">Product insights</h1>
-      <div className="flex items-center gap-4">
-        <TopSellingProducts
-          data={productsWithTopVariants}
-          isLoading={isLoading}
-        />
+      <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
+        Product insights
+      </h1>
 
-        <LowStockVariants data={products} isLoading={isLoading} />
+      <div className="lg:w-4/5">
+        <div className="flex items-center gap-4 flex-col md:flex-row">
+          <TopSellingProducts
+            data={productsWithTopVariants}
+            isLoading={isLoading}
+            specificTimeline="last 30 days"
+          />
+
+          <LowStockVariants
+            data={products}
+            isLoading={isLoading}
+            specificTimeline="last 30 days"
+          />
+        </div>
       </div>
     </>
   );
 };
 
-const LowStockVariants: React.FC<BarChartTypes> = ({ data, isLoading }) => (
+const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
+  data,
+  isLoading,
+  specificTimeline,
+}) => (
   <Container className="min-h-[9.375rem] flex-1 mb-4">
     <div className="flex justify-between w-full">
       <div>
@@ -48,7 +62,7 @@ const LowStockVariants: React.FC<BarChartTypes> = ({ data, isLoading }) => (
           Low Stock Variants
         </Text>
         <Text size="small" className="mb-8 text-ui-fg-muted">
-          Variants with low inventory levels
+          Variants with low inventory levels in the {specificTimeline}
         </Text>
       </div>
 

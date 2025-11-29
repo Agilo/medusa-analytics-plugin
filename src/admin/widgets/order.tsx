@@ -22,7 +22,7 @@ const OrderWidget = () => {
   return (
     <>
       <div className="flex items-center justify-between w-full mt-6 mb-4">
-        <h1 className="xl:text-3xl text-2xl">Order insights</h1>
+        <h1 className="xl:text-3xl text-2xl font-medium">Order insights</h1>
 
         <div className="flex items-center gap-3">
           <p className="ml-auto text-ui-fg-muted text-sm">
@@ -57,7 +57,7 @@ const OrderWidget = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center flex-col md:flex-row gap-4">
         <TotalSales data={orders} isLoading={isLoading} />
         <TotalOrders data={orders} isLoading={isLoading} />
         <AverageOrderValue data={orders} isLoading={isLoading} />

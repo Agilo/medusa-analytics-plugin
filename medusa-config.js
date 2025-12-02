@@ -1,4 +1,4 @@
-const { defineConfig, Modules } = require("@medusajs/utils");
+const { defineConfig } = require('@medusajs/utils');
 
 module.exports = defineConfig({
   admin: {
@@ -6,16 +6,12 @@ module.exports = defineConfig({
   },
   modules: [
     {
-      resolve: "@medusajs/medusa/fulfillment",
+      resolve: '@medusajs/medusa/fulfillment',
       options: {
         providers: [
           {
-            resolve: "@medusajs/fulfillment-manual",
-            id: "test-provider",
-          },
-          {
-            resolve: "@agilo/medusa-analytics-plugin",
-            options: {},
+            resolve: '@medusajs/fulfillment-manual',
+            id: 'test-provider',
           },
         ],
       },

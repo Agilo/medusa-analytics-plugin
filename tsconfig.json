@@ -22,7 +22,7 @@
   "ts-node": {
     "swc": true
   },
-  "include": ["**/*", ".medusa/types/*", "src/admin/widgets/.tsx"],
+  "include": ["**/*", ".medusa/types/*"],
   "exclude": [
     "node_modules",
     ".medusa/server",

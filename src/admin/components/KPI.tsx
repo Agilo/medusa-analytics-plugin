@@ -1,10 +1,10 @@
-import * as React from "react";
-import { Container, Text } from "@medusajs/ui";
-import { ChartNoAxesCombined, CircleSlash2 } from "lucide-react";
-import { SmallCardSkeleton } from "../skeletons/SmallCardSkeleton";
-import { OrderAnalyticsResponse } from "../hooks/order-analytics";
-import { CustomerAnalyticsResponse } from "../hooks/customer-analytics";
-import { ShoppingCart, User } from "@medusajs/icons";
+import * as React from 'react';
+import { Container, Text } from '@medusajs/ui';
+import { ChartNoAxesCombined, CircleSlash2 } from 'lucide-react';
+import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
+import { OrderAnalyticsResponse } from '../hooks/order-analytics';
+import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
+import { ShoppingCart, User } from '@medusajs/icons';
 
 type KPIProps<T = OrderAnalyticsResponse> = {
   data: T | undefined;
@@ -20,13 +20,13 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => (
     ) : (
       <>
         <Text size="xlarge" weight="plus">
-          {new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: data?.currency_code || "EUR",
+          {new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: data?.currency_code || 'EUR',
           }).format(data?.total_sales || 0)}
         </Text>
         <Text size="xsmall" className="text-ui-fg-muted">
-          {(data?.prev_sales_percent || 0) > 0 && "+"}
+          {(data?.prev_sales_percent || 0) > 0 && '+'}
           {data?.prev_sales_percent || 0}% from previous period
         </Text>
       </>
@@ -46,7 +46,7 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => (
           {data?.total_orders || 0}
         </Text>
         <Text size="xsmall" className="text-ui-fg-muted">
-          {(data?.prev_orders_percent || 0) > 0 && "+"}
+          {(data?.prev_orders_percent || 0) > 0 && '+'}
           {data?.prev_orders_percent || 0}% from previous period
         </Text>
       </>
@@ -74,7 +74,7 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
             %
           </Text>
           <Text size="xsmall" className="text-ui-fg-muted">
-            {averageOrderValue > 0 && "+"}
+            {averageOrderValue > 0 && '+'}
             {averageOrderValue}% from previous period
           </Text>
         </>
@@ -92,7 +92,7 @@ export const ReturningCustomers: React.FC<
     <Container className="relative">
       <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
       <Text size="small">
-        Returning Customers{" "}
+        Returning Customers{' '}
         {specificTimeline && (
           <span className="text-ui-fg-muted">({specificTimeline})</span>
         )}

@@ -30,7 +30,7 @@ export const useCustomerAnalytics = (
   options?: Omit<
     UseQueryOptions<CustomerAnalyticsResponse | undefined, Error>,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: ['customer-analytics', query?.from, query?.to],

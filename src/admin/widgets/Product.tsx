@@ -1,10 +1,10 @@
-import * as React from "react";
-import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { useProductAnalytics } from "../hooks/product-analytics";
-import { BarChartTypes, TopSellingProducts } from "../components/Charts";
-import { Button, Container, Text } from "@medusajs/ui";
-import { BarChart } from "../components/BarChart";
-import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
+import * as React from 'react';
+import { defineWidgetConfig } from '@medusajs/admin-sdk';
+import { useProductAnalytics } from '../hooks/product-analytics';
+import { BarChartTypes, TopSellingProducts } from '../components/Charts';
+import { Button, Container, Text } from '@medusajs/ui';
+import { BarChart } from '../components/BarChart';
+import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
 
 const today = new Date();
 const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
@@ -94,7 +94,7 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
 );
 
 export const config = defineWidgetConfig({
-  zone: "product.list.before",
+  zone: 'product.list.before',
 });
 
 export default ProductWidget;

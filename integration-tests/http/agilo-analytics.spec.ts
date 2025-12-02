@@ -74,7 +74,7 @@ medusaIntegrationTestRunner({
             auth_identity_id: authIdentity.id,
           },
           process.env.JWT_SECRET || 'test',
-          { expiresIn: '1d' }
+          { expiresIn: '1d' },
         );
 
         headers['Authorization'] = `Bearer ${token}`;
@@ -97,7 +97,7 @@ medusaIntegrationTestRunner({
       describe('/orders', () => {
         it('should return 401 if no authorization header', async () => {
           await expect(
-            api.get('/admin/agilo-analytics/orders?preset=last-month')
+            api.get('/admin/agilo-analytics/orders?preset=last-month'),
           ).rejects.toMatchObject({
             response: { status: 401 },
           });
@@ -107,7 +107,7 @@ medusaIntegrationTestRunner({
           await expect(
             api.get('/admin/agilo-analytics/orders?preset=nonexistent', {
               headers,
-            })
+            }),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
@@ -117,16 +117,16 @@ medusaIntegrationTestRunner({
           await expect(
             api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_from=2024-01-01',
-              { headers }
-            )
+              { headers },
+            ),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
           await expect(
             api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_to=2024-01-31',
-              { headers }
-            )
+              { headers },
+            ),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
@@ -136,8 +136,8 @@ medusaIntegrationTestRunner({
           await expect(
             api.get(
               '/admin/agilo-analytics/orders?preset=custom&date_from=not-a-date&date_to=2024-01-31',
-              { headers }
-            )
+              { headers },
+            ),
           ).rejects.toMatchObject({
             response: { status: 500 },
           });
@@ -146,7 +146,7 @@ medusaIntegrationTestRunner({
         it('should return 200 and include expected keys', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=this-month',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -164,7 +164,7 @@ medusaIntegrationTestRunner({
         it('should return 200 for last-month preset and have zero sales and orders', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=last-month',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -175,7 +175,7 @@ medusaIntegrationTestRunner({
         it('should work with last-3-months preset and have arrays with correct keys', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=last-3-months',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -191,7 +191,7 @@ medusaIntegrationTestRunner({
         it('should return 200 for custom preset with correct dates', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=custom&date_from=2024-01-01&date_to=2024-12-31',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -200,7 +200,7 @@ medusaIntegrationTestRunner({
         it('should return statuses array with valid format', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=this-month',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -217,7 +217,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/orders?preset=custom&date_from=${futureStart}&date_to=${futureEnd}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -227,7 +227,7 @@ medusaIntegrationTestRunner({
         it('should return correct total orders and total sales based on seeded order', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=this-month',
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -239,7 +239,7 @@ medusaIntegrationTestRunner({
           expect(res.data.total_sales).toBeGreaterThanOrEqual(expectedTotal);
 
           const anySalesAboveZero = res.data.order_sales.some(
-            (d) => d.sales > 0
+            (d) => d.sales > 0,
           );
           expect(anySalesAboveZero).toBe(true);
 
@@ -248,7 +248,7 @@ medusaIntegrationTestRunner({
         it('should return correct status and region on seeded order', async () => {
           const res = await api.get(
             '/admin/agilo-analytics/orders?preset=this-month',
-            { headers }
+            { headers },
           );
 
           const expectedTotal = (order?.total || 0) / 100;
@@ -259,7 +259,7 @@ medusaIntegrationTestRunner({
 
           expect(res.data.regions?.[0]?.name).toBe(region.name);
           expect(res.data.regions?.[0]?.sales).toBeGreaterThanOrEqual(
-            expectedTotal
+            expectedTotal,
           );
         });
         it('should correctly aggregate data with multiple orders', async () => {
@@ -283,29 +283,29 @@ medusaIntegrationTestRunner({
             '/admin/agilo-analytics/orders?preset=this-month',
             {
               headers,
-            }
+            },
           );
 
           expect(res.status).toEqual(200);
           expect(res.data.total_orders).toBeGreaterThanOrEqual(6);
           expect(res.data.total_sales).toBeGreaterThanOrEqual(
-            (order?.total || 0) * 6
+            (order?.total || 0) * 6,
           );
         });
         it('should correctly handle orders with different created_at dates in different months', async () => {
           const prevMonth = subMonths(new Date(), 1);
           const dates: string[] = [];
           dates.push(
-            format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z'
+            format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z',
           );
           dates.push(
-            format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+            format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z',
           );
           dates.push(
-            format(startOfMonth(new Date()), 'yyyy-MM-dd') + 'T00:00:00Z'
+            format(startOfMonth(new Date()), 'yyyy-MM-dd') + 'T00:00:00Z',
           );
           dates.push(
-            format(endOfMonth(new Date()), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+            format(endOfMonth(new Date()), 'yyyy-MM-dd') + 'T23:59:59.999Z',
           );
           await Promise.all(
             dates.map(async (d) => {
@@ -323,15 +323,15 @@ medusaIntegrationTestRunner({
                 fulfillmentSetsOverride: fulfillmentSets,
                 regionOverride: region,
               });
-            })
+            }),
           );
           const res1 = await api.get(
             `/admin/agilo-analytics/orders?preset=this-month`,
-            { headers }
+            { headers },
           );
           const res2 = await api.get(
             `/admin/agilo-analytics/orders?preset=last-month`,
-            { headers }
+            { headers },
           );
           const expectedTotal1 = order?.total * 3 || 0;
           const expectedTotal2 = order?.total * 2 || 0;
@@ -359,10 +359,10 @@ medusaIntegrationTestRunner({
           for (let i = 0; i < 6; i++) {
             const prevMonth = subMonths(new Date(), i + 1);
             dates.push(
-              format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+              format(endOfMonth(prevMonth), 'yyyy-MM-dd') + 'T23:59:59.999Z',
             );
             dates.push(
-              format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z'
+              format(startOfMonth(prevMonth), 'yyyy-MM-dd') + 'T00:00:00Z',
             );
           }
 
@@ -382,13 +382,13 @@ medusaIntegrationTestRunner({
                 fulfillmentSetsOverride: fulfillmentSets,
                 regionOverride: region,
               });
-            })
+            }),
           );
           const res = await api.get(
             `/admin/agilo-analytics/orders?preset=custom&date_from=${
               dates[dates.length - 1]
             }&date_to=${dates[0]}`,
-            { headers }
+            { headers },
           );
 
           const expectedTotal = order?.total * 12 || 0;
@@ -411,7 +411,7 @@ medusaIntegrationTestRunner({
       describe('/products', () => {
         it('should return 401 if no authorization header', async () => {
           await expect(
-            api.get('/admin/agilo-analytics/products?preset=last-month')
+            api.get('/admin/agilo-analytics/products?preset=last-month'),
           ).rejects.toMatchObject({
             response: { status: 401 },
           });
@@ -421,14 +421,14 @@ medusaIntegrationTestRunner({
           await expect(
             api.get('/admin/agilo-analytics/products?date_from=2024-01-01', {
               headers,
-            })
+            }),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
           await expect(
             api.get('/admin/agilo-analytics/orders?date_to=2024-01-31', {
               headers,
-            })
+            }),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
@@ -437,8 +437,8 @@ medusaIntegrationTestRunner({
           await expect(
             api.get(
               '/admin/agilo-analytics/products?date_from=not-a-date&date_to=2024-01-31',
-              { headers }
-            )
+              { headers },
+            ),
           ).rejects.toMatchObject({
             response: { status: 500 },
           });
@@ -449,7 +449,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -482,7 +482,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -503,7 +503,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -526,7 +526,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -545,7 +545,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/products?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
           const variant = product.variants[0];
 
@@ -554,7 +554,7 @@ medusaIntegrationTestRunner({
           const lowStockVariants = res.data.lowStockVariants;
 
           const foundVariant = lowStockVariants.find(
-            (v) => v.sku === variant.sku
+            (v) => v.sku === variant.sku,
           );
 
           expect(foundVariant).toBeDefined();
@@ -568,8 +568,8 @@ medusaIntegrationTestRunner({
           const end = addDays(new Date(), 0);
           await expect(
             api.get(
-              `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`
-            )
+              `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
+            ),
           ).rejects.toMatchObject({
             response: { status: 401 },
           });
@@ -579,14 +579,14 @@ medusaIntegrationTestRunner({
           await expect(
             api.get('/admin/agilo-analytics/customers?date_from=2024-01-01', {
               headers,
-            })
+            }),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
           await expect(
             api.get('/admin/agilo-analytics/customers?date_to=2024-01-31', {
               headers,
-            })
+            }),
           ).rejects.toMatchObject({
             response: { status: 400 },
           });
@@ -595,8 +595,8 @@ medusaIntegrationTestRunner({
           await expect(
             api.get(
               '/admin/agilo-analytics/customers?date_from=not-a-date&date_to=2024-01-31',
-              { headers }
-            )
+              { headers },
+            ),
           ).rejects.toMatchObject({
             response: { status: 500 },
           });
@@ -607,7 +607,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -625,7 +625,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -655,7 +655,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -707,7 +707,7 @@ medusaIntegrationTestRunner({
           });
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -774,7 +774,7 @@ medusaIntegrationTestRunner({
           });
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -824,7 +824,7 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
@@ -879,13 +879,13 @@ medusaIntegrationTestRunner({
 
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
 
           const firstCustomer = res.data.customer_sales.find(
-            (c) => c.email === customer.email
+            (c) => c.email === customer.email,
           );
 
           expect(firstCustomer).toBeDefined();
@@ -947,15 +947,15 @@ medusaIntegrationTestRunner({
           });
           const res = await api.get(
             `/admin/agilo-analytics/customers?date_from=${start}&date_to=${end}`,
-            { headers }
+            { headers },
           );
 
           expect(res.status).toEqual(200);
           const groupData = res.data.customer_group.find(
-            (g) => g.name === group.name
+            (g) => g.name === group.name,
           );
           const groupData2 = res.data.customer_group.find(
-            (g) => g.name === group2.name
+            (g) => g.name === group2.name,
           );
           expect(groupData).toBeDefined();
           expect(groupData.total).toEqual(2400);

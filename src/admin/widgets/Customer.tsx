@@ -1,10 +1,10 @@
-import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { useCustomerAnalytics } from "../hooks/customer-analytics";
-import { Container, Text } from "@medusajs/ui";
-import { PieChart } from "../components/PieChart";
-import { ReturningCustomers } from "../components/KPI";
-import { BarChartTypes, TopCustomerGroupBySales } from "../components/Charts";
-import { BarChartSkeleton } from "../skeletons/BarChartSkeleton";
+import { defineWidgetConfig } from '@medusajs/admin-sdk';
+import { useCustomerAnalytics } from '../hooks/customer-analytics';
+import { Container, Text } from '@medusajs/ui';
+import { PieChart } from '../components/PieChart';
+import { ReturningCustomers } from '../components/KPI';
+import { BarChartTypes, TopCustomerGroupBySales } from '../components/Charts';
+import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
 
 const today = new Date();
 const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
@@ -18,11 +18,11 @@ const CustomerWidget = () => {
     });
 
   const pieChartCustomers = [
-    { count: customersLast30Days?.total_customers, name: "Total Customers" },
-    { count: customersLast30Days?.new_customers, name: "New Customers" },
+    { count: customersLast30Days?.total_customers, name: 'Total Customers' },
+    { count: customersLast30Days?.new_customers, name: 'New Customers' },
     {
       count: customersLast30Days?.returning_customers,
-      name: "Returning Customers",
+      name: 'Returning Customers',
     },
   ];
 
@@ -83,7 +83,7 @@ const OrderBreakdownPie: React.FC<
     {isLoading ? (
       <BarChartSkeleton />
     ) : data ? (
-      <div className="w-full" style={{ aspectRatio: "16/9" }}>
+      <div className="w-full" style={{ aspectRatio: '16/9' }}>
         <PieChart data={data} dataKey="count" />
       </div>
     ) : (
@@ -95,7 +95,7 @@ const OrderBreakdownPie: React.FC<
 );
 
 export const config = defineWidgetConfig({
-  zone: "customer.list.before",
+  zone: 'customer.list.before',
 });
 
 export default CustomerWidget;

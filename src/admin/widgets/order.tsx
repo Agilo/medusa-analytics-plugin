@@ -1,17 +1,17 @@
-import * as React from "react";
-import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { Button } from "@medusajs/ui";
-import { useOrderAnalytics } from "../hooks/order-analytics";
-import { ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
-import { AverageOrderValue, TotalOrders, TotalSales } from "../components/KPI";
+import * as React from 'react';
+import { defineWidgetConfig } from '@medusajs/admin-sdk';
+import { Button } from '@medusajs/ui';
+import { useOrderAnalytics } from '../hooks/order-analytics';
+import { ArrowDownWideNarrow, ArrowUpWideNarrow } from 'lucide-react';
+import { AverageOrderValue, TotalOrders, TotalSales } from '../components/KPI';
 
 const today = new Date();
 const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
 const daysPrior60 = new Date(new Date().setDate(today.getDate() - 60));
 
 const OrderWidget = () => {
-  const [interval, setInterval] = React.useState<"30-days-ago" | "60-days-ago">(
-    "30-days-ago"
+  const [interval, setInterval] = React.useState<'30-days-ago' | '60-days-ago'>(
+    '30-days-ago',
   );
   const [range, setRange] = React.useState({
     from: daysPrior30,
@@ -26,29 +26,29 @@ const OrderWidget = () => {
 
         <div className="flex items-center gap-3">
           <p className="ml-auto text-ui-fg-muted text-sm">
-            {interval === "30-days-ago" ? "Last 30 Days" : "Last 60 Days"}
+            {interval === '30-days-ago' ? 'Last 30 Days' : 'Last 60 Days'}
           </p>
 
           <Button
             variant="secondary"
             className="p-2.5 size-9"
             onClick={() => {
-              if (interval === "30-days-ago") {
-                setInterval("60-days-ago");
+              if (interval === '30-days-ago') {
+                setInterval('60-days-ago');
                 setRange({
                   from: daysPrior60,
                   to: today,
                 });
                 return;
               }
-              setInterval("30-days-ago");
+              setInterval('30-days-ago');
               setRange({
                 from: daysPrior30,
                 to: today,
               });
             }}
           >
-            {interval === "30-days-ago" ? (
+            {interval === '30-days-ago' ? (
               <ArrowDownWideNarrow />
             ) : (
               <ArrowUpWideNarrow />
@@ -67,7 +67,7 @@ const OrderWidget = () => {
 };
 
 export const config = defineWidgetConfig({
-  zone: "order.list.before",
+  zone: 'order.list.before',
 });
 
 export default OrderWidget;

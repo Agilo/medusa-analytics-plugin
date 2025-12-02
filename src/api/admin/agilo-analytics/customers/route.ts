@@ -29,7 +29,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const cacheModuleService = req.scope.resolve(Modules.CACHE);
   const stores = await storeModuleService.listStores(
     {},
-    { relations: ['supported_currencies'] }
+    { relations: ['supported_currencies'] },
   );
 
   const store = stores?.[0];
@@ -45,7 +45,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   if (!exchangeRates) {
     const response = await fetch(
-      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
+      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
     );
     exchangeRates = await response.json();
 
@@ -63,7 +63,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', ')
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
   const { data: orders } = await query.graph({
@@ -92,7 +92,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         acc[customer.id] = customer;
       }
       return acc;
-    }, {})
+    }, {}),
   );
 
   const newCustomers = customers.filter(
@@ -104,15 +104,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       customer?.orders?.every(
         (order) =>
           new Date(order.created_at) >=
-          new Date(result.data.date_from + 'T00:00:00Z')
-      )
+          new Date(result.data.date_from + 'T00:00:00Z'),
+      ),
   );
 
   const calculateDateRange = calculateDateRangeMethod['custom'];
   if (!calculateDateRange) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      'Invalid preset value'
+      'Invalid preset value',
     );
   }
 
@@ -161,7 +161,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       new Date(order.created_at),
       groupBy,
       currentFrom,
-      currentTo
+      currentTo,
     );
     if (!groupedByKey[key]) {
       groupedByKey[key] = {
@@ -174,7 +174,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       order.customer.id &&
       newCustomers.some(
         (c) =>
-          c && typeof c === 'object' && 'id' in c && c.id === order.customer.id
+          c && typeof c === 'object' && 'id' in c && c.id === order.customer.id,
       )
     ) {
       groupedByKey[key].newCustomers.add(order.customer.id);
@@ -215,7 +215,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         new Date(order.created_at) > customerSales[order.customer.id].last_order
       ) {
         customerSales[order.customer.id].last_order = new Date(
-          order.created_at
+          order.created_at,
         );
       }
     }
@@ -231,7 +231,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     ([name, total]) => ({
       name,
       total,
-    })
+    }),
   );
 
   const customerSalesArray = Object.entries(customerSales)

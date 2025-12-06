@@ -1,4 +1,4 @@
-import { Container, Text } from '@medusajs/ui';
+import { Button, Container, Text } from '@medusajs/ui';
 import * as React from 'react';
 import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
 import { BarChart } from './BarChart';
@@ -18,21 +18,33 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
 }) => {
   return (
     <Container className="min-h-[9.375rem] flex-1 mb-4">
-      <Text size="xlarge" weight="plus">
-        Top-Selling Products
-      </Text>
-      <Text size="small" className="mb-8 text-ui-fg-muted">
-        Products by quantity sold in the {specificTimeline ?? 'selected period'}
-      </Text>
+      <div className="flex justify-between">
+        <div>
+          <Text size="xlarge" weight="plus">
+            Top-Selling Products
+          </Text>
+          <Text size="small" className="mb-8 text-ui-fg-muted">
+            Products by quantity sold in the{' '}
+            {specificTimeline ?? 'selected period'}
+          </Text>
+        </div>
+
+        <a href="/app/analytics?tab=products">
+          <Button variant="transparent" className="text-ui-fg-muted">
+            View more
+          </Button>
+        </a>
+      </div>
       {isLoading ? (
         <BarChartSkeleton />
       ) : data?.variantQuantitySold &&
         data?.variantQuantitySold?.some((item) => item.quantity > 0) ? (
-        <div className="w-full" style={{ aspectRatio: '16/9' }}>
+        <div className="aspect-video xl:mx-auto">
           <BarChart
+            isHorizontal
             data={data.variantQuantitySold}
-            xAxisDataKey="title"
             yAxisDataKey="quantity"
+            xAxisDataKey="title"
             lineColor="#82ca9d"
             useStableColors={true}
             colorKeyField="title"

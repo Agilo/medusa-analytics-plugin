@@ -13,8 +13,8 @@ type KPIProps<T = OrderAnalyticsResponse> = {
 
 export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
   const top3Sales = data?.order_count
-    .sort((a, b) => a.count - b.count)
-    .slice(-3);
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
   return (
     <Container>
       <div className="flex justify-between items-center">
@@ -57,8 +57,8 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
 
 export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
   const top3Sales = data?.order_sales
-    .sort((a, b) => a.sales - b.sales)
-    .slice(-3);
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 3);
 
   return (
     <Container className="relative">

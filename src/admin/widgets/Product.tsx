@@ -25,6 +25,7 @@ export const ProductWidget = () => {
     ? { ...products, variantQuantitySold: topThreeSellers ?? [] }
     : undefined;
 
+  console.log(products);
   return (
     <>
       <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
@@ -54,7 +55,7 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
   specificTimeline,
 }) => (
   <Container className="min-h-[9.375rem] flex-1 mb-4">
-    <div className="flex justify-between w-full">
+    <div className="flex justify-between">
       <div>
         <Text size="xlarge" weight="plus">
           Low Stock Variants
@@ -84,7 +85,7 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
         />
       </div>
     ) : (
-      <Text size="small" className="text-ui-fg-muted text-center">
+      <Text size="small" className="text-ui-fg-muted text-center h-full">
         No data available for the selected period.
       </Text>
     )}

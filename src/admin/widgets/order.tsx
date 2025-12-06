@@ -2,8 +2,9 @@ import * as React from 'react';
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
 import { Button } from '@medusajs/ui';
 import { useOrderAnalytics } from '../hooks/order-analytics';
-import { ArrowDownWideNarrow, ArrowUpWideNarrow } from 'lucide-react';
 import { AverageOrderValue, TotalOrders, TotalSales } from '../components/KPI';
+import { TimelineVertical } from '@medusajs/icons';
+import { twJoin } from 'tailwind-merge';
 
 const today = new Date();
 const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
@@ -25,7 +26,12 @@ const OrderWidget = () => {
         <h1 className="xl:text-3xl text-2xl font-medium">Order insights</h1>
 
         <div className="flex items-center gap-3">
-          <p className="ml-auto text-ui-fg-muted text-sm">
+          <p
+            className={twJoin(
+              'ml-auto text-sm',
+              interval === '60-days-ago' ? 'text-ui-fg-muted' : undefined,
+            )}
+          >
             {interval === '30-days-ago' ? 'Last 30 Days' : 'Last 60 Days'}
           </p>
 
@@ -48,11 +54,11 @@ const OrderWidget = () => {
               });
             }}
           >
-            {interval === '30-days-ago' ? (
-              <ArrowDownWideNarrow />
-            ) : (
-              <ArrowUpWideNarrow />
-            )}
+            <TimelineVertical
+              className={
+                interval === '60-days-ago' ? 'text-ui-fg-muted' : undefined
+              }
+            />
           </Button>
         </div>
       </div>

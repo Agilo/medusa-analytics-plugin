@@ -31,20 +31,18 @@ export const ProductWidget = () => {
         Product insights
       </h1>
 
-      <div className="lg:w-4/5">
-        <div className="flex items-center gap-4 flex-col md:flex-row">
-          <TopSellingProducts
-            data={productsWithTopVariants}
-            isLoading={isLoading}
-            specificTimeline="last 30 days"
-          />
+      <div className="flex items-center gap-4 flex-col md:flex-row">
+        <TopSellingProducts
+          data={productsWithTopVariants}
+          isLoading={isLoading}
+          specificTimeline="last 30 days"
+        />
 
-          <LowStockVariants
-            data={products}
-            isLoading={isLoading}
-            specificTimeline="last 30 days"
-          />
-        </div>
+        <LowStockVariants
+          data={products}
+          isLoading={isLoading}
+          specificTimeline="last 30 days"
+        />
       </div>
     </>
   );

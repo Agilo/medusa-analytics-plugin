@@ -5,6 +5,7 @@ import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 import { OrderAnalyticsResponse } from '../hooks/order-analytics';
 import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
 import { ShoppingCart, User } from '@medusajs/icons';
+import { LineChart } from './LineChart';
 
 type KPIProps<T = OrderAnalyticsResponse> = {
   data: T | undefined;
@@ -29,6 +30,11 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => (
           {(data?.prev_sales_percent || 0) > 0 && '+'}
           {data?.prev_sales_percent || 0}% from previous period
         </Text>
+        {/* <LineChart
+          data={data?.order_sales}
+          xAxisDataKey="name"
+          yAxisDataKey="count"
+        /> */}
       </>
     )}
   </Container>
@@ -61,7 +67,7 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
     totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
   return (
     <Container className="relative">
-      <CircleSlash2 className="absolute right-6 top-4 text-ui-fg-muted" />
+      <CircleSlash2 className="absolute right-6 top-4 text-ui-fg-muted size-4" />
       <Text size="small">Average order value</Text>
       {isLoading ? (
         <SmallCardSkeleton />

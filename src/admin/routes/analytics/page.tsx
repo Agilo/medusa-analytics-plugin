@@ -10,6 +10,7 @@ import {
 } from '@medusajs/ui';
 import {
   ChartBar,
+  ShoppingCart,
   Calendar as CalendarIcon,
   ChevronDown,
   ChevronLeft,
@@ -51,15 +52,6 @@ import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 import { StackedBarChart } from '../../components/StackedBarChart';
 import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
 import { CustomersTable } from '../../components/CustomersTable';
-import {
-  ReturningCustomers,
-  TotalOrders,
-  TotalSales,
-} from '../../components/KPI';
-import {
-  TopCustomerGroupBySales,
-  TopSellingProducts,
-} from '../../components/Charts';
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -101,7 +93,6 @@ function rangeValueToDateRange(
   };
 }
 
-// Move this in utils later
 function presetToDateRange(
   preset: 'this-month' | 'last-month' | 'last-3-months',
 ): DateRange {
@@ -379,7 +370,25 @@ const AnalyticsPage = () => {
             <Tabs.Content value="orders">
               <div className="flex max-md:flex-col gap-4 mb-4">
                 <div className="space-y-4 flex-1">
-                  <TotalOrders data={orders} isLoading={isLoadingOrders} />
+                  <Container className="relative">
+                    <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
+                    <Text size="small">Total Orders</Text>
+                    {isLoadingOrders ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {orders?.total_orders || 0}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-muted">
+                          {(orders?.prev_orders_percent || 0) > 0 && '+'}
+                          {orders?.prev_orders_percent || 0}% from previous
+                          period
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Orders Over Time
@@ -411,7 +420,28 @@ const AnalyticsPage = () => {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  <TotalSales data={orders} isLoading={isLoadingOrders} />
+                  <Container className="relative">
+                    <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
+                    <Text size="small">Total Sales</Text>
+                    {isLoadingOrders ? (
+                      <SmallCardSkeleton />
+                    ) : (
+                      <>
+                        <Text size="xlarge" weight="plus">
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: orders?.currency_code || 'EUR',
+                          }).format(orders?.total_sales || 0)}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-muted">
+                          {(orders?.prev_sales_percent || 0) > 0 && '+'}
+                          {orders?.prev_sales_percent || 0}% from previous
+                          period
+                        </Text>
+                      </>
+                    )}
+                  </Container>
+
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
                       Sales Over Time
@@ -450,7 +480,7 @@ const AnalyticsPage = () => {
                   </Container>
                 </div>
               </div>
-              <div className="flex max-md:flex-col gap-4 mb-4">
+              <div className="flex max-md:flex-col gap-4">
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
@@ -515,10 +545,33 @@ const AnalyticsPage = () => {
               </div>
             </Tabs.Content>
             <Tabs.Content value="products">
-              <TopSellingProducts
-                data={products}
-                isLoading={isLoadingProducts}
-              />
+              <Container className="mb-4 min-h-[9.375rem]">
+                <Text size="xlarge" weight="plus">
+                  Top-Selling Products
+                </Text>
+                <Text size="small" className="mb-8 text-ui-fg-muted">
+                  Products by quantity sold in selected period
+                </Text>
+                {isLoadingProducts ? (
+                  <BarChartSkeleton />
+                ) : products?.variantQuantitySold &&
+                  someTopSellingProductsGreaterThanZero ? (
+                  <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                    <BarChart
+                      data={products.variantQuantitySold}
+                      xAxisDataKey="title"
+                      yAxisDataKey="quantity"
+                      lineColor="#82ca9d"
+                      useStableColors={true}
+                      colorKeyField="title"
+                    />
+                  </div>
+                ) : (
+                  <Text size="small" className="text-ui-fg-muted text-center">
+                    No data available for the selected period.
+                  </Text>
+                )}
+              </Container>
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">
@@ -592,7 +645,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 <div className="space-y-4 flex-1">
-                  {/* <Container className="relative">
+                  <Container className="relative">
                     <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
                     <Text size="small">Returning Customers</Text>
                     {isLoadingCustomers ? (
@@ -604,11 +657,7 @@ const AnalyticsPage = () => {
                         </Text>
                       </>
                     )}
-                  </Container> */}
-                  <ReturningCustomers
-                    data={customers}
-                    isLoading={isLoadingCustomers}
-                  />
+                  </Container>
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Average Sales per Customer</Text>
@@ -669,10 +718,42 @@ const AnalyticsPage = () => {
                   </Container>
                 </div>
                 <div className="flex-1">
-                  <TopCustomerGroupBySales
-                    data={customers}
-                    isLoading={isLoadingCustomers}
-                  />
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Top Customer Groups by Sales
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Sales breakdown by customer group in the selected period
+                    </Text>
+                    {isLoadingCustomers ? (
+                      <BarChartSkeleton />
+                    ) : customers?.customer_group &&
+                      customers.customer_group.length > 0 ? (
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <BarChart
+                          data={customers.customer_group}
+                          xAxisDataKey="name"
+                          lineColor="#82ca9d"
+                          useStableColors={true}
+                          colorKeyField="name"
+                          yAxisDataKey="total"
+                          yAxisTickFormatter={(value: number) =>
+                            new Intl.NumberFormat('en-US', {
+                              currency: customers.currency_code || 'EUR',
+                              maximumFractionDigits: 0,
+                            }).format(value)
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <Text
+                        size="small"
+                        className="text-ui-fg-muted text-center"
+                      >
+                        No data available for the selected period.
+                      </Text>
+                    )}
+                  </Container>
                 </div>
               </div>
               <div className="flex gap-4 max-xl:flex-col">

@@ -38,26 +38,24 @@ const CustomerWidget = () => {
       <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
         Customer insights
       </h1>
-      <div className="lg:w-4/5">
-        <ReturningCustomers
-          data={customersLast90Days}
-          isLoading={isLoadingLast90Days}
-          specificTimeline="last 90 days"
+      <ReturningCustomers
+        data={customersLast90Days}
+        isLoading={isLoadingLast90Days}
+        specificTimeline="last 90 days"
+      />
+      <div className="flex gap-4 my-4 flex-col md:flex-row">
+        <OrderBreakdownPie
+          data={pieChartCustomers}
+          isLoading={isLoadingLast30Days}
+          specificTimeline="last 30 days"
         />
-        <div className="flex gap-4 my-4 flex-col md:flex-row">
-          <OrderBreakdownPie
-            data={pieChartCustomers}
-            isLoading={isLoadingLast30Days}
-            specificTimeline="last 30 days"
-          />
 
-          {/* Defined to be the last 90 days for returning customers */}
-          <TopCustomerGroupBySales
-            data={customersLast30Days}
-            isLoading={isLoadingLast30Days}
-            specificTimeline="last 30 days"
-          />
-        </div>
+        {/* Defined to be the last 90 days for returning customers */}
+        <TopCustomerGroupBySales
+          data={customersLast30Days}
+          isLoading={isLoadingLast30Days}
+          specificTimeline="last 30 days"
+        />
       </div>
     </>
   );

@@ -24,23 +24,11 @@ export const ProductWidget = () => {
       </h1>
 
       <div className="flex gap-4 flex-col xl:flex-row items-stretch">
-        <TopSellingProducts
-          data={products}
-          isLoading={isLoading}
-          specificTimeline="last 30 days"
-        />
+        <TopSellingProducts data={products} isLoading={isLoading} />
 
-        <LowStockVariants
-          data={products}
-          isLoading={isLoading}
-          specificTimeline="last 30 days"
-        />
+        <LowStockVariants data={products} isLoading={isLoading} />
 
-        <WorstSellingProducts
-          data={products}
-          isLoading={isLoading}
-          specificTimeline="last 30 days"
-        />
+        <WorstSellingProducts data={products} isLoading={isLoading} />
       </div>
     </>
   );
@@ -49,14 +37,9 @@ export const ProductWidget = () => {
 export type BarChartTypes<T = ProductAnalyticsResponse> = {
   data: T | undefined;
   isLoading: boolean;
-  specificTimeline?: string;
 };
 
-const TopSellingProducts: React.FC<BarChartTypes> = ({
-  data,
-  isLoading,
-  specificTimeline,
-}) => {
+const TopSellingProducts: React.FC<BarChartTypes> = ({ data, isLoading }) => {
   const topThreeSellers = data?.variantQuantitySold
     ?.filter((item) => item.quantity > 0)
     .sort((a, b) => b.quantity - a.quantity)
@@ -70,8 +53,7 @@ const TopSellingProducts: React.FC<BarChartTypes> = ({
             Top-Selling Products
           </Text>
           <Text size="xsmall" className="mb-8 text-ui-fg-muted ">
-            Top products by quantity sold in the{' '}
-            {specificTimeline ?? 'selected period'}
+            Top products by quantity sold in the last 30 days
           </Text>
         </div>
 
@@ -113,7 +95,6 @@ const TopSellingProducts: React.FC<BarChartTypes> = ({
 const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
   data,
   isLoading,
-  specificTimeline,
 }) => (
   <Container className="min-h-[9.375rem] flex flex-col flex-1">
     <div className="flex justify-between">
@@ -122,7 +103,7 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
           Low Stock Variants
         </Text>
         <Text size="small" className="mb-8 text-ui-fg-muted">
-          Variants with low inventory levels in the {specificTimeline}
+          Variants with low inventory levels in the last 30 days
         </Text>
       </div>
 
@@ -163,7 +144,6 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
 const WorstSellingProducts: React.FC<Required<BarChartTypes>> = ({
   data,
   isLoading,
-  specificTimeline,
 }) => {
   const topThreeWorstSellingProducts = data?.variantQuantitySold
     ?.filter((item) => item.quantity > 0)
@@ -178,7 +158,7 @@ const WorstSellingProducts: React.FC<Required<BarChartTypes>> = ({
             Bottom-Selling Products
           </Text>
           <Text size="small" className="mb-8 text-ui-fg-muted">
-            Worst products by quantity sold {specificTimeline}
+            Worst products by quantity sold in the last 30 days
           </Text>
         </div>
 

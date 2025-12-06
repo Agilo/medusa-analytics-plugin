@@ -37,20 +37,17 @@ const CustomerWidget = () => {
       <ReturningCustomers
         data={customersLast90Days}
         isLoading={isLoadingLast90Days}
-        specificTimeline="last 90 days"
       />
       <div className="flex gap-4 flex-col md:flex-row">
         <OrderBreakdownPie
           data={customersLast30Days}
           isLoading={isLoadingLast30Days}
-          specificTimeline="last 30 days"
         />
 
         {/* Defined to be the last 90 days for returning customers */}
         <TopCustomerGroupBySales
           data={customersLast30Days}
           isLoading={isLoadingLast30Days}
-          specificTimeline="last 30 days"
         />
       </div>
     </>
@@ -62,19 +59,16 @@ type KPIProps<T = OrderAnalyticsResponse> = {
   isLoading: boolean;
 };
 
-const ReturningCustomers: React.FC<
-  KPIProps<CustomerAnalyticsResponse> & {
-    specificTimeline?: string;
-  }
-> = ({ data, isLoading, specificTimeline }) => {
+const ReturningCustomers: React.FC<KPIProps<CustomerAnalyticsResponse>> = ({
+  data,
+  isLoading,
+}) => {
   return (
     <Container className="relative">
       <div className="flex justify-between items-center">
         <Text size="large">
           Returning Customers{' '}
-          {specificTimeline && (
-            <span className="text-ui-fg-muted">({specificTimeline})</span>
-          )}
+          <span className="text-ui-fg-muted">(last 90 days)</span>
         </Text>
         <a href="/app/analytics?tab=customers">
           <Button
@@ -101,13 +95,11 @@ const ReturningCustomers: React.FC<
 type BarChartTypes<T = ProductAnalyticsResponse> = {
   data: T | undefined;
   isLoading: boolean;
-  specificTimeline?: string;
 };
 
 const OrderBreakdownPie: React.FC<BarChartTypes<CustomerAnalyticsResponse>> = ({
   data,
   isLoading,
-  specificTimeline,
 }) => {
   const pieChartCustomers = [
     { count: data?.total_customers, name: 'Total Customers' },
@@ -125,7 +117,7 @@ const OrderBreakdownPie: React.FC<BarChartTypes<CustomerAnalyticsResponse>> = ({
             Order Status Breakdown
           </Text>
           <Text size="small" className="mb-8 text-ui-fg-muted">
-            Distribution of orders by status in the {specificTimeline}
+            Distribution of orders by status in the last 30 days
           </Text>
         </div>
 
@@ -158,7 +150,7 @@ const OrderBreakdownPie: React.FC<BarChartTypes<CustomerAnalyticsResponse>> = ({
 
 const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
-> = ({ data, isLoading, specificTimeline }) => (
+> = ({ data, isLoading }) => (
   <Container className="min-h-[9.375rem] ">
     <div className="flex justify-between">
       <div>
@@ -166,8 +158,7 @@ const TopCustomerGroupBySales: React.FC<
           Top Customer Groups by Sales
         </Text>
         <Text size="xsmall" className="mb-8 text-ui-fg-muted">
-          Sales breakdown by customer group in the{' '}
-          {specificTimeline ?? 'selected period'}
+          Sales breakdown by customer group in the last 30 days
         </Text>
       </div>
 

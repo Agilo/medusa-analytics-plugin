@@ -21,7 +21,7 @@ export const ProductWidget = () => {
         Product insights
       </h1>
 
-      <div className="flex gap-4 flex-col md:flex-row items-stretch">
+      <div className="flex gap-4 flex-col xl:flex-row items-stretch">
         <TopSellingProducts
           data={products}
           isLoading={isLoading}
@@ -49,7 +49,7 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
   isLoading,
   specificTimeline,
 }) => (
-  <Container className="min-h-[9.375rem] mb-4 flex-1">
+  <Container className="min-h-[9.375rem] flex flex-col flex-1">
     <div className="flex justify-between">
       <div>
         <Text size="xlarge" weight="plus">
@@ -60,8 +60,11 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
         </Text>
       </div>
 
-      <a href="/app/analytics?tab=products">
-        <Button variant="transparent" className="text-ui-fg-muted">
+      <a href="/app/analytics?range=2025-09-01-2025-11-30&tab=products#:~:text=Out%2Dof%2DStock%20Variants">
+        <Button
+          variant="transparent"
+          className="text-ui-fg-muted text-xs lg:text-sm"
+        >
           View more
         </Button>
       </a>
@@ -81,7 +84,10 @@ const LowStockVariants: React.FC<Required<BarChartTypes>> = ({
         />
       </div>
     ) : (
-      <Text size="small" className="text-ui-fg-muted text-center h-full">
+      <Text
+        size="small"
+        className="text-ui-fg-muted flex items-center justify-center flex-1"
+      >
         No data available for the selected period.
       </Text>
     )}
@@ -99,19 +105,22 @@ const WorstSellingProducts: React.FC<Required<BarChartTypes>> = ({
     .slice(0, 3);
 
   return (
-    <Container className="min-h-[9.375rem] mb-4 flex-1">
+    <Container className="min-h-[9.375rem] flex flex-col flex-1">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
-            Worst Selling Products
+            Bottom-Selling Products
           </Text>
           <Text size="small" className="mb-8 text-ui-fg-muted">
-            Products with the lowest sales in the {specificTimeline}
+            Worst products by quantity sold {specificTimeline}
           </Text>
         </div>
 
         <a href="/app/analytics?tab=products">
-          <Button variant="transparent" className="text-ui-fg-muted">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>
@@ -120,7 +129,7 @@ const WorstSellingProducts: React.FC<Required<BarChartTypes>> = ({
         <BarChartSkeleton />
       ) : topThreeWorstSellingProducts &&
         topThreeWorstSellingProducts.length > 0 ? (
-        <div className="aspect-video">
+        <div className="aspect-video text-sm">
           <BarChart
             isHorizontal
             data={topThreeWorstSellingProducts}
@@ -132,7 +141,10 @@ const WorstSellingProducts: React.FC<Required<BarChartTypes>> = ({
           />
         </div>
       ) : (
-        <Text size="small" className="text-ui-fg-muted text-center">
+        <Text
+          size="small"
+          className="text-ui-fg-muted flex items-center justify-center flex-1"
+        >
           No data available for the selected period.
         </Text>
       )}

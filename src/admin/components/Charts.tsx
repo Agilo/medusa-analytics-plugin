@@ -22,20 +22,23 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="min-h-[9.375rem] flex-1 mb-4">
+    <Container className="min-h-[9.375rem] flex-1  flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
             Top-Selling Products
           </Text>
-          <Text size="small" className="mb-8 text-ui-fg-muted">
+          <Text size="xsmall" className="mb-8 text-ui-fg-muted ">
             Top products by quantity sold in the{' '}
             {specificTimeline ?? 'selected period'}
           </Text>
         </div>
 
         <a href="/app/analytics?tab=products">
-          <Button variant="transparent" className="text-ui-fg-muted">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>
@@ -43,7 +46,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
       {isLoading ? (
         <BarChartSkeleton />
       ) : topThreeSellers && topThreeSellers.length > 0 ? (
-        <div className="aspect-video">
+        <div className="aspect-video text-sm">
           <BarChart
             isHorizontal
             data={topThreeSellers}
@@ -55,7 +58,10 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
           />
         </div>
       ) : (
-        <Text size="small" className="text-ui-fg-muted text-center">
+        <Text
+          size="xsmall"
+          className="text-ui-fg-muted flex items-center justify-center flex-1"
+        >
           No data available for the selected period.
         </Text>
       )}
@@ -66,18 +72,31 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
 export const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading, specificTimeline }) => (
-  <Container className="min-h-[9.375rem]">
-    <Text size="xlarge" weight="plus">
-      Top Customer Groups by Sales
-    </Text>
-    <Text size="small" className="mb-8 text-ui-fg-muted">
-      Sales breakdown by customer group in the{' '}
-      {specificTimeline ?? 'selected period'}
-    </Text>
+  <Container className="min-h-[9.375rem] ">
+    <div className="flex justify-between">
+      <div>
+        <Text size="xlarge" weight="plus">
+          Top Customer Groups by Sales
+        </Text>
+        <Text size="xsmall" className="mb-8 text-ui-fg-muted">
+          Sales breakdown by customer group in the{' '}
+          {specificTimeline ?? 'selected period'}
+        </Text>
+      </div>
+
+      <a href="/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales">
+        <Button
+          variant="transparent"
+          className="text-ui-fg-muted text-xs lg:text-sm"
+        >
+          View more
+        </Button>
+      </a>
+    </div>
     {isLoading ? (
       <BarChartSkeleton />
     ) : data?.customer_group && data.customer_group.length > 0 ? (
-      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+      <div className="max-w-80 mx-auto aspect-video">
         <BarChart
           data={data.customer_group}
           xAxisDataKey="name"
@@ -94,7 +113,7 @@ export const TopCustomerGroupBySales: React.FC<
         />
       </div>
     ) : (
-      <Text size="small" className="text-ui-fg-muted text-center">
+      <Text size="xsmall" className="text-ui-fg-muted text-center">
         No data available for the selected period.
       </Text>
     )}

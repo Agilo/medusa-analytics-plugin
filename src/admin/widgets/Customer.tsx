@@ -1,6 +1,9 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { useCustomerAnalytics } from '../hooks/customer-analytics';
-import { Container, Text } from '@medusajs/ui';
+import {
+  CustomerAnalyticsResponse,
+  useCustomerAnalytics,
+} from '../hooks/customer-analytics';
+import { Button, Container, Text } from '@medusajs/ui';
 import { PieChart } from '../components/PieChart';
 import { ReturningCustomers } from '../components/KPI';
 import { BarChartTypes, TopCustomerGroupBySales } from '../components/Charts';
@@ -16,15 +19,6 @@ const CustomerWidget = () => {
       from: daysPrior30,
       to: today,
     });
-
-  const pieChartCustomers = [
-    { count: customersLast30Days?.total_customers, name: 'Total Customers' },
-    { count: customersLast30Days?.new_customers, name: 'New Customers' },
-    {
-      count: customersLast30Days?.returning_customers,
-      name: 'Returning Customers',
-    },
-  ];
 
   // Getting data for the last 90 days for returning customers rate
   const { data: customersLast90Days, isLoading: isLoadingLast90Days } =
@@ -43,9 +37,9 @@ const CustomerWidget = () => {
         isLoading={isLoadingLast90Days}
         specificTimeline="last 90 days"
       />
-      <div className="flex gap-4 my-4 flex-col md:flex-row">
+      <div className="flex gap-4 flex-col md:flex-row">
         <OrderBreakdownPie
-          data={pieChartCustomers}
+          data={customersLast30Days}
           isLoading={isLoadingLast30Days}
           specificTimeline="last 30 days"
         />
@@ -61,36 +55,57 @@ const CustomerWidget = () => {
   );
 };
 
-const OrderBreakdownPie: React.FC<
-  Required<
-    BarChartTypes<
-      {
-        count: number | undefined;
-        name: string;
-      }[]
-    >
-  >
-> = ({ data, isLoading, specificTimeline }) => (
-  <Container className="min-h-[9.375rem]">
-    <Text size="xlarge" weight="plus">
-      Order Status Breakdown
-    </Text>
-    <Text size="small" className="mb-8 text-ui-fg-muted">
-      Distribution of orders by status in the {specificTimeline}
-    </Text>
-    {isLoading ? (
-      <BarChartSkeleton />
-    ) : data ? (
-      <div className="w-full" style={{ aspectRatio: '16/9' }}>
-        <PieChart data={data} dataKey="count" />
+const OrderBreakdownPie: React.FC<BarChartTypes<CustomerAnalyticsResponse>> = ({
+  data,
+  isLoading,
+  specificTimeline,
+}) => {
+  const pieChartCustomers = [
+    { count: data?.total_customers, name: 'Total Customers' },
+    { count: data?.new_customers, name: 'New Customers' },
+    {
+      count: data?.returning_customers,
+      name: 'Returning Customers',
+    },
+  ];
+  return (
+    <Container className="min-h-[9.375rem]">
+      <div className="flex justify-between">
+        <div>
+          <Text size="xlarge" weight="plus">
+            Order Status Breakdown
+          </Text>
+          <Text size="small" className="mb-8 text-ui-fg-muted">
+            Distribution of orders by status in the {specificTimeline}
+          </Text>
+        </div>
+
+        <a href="/app/analytics?range=this-month&tab=orders#:~:text=Order%20Status%20Breakdown">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
+            View more
+          </Button>
+        </a>
       </div>
-    ) : (
-      <Text size="small" className="text-ui-fg-muted text-center">
-        No data available for the selected period.
-      </Text>
-    )}
-  </Container>
-);
+      {isLoading ? (
+        <BarChartSkeleton />
+      ) : data ? (
+        <div className="max-w-80 mx-auto aspect-video">
+          <PieChart data={pieChartCustomers} dataKey="count" />
+        </div>
+      ) : (
+        <Text
+          size="small"
+          className="text-ui-fg-muted flex items-center justify-center flex-1"
+        >
+          No data available for the selected period.
+        </Text>
+      )}
+    </Container>
+  );
+};
 
 export const config = defineWidgetConfig({
   zone: 'customer.list.before',

@@ -3,7 +3,6 @@ import { Button, Container, Text } from '@medusajs/ui';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 import { OrderAnalyticsResponse } from '../hooks/order-analytics';
 import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
-import { LineChart } from './LineChart';
 import { BarChart } from './BarChart';
 
 type KPIProps<T = OrderAnalyticsResponse> = {
@@ -19,8 +18,11 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
     <Container>
       <div className="flex justify-between items-center">
         <Text>Total Sales</Text>
-        <a href="/http://localhost:9000/app/analytics?range=last-3-months#:~:text=Sales%20Over%20Time">
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+        <a href="/app/analytics#:~:text=Sales%20Over%20Time">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>
@@ -42,7 +44,7 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
             </Text>
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-w-60">
+          <div className="aspect-video flex-1 mt-2.5 max-w-64">
             <BarChart
               data={topThreeSales}
               xAxisDataKey="name"
@@ -64,8 +66,11 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
     <Container className="relative">
       <div className="flex justify-between items-center">
         <Text>Total Orders</Text>
-        <a href="/app/analytics?range=last-3-months#:~:text=Orders%20Over%20Time">
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+        <a href="/app/analytics?range=2025-09-01-2025-11-30#:~:text=Orders%20Over%20Time">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>
@@ -85,7 +90,7 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
               </Text>
             </div>
 
-            <div className="aspect-video flex-1 mt-2.5 max-w-60">
+            <div className="aspect-video flex-1 mt-2.5 max-w-64">
               <BarChart
                 data={topThreeOrders}
                 xAxisDataKey="name"
@@ -105,8 +110,11 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
     <Container className="relative">
       <div className="flex justify-between items-center">
         <Text>Average order value</Text>
-        <a href="/app/analytics?range=last-3-months#:~:text=Orders%20Over%20Time">
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+        <a href="/app/analytics?range=this-month&tab=orders#:~:text=Orders%20Over%20Time">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>
@@ -147,7 +155,10 @@ export const ReturningCustomers: React.FC<
           )}
         </Text>
         <a href="/app/analytics?tab=customers">
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
             View more
           </Button>
         </a>

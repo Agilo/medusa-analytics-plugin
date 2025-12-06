@@ -1,87 +1,130 @@
 import * as React from 'react';
-import { Container, Text } from '@medusajs/ui';
-import { ChartNoAxesCombined, CircleSlash2 } from 'lucide-react';
+import { Button, Container, Text } from '@medusajs/ui';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 import { OrderAnalyticsResponse } from '../hooks/order-analytics';
 import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
-import { ShoppingCart, User } from '@medusajs/icons';
 import { LineChart } from './LineChart';
+import { BarChart } from './BarChart';
 
 type KPIProps<T = OrderAnalyticsResponse> = {
   data: T | undefined;
   isLoading: boolean;
 };
 
-export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => (
-  <Container className="relative">
-    <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-    <Text size="small">Total Sales</Text>
-    {isLoading ? (
-      <SmallCardSkeleton />
-    ) : (
-      <>
-        <Text size="xlarge" weight="plus">
-          {new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: data?.currency_code || 'EUR',
-          }).format(data?.total_sales || 0)}
-        </Text>
-        <Text size="xsmall" className="text-ui-fg-muted">
-          {(data?.prev_sales_percent || 0) > 0 && '+'}
-          {data?.prev_sales_percent || 0}% from previous period
-        </Text>
-        {/* <LineChart
-          data={data?.order_sales}
-          xAxisDataKey="name"
-          yAxisDataKey="count"
-        /> */}
-      </>
-    )}
-  </Container>
-);
+export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
+  const top3Sales = data?.order_count
+    .sort((a, b) => a.count - b.count)
+    .slice(-3);
+  return (
+    <Container>
+      <div className="flex justify-between items-center">
+        <Text>Total Sales</Text>
+        <a href="/http://localhost:9000/app/analytics?range=last-3-months#:~:text=Sales%20Over%20Time">
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
+      {isLoading ? (
+        <SmallCardSkeleton />
+      ) : (
+        <div className="flex gap-4 justify-between">
+          <div>
+            <Text size="xlarge" weight="plus">
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: data?.currency_code || 'EUR',
+              }).format(data?.total_sales || 0)}
+            </Text>
+            <Text size="xsmall" className="text-ui-fg-muted">
+              {(data?.prev_sales_percent || 0) > 0 && '+'}
+              {data?.prev_sales_percent || 0}% from previous period
+            </Text>
+          </div>
 
-export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => (
-  <Container className="relative">
-    <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
-    <Text size="small">Total Orders</Text>
-    {isLoading ? (
-      <SmallCardSkeleton />
-    ) : (
-      <>
-        <Text size="xlarge" weight="plus">
-          {data?.total_orders || 0}
-        </Text>
-        <Text size="xsmall" className="text-ui-fg-muted">
-          {(data?.prev_orders_percent || 0) > 0 && '+'}
-          {data?.prev_orders_percent || 0}% from previous period
-        </Text>
-      </>
-    )}
-  </Container>
-);
+          <div className="aspect-video flex-1 mt-2.5 max-w-60">
+            <BarChart
+              data={top3Sales}
+              xAxisDataKey="name"
+              yAxisDataKey="count"
+            />
+          </div>
+        </div>
+      )}
+    </Container>
+  );
+};
 
-export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
-  const totalSales = data?.total_sales ?? 0;
-  const totalOrders = data?.total_orders ?? 0;
-  const averageOrderValue =
-    totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
+export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
+  const top3Sales = data?.order_sales
+    .sort((a, b) => a.sales - b.sales)
+    .slice(-3);
+
   return (
     <Container className="relative">
-      <CircleSlash2 className="absolute right-6 top-4 text-ui-fg-muted size-4" />
-      <Text size="small">Average order value</Text>
+      <div className="flex justify-between items-center">
+        <Text>Total Orders</Text>
+        <a href="/app/analytics?range=last-3-months#:~:text=Orders%20Over%20Time">
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
+      {isLoading ? (
+        <SmallCardSkeleton />
+      ) : (
+        <>
+          <div className="flex gap-4 justify-between">
+            <div>
+              <Text size="xlarge" weight="plus">
+                {data?.total_orders || 0}
+              </Text>
+              <Text size="xsmall" className="text-ui-fg-muted">
+                {(data?.prev_orders_percent || 0) > 0 && '+'}
+                {data?.prev_orders_percent || 0}% from previous period
+              </Text>
+            </div>
+
+            <div className="aspect-video flex-1 mt-2.5 max-w-60">
+              <BarChart
+                data={top3Sales}
+                xAxisDataKey="name"
+                yAxisDataKey="sales"
+                lineColor="#82ca9d"
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </Container>
+  );
+};
+
+export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
+  return (
+    <Container className="relative">
+      <div className="flex justify-between items-center">
+        <Text>Average order value</Text>
+        <a href="/app/analytics?range=last-3-months#:~:text=Orders%20Over%20Time">
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
       {isLoading ? (
         <SmallCardSkeleton />
       ) : (
         <>
           <Text size="xlarge" weight="plus">
             {data?.total_sales && data?.total_orders
-              ? Math.round(data?.total_sales / data?.total_orders)
-              : 0}
-            %
-          </Text>
-          <Text size="xsmall" className="text-ui-fg-muted">
-            {averageOrderValue > 0 && '+'}
-            {averageOrderValue}% from previous period
+              ? new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: data?.currency_code || 'EUR',
+                }).format(Math.round(data?.total_sales / data?.total_orders))
+              : new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: data?.currency_code || 'EUR',
+                }).format(0)}
           </Text>
         </>
       )}
@@ -96,13 +139,19 @@ export const ReturningCustomers: React.FC<
 > = ({ data, isLoading, specificTimeline }) => {
   return (
     <Container className="relative">
-      <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-      <Text size="small">
-        Returning Customers{' '}
-        {specificTimeline && (
-          <span className="text-ui-fg-muted">({specificTimeline})</span>
-        )}
-      </Text>
+      <div className="flex justify-between items-center">
+        <Text>
+          Returning Customers{' '}
+          {specificTimeline && (
+            <span className="text-ui-fg-muted">({specificTimeline})</span>
+          )}
+        </Text>
+        <a href="/app/analytics?tab=customers">
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
       {isLoading ? (
         <SmallCardSkeleton />
       ) : (

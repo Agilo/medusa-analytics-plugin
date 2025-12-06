@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { useProductAnalytics } from '../hooks/product-analytics';
-import { BarChartTypes, TopSellingProducts } from '../components/Charts';
+import {
+  ProductAnalyticsResponse,
+  useProductAnalytics,
+} from '../hooks/product-analytics';
 import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
 import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
@@ -41,6 +43,70 @@ export const ProductWidget = () => {
         />
       </div>
     </>
+  );
+};
+
+export type BarChartTypes<T = ProductAnalyticsResponse> = {
+  data: T | undefined;
+  isLoading: boolean;
+  specificTimeline?: string;
+};
+
+const TopSellingProducts: React.FC<BarChartTypes> = ({
+  data,
+  isLoading,
+  specificTimeline,
+}) => {
+  const topThreeSellers = data?.variantQuantitySold
+    ?.filter((item) => item.quantity > 0)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3);
+
+  return (
+    <Container className="min-h-[9.375rem] flex-1  flex flex-col">
+      <div className="flex justify-between">
+        <div>
+          <Text size="xlarge" weight="plus">
+            Top-Selling Products
+          </Text>
+          <Text size="xsmall" className="mb-8 text-ui-fg-muted ">
+            Top products by quantity sold in the{' '}
+            {specificTimeline ?? 'selected period'}
+          </Text>
+        </div>
+
+        <a href="/app/analytics?tab=products">
+          <Button
+            variant="transparent"
+            className="text-ui-fg-muted text-xs lg:text-sm"
+          >
+            View more
+          </Button>
+        </a>
+      </div>
+      {isLoading ? (
+        <BarChartSkeleton />
+      ) : topThreeSellers && topThreeSellers.length > 0 ? (
+        <div className="aspect-video text-sm">
+          <BarChart
+            isHorizontal
+            data={topThreeSellers}
+            yAxisDataKey="quantity"
+            xAxisDataKey="title"
+            lineColor="#82ca9d"
+            useStableColors={true}
+            colorKeyField="title"
+          />
+        </div>
+      ) : (
+        <Text
+          size="xsmall"
+          className="text-ui-fg-muted flex items-center justify-center flex-1"
+        >
+          No data available for the selected period.
+        </Text>
+      )}
+    </Container>
   );
 };
 

@@ -16,6 +16,11 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
   isLoading,
   specificTimeline,
 }) => {
+  const topThreeSellers = data?.variantQuantitySold
+    ?.filter((item) => item.quantity > 0)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3);
+
   return (
     <Container className="min-h-[9.375rem] flex-1 mb-4">
       <div className="flex justify-between">
@@ -24,7 +29,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
             Top-Selling Products
           </Text>
           <Text size="small" className="mb-8 text-ui-fg-muted">
-            Products by quantity sold in the{' '}
+            Top products by quantity sold in the{' '}
             {specificTimeline ?? 'selected period'}
           </Text>
         </div>
@@ -37,12 +42,11 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
       </div>
       {isLoading ? (
         <BarChartSkeleton />
-      ) : data?.variantQuantitySold &&
-        data?.variantQuantitySold?.some((item) => item.quantity > 0) ? (
-        <div className="aspect-video xl:mx-auto">
+      ) : topThreeSellers && topThreeSellers.length > 0 ? (
+        <div className="aspect-video">
           <BarChart
             isHorizontal
-            data={data.variantQuantitySold}
+            data={topThreeSellers}
             yAxisDataKey="quantity"
             xAxisDataKey="title"
             lineColor="#82ca9d"

@@ -12,7 +12,7 @@ type KPIProps<T = OrderAnalyticsResponse> = {
 };
 
 export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
-  const top3Sales = data?.order_count
+  const topThreeSales = data?.order_count
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
   return (
@@ -44,7 +44,7 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
 
           <div className="aspect-video flex-1 mt-2.5 max-w-60">
             <BarChart
-              data={top3Sales}
+              data={topThreeSales}
               xAxisDataKey="name"
               yAxisDataKey="count"
             />
@@ -56,7 +56,7 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
 };
 
 export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
-  const top3Sales = data?.order_sales
+  const topThreeOrders = data?.order_sales
     .sort((a, b) => b.sales - a.sales)
     .slice(0, 3);
 
@@ -87,7 +87,7 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
 
             <div className="aspect-video flex-1 mt-2.5 max-w-60">
               <BarChart
-                data={top3Sales}
+                data={topThreeOrders}
                 xAxisDataKey="name"
                 yAxisDataKey="sales"
                 lineColor="#82ca9d"

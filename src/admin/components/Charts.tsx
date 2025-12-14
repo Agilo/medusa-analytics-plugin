@@ -34,10 +34,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
         </div>
 
         <a href="/app/analytics?tab=products">
-          <Button
-            variant="transparent"
-            className="text-ui-fg-muted text-xs lg:text-sm"
-          >
+          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
@@ -84,10 +81,7 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
       </div>
 
       <a href="/app/analytics?range=2025-09-01-2025-11-30&tab=products#:~:text=Out%2Dof%2DStock%20Variants">
-        <Button
-          variant="transparent"
-          className="text-ui-fg-muted text-xs lg:text-sm"
-        >
+        <Button variant="transparent" className="text-ui-fg-muted text-xs ">
           View more
         </Button>
       </a>
@@ -139,10 +133,7 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
         </div>
 
         <a href="/app/analytics?tab=products">
-          <Button
-            variant="transparent"
-            className="text-ui-fg-muted text-xs lg:text-sm"
-          >
+          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
@@ -175,34 +166,27 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
 };
 
 // Customers
-export const OrderBreakdownPie: React.FC<
+export const NewVsReturningCustomers: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => {
   const pieChartCustomers = [
     { count: data?.total_customers, name: 'Total Customers' },
     { count: data?.new_customers, name: 'New Customers' },
-    {
-      count: data?.returning_customers,
-      name: 'Returning Customers',
-    },
   ];
   return (
     <Container className="min-h-[9.375rem]">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
-            Order Status Breakdown
+            New vs Returning Customers
           </Text>
           <Text size="small" className="mb-8 text-ui-fg-muted">
-            Distribution of orders by status in the last 30 days
+            Customer breakdown in the last 30 days
           </Text>
         </div>
 
         <a href="/app/analytics?range=this-month&tab=orders#:~:text=Order%20Status%20Breakdown">
-          <Button
-            variant="transparent"
-            className="text-ui-fg-muted text-xs lg:text-sm"
-          >
+          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
@@ -240,10 +224,7 @@ export const TopCustomerGroupBySales: React.FC<
       </div>
 
       <a href="/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales">
-        <Button
-          variant="transparent"
-          className="text-ui-fg-muted text-xs lg:text-sm"
-        >
+        <Button variant="transparent" className="text-ui-fg-muted text-xs ">
           View more
         </Button>
       </a>

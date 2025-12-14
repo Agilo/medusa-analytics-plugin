@@ -2,7 +2,7 @@ import { defineWidgetConfig } from '@medusajs/admin-sdk';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { ReturningCustomers } from '../components/KPI';
 import {
-  OrderBreakdownPie,
+  NewVsReturningCustomers,
   TopCustomerGroupBySales,
 } from '../components/Charts';
 
@@ -29,12 +29,8 @@ const CustomerWidget = () => {
       <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
         Customer insights
       </h1>
-      <ReturningCustomers
-        data={customersLast90Days}
-        isLoading={isLoadingLast90Days}
-      />
-      <div className="flex gap-4 flex-col md:flex-row">
-        <OrderBreakdownPie
+      <div className="flex gap-4 flex-col lg:flex-row">
+        <NewVsReturningCustomers
           data={customersLast30Days}
           isLoading={isLoadingLast30Days}
         />
@@ -43,6 +39,10 @@ const CustomerWidget = () => {
         <TopCustomerGroupBySales
           data={customersLast30Days}
           isLoading={isLoadingLast30Days}
+        />
+        <ReturningCustomers
+          data={customersLast90Days}
+          isLoading={isLoadingLast90Days}
         />
       </div>
     </>

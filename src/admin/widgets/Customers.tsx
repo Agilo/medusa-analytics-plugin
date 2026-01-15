@@ -25,27 +25,20 @@ const CustomerWidget = () => {
     });
 
   return (
-    <>
-      <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
-        Customer insights
-      </h1>
-      <div className="flex gap-4 flex-col lg:flex-row">
-        <NewVsReturningCustomers
-          data={customersLast30Days}
-          isLoading={isLoadingLast30Days}
-        />
-
-        {/* Defined to be the last 90 days for returning customers */}
-        <TopCustomerGroupBySales
-          data={customersLast30Days}
-          isLoading={isLoadingLast30Days}
-        />
-        <ReturningCustomers
-          data={customersLast90Days}
-          isLoading={isLoadingLast90Days}
-        />
-      </div>
-    </>
+    <div className="flex gap-4 flex-col lg:flex-row">
+      <NewVsReturningCustomers
+        data={customersLast30Days}
+        isLoading={isLoadingLast30Days}
+      />
+      <TopCustomerGroupBySales
+        data={customersLast30Days}
+        isLoading={isLoadingLast30Days}
+      />
+      <ReturningCustomers
+        data={customersLast90Days}
+        isLoading={isLoadingLast90Days}
+      />
+    </div>
   );
 };
 

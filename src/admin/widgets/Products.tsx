@@ -16,17 +16,11 @@ export const ProductWidget = () => {
   });
 
   return (
-    <>
-      <h1 className="xl:text-3xl text-2xl mt-6 mb-4 font-medium">
-        Product insights
-      </h1>
-
-      <div className="flex gap-4 flex-col xl:flex-row items-stretch">
-        <TopSellingProducts data={products} isLoading={isLoading} />
-        <LowStockVariants data={products} isLoading={isLoading} />
-        <BottomSellingProducts data={products} isLoading={isLoading} />
-      </div>
-    </>
+    <div className="flex gap-4 flex-col xl:flex-row items-stretch">
+      <TopSellingProducts data={products} isLoading={isLoading} />
+      <LowStockVariants data={products} isLoading={isLoading} />
+      <BottomSellingProducts data={products} isLoading={isLoading} />
+    </div>
   );
 };
 

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { Button } from '@medusajs/ui';
+import { Select } from '@medusajs/ui';
 import { useOrderAnalytics } from '../hooks/order-analytics';
-import { TimelineVertical } from '@medusajs/icons';
 import { twJoin } from 'tailwind-merge';
 import { AverageOrderValue, TotalOrders, TotalSales } from '../components/KPI';
 
@@ -22,45 +21,39 @@ const OrderWidget = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full mt-6 mb-4">
-        <h1 className="xl:text-3xl text-2xl font-medium">Order insights</h1>
-
-        <div className="flex items-center gap-3">
-          <p
-            className={twJoin(
-              'ml-auto text-sm',
-              interval === '60-days-ago' ? 'text-ui-fg-muted' : undefined,
-            )}
-          >
-            {interval === '30-days-ago' ? 'Last 30 Days' : 'Last 60 Days'}
-          </p>
-
-          <Button
-            variant="secondary"
-            className="p-2.5 size-9"
-            onClick={() => {
-              if (interval === '30-days-ago') {
-                setInterval('60-days-ago');
-                setRange({
-                  from: daysPrior60,
-                  to: today,
-                });
-                return;
-              }
+      <div className="flex items-center justify-end mb-4">
+        <Select
+          size="small"
+          value={interval}
+          onValueChange={(value) => {
+            if (value === '30-days-ago') {
               setInterval('30-days-ago');
               setRange({
                 from: daysPrior30,
                 to: today,
               });
-            }}
-          >
-            <TimelineVertical
+            } else {
+              setInterval('60-days-ago');
+              setRange({
+                from: daysPrior60,
+                to: today,
+              });
+            }
+          }}
+        >
+          <Select.Trigger>
+            <Select.Value />
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Item value="30-days-ago">Last 30 Days</Select.Item>
+            <Select.Item value="60-days-ago">Last 60 Days</Select.Item>
+          </Select.Content>
+          {/* <TimelineVertical
               className={
                 interval === '60-days-ago' ? 'text-ui-fg-muted' : undefined
               }
-            />
-          </Button>
-        </div>
+            /> */}
+        </Select>
       </div>
 
       <div className="flex flex-col items-stretch md:flex-row gap-4">

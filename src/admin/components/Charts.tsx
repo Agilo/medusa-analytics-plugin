@@ -69,7 +69,7 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
   data,
   isLoading,
 }) => (
-  <Container className="min-h-[9.375rem] flex flex-col flex-1">
+  <Container className="min-h-[9.375rem] max-h-52 flex flex-col flex-1">
     <div className="flex justify-between">
       <div>
         <Text size="xlarge" weight="plus">
@@ -121,7 +121,7 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="min-h-[9.375rem] flex flex-col flex-1">
+    <Container className="min-h-[9.375rem] max-h-52 flex flex-col flex-1">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
@@ -174,7 +174,7 @@ export const NewVsReturningCustomers: React.FC<
     { count: data?.new_customers, name: 'New Customers' },
   ];
   return (
-    <Container className="min-h-[9.375rem]">
+    <Container className="min-h-[9.375rem] max-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="xlarge" weight="plus">
@@ -212,7 +212,7 @@ export const NewVsReturningCustomers: React.FC<
 export const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => (
-  <Container className="min-h-[9.375rem] ">
+  <Container className="min-h-[9.375rem] max-h-52">
     <div className="flex justify-between">
       <div>
         <Text size="xlarge" weight="plus">

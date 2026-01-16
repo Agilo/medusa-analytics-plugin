@@ -5,22 +5,29 @@ import {
   TopSellingProducts,
   BottomSellingProducts,
 } from '../components/Charts';
-
-const today = new Date();
-const daysPrior30 = new Date(new Date().setDate(today.getDate() - 30));
+import { useIntervalRange } from '../hooks/use-interval-range';
+import { SelectInterval } from '../components/SelectInterval';
 
 export const ProductWidget = () => {
-  const { data: products, isLoading } = useProductAnalytics({
-    from: daysPrior30,
-    to: today,
-  });
+  const { interval, onIntervalChange, range } = useIntervalRange();
+
+  const { data: products, isLoading } = useProductAnalytics(range);
 
   return (
-    <div className="flex gap-4 flex-col xl:flex-row items-stretch">
-      <TopSellingProducts data={products} isLoading={isLoading} />
-      <LowStockVariants data={products} isLoading={isLoading} />
-      <BottomSellingProducts data={products} isLoading={isLoading} />
-    </div>
+    <>
+      <div className="flex justify-end">
+        <SelectInterval
+          interval={interval}
+          onIntervalChange={onIntervalChange}
+        />
+      </div>
+
+      <div className="flex gap-4 flex-col xl:flex-row items-stretch">
+        <TopSellingProducts data={products} isLoading={isLoading} />
+        <LowStockVariants data={products} isLoading={isLoading} />
+        <BottomSellingProducts data={products} isLoading={isLoading} />
+      </div>
+    </>
   );
 };
 

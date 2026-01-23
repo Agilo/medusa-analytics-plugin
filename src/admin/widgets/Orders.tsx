@@ -17,7 +17,7 @@ const OrderWidget = () => {
         />
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <TotalSales data={orders} isLoading={isLoading} />
         <TotalOrders data={orders} isLoading={isLoading} />
         <AverageOrderValue data={orders} isLoading={isLoading} />

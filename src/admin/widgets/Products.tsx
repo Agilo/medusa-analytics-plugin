@@ -22,7 +22,7 @@ export const ProductWidget = () => {
         />
       </div>
 
-      <div className="flex gap-4 flex-col xl:flex-row items-stretch">
+      <div className="flex gap-4 flex-col lg:flex-row items-stretch">
         <TopSellingProducts data={products} isLoading={isLoading} />
         <LowStockVariants data={products} isLoading={isLoading} />
         <BottomSellingProducts data={products} isLoading={isLoading} />

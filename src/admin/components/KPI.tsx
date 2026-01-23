@@ -54,9 +54,9 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
           </div>
           <div className="self-end mt-auto flex-1 flex justify-end">
             {aovChangeFormula > 0 ? (
-              <MoveUpRight className="size-26 text-ui-tag-green-text" />
+              <MoveUpRight className="lg:size-24 size-16 text-ui-tag-green-text" />
             ) : (
-              <MoveDownRight className="size-26 text-ui-fg-error" />
+              <MoveDownRight className="lg:size-24 size-16 text-ui-fg-error" />
             )}
           </div>
         </div>
@@ -87,7 +87,7 @@ export const ReturningCustomers: React.FC<
               {data?.returning_customers || 0}
             </Text>
             <Text size="xsmall" className="text-ui-fg-muted">
-              In the last 90 days
+              in the selected time period
             </Text>
           </div>
           <div className="aspect-video flex-1 mt-2.5 self-end">

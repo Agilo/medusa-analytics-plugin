@@ -22,7 +22,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="flex-1 flex flex-col h-full min-h-[9.375rem]">
+    <Container className="flex flex-col min-h-[9.375rem]">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -42,7 +42,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
       {isLoading ? (
         <BarChartSkeleton />
       ) : topThreeSellers && topThreeSellers.length > 0 ? (
-        <div className="h-44 w-fit text-xs aspect-video">
+        <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
             isHorizontal
             data={topThreeSellers}
@@ -69,7 +69,7 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
   data,
   isLoading,
 }) => (
-  <Container className="flex flex-col flex-1 h-full min-h-[9.375rem]">
+  <Container className="flex flex-col min-h-[9.375rem]">
     <div className="flex justify-between">
       <div>
         <Text size="large" weight="plus">
@@ -89,7 +89,7 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
     {isLoading ? (
       <BarChartSkeleton />
     ) : data?.lowStockVariants && data?.lowStockVariants?.length > 0 ? (
-      <div className="h-44 w-fit text-xs aspect-video">
+      <div className="max-w-72 flex-1 text-xs aspect-video">
         <BarChart
           isHorizontal
           data={data?.lowStockVariants}
@@ -121,8 +121,8 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col flex-1 h-full min-h-[9.375rem]">
-      <div className="flex justify-between">
+    <Container className="flex flex-col min-h-[9.375rem]">
+      <div className="flex justify-between ">
         <div>
           <Text size="large" weight="plus">
             Bottom-Selling Products
@@ -142,7 +142,7 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
         <BarChartSkeleton />
       ) : topThreeWorstSellingProducts &&
         topThreeWorstSellingProducts.length > 0 ? (
-        <div className="h-44 w-fit text-xs aspect-video">
+        <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
             isHorizontal
             data={topThreeWorstSellingProducts}
@@ -170,11 +170,11 @@ export const NewVsReturningCustomers: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => {
   const pieChartCustomers = [
-    { count: data?.total_customers, name: 'Total Customers' },
     { count: data?.new_customers, name: 'New Customers' },
+    { count: data?.returning_customers, name: 'Returning Customers' },
   ];
   return (
-    <Container>
+    <Container className="flex flex-col min-h-[9.375rem]">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -194,7 +194,7 @@ export const NewVsReturningCustomers: React.FC<
       {isLoading ? (
         <BarChartSkeleton />
       ) : data ? (
-        <div className="max-w-80 mx-auto aspect-video">
+        <div className="max-w-72 mx-auto flex-1 aspect-video">
           <PieChart data={pieChartCustomers} dataKey="count" />
         </div>
       ) : (
@@ -212,7 +212,7 @@ export const NewVsReturningCustomers: React.FC<
 export const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => (
-  <Container>
+  <Container className="flex flex-col min-h-[9.375rem]">
     <div className="flex justify-between">
       <div>
         <Text size="large" weight="plus">
@@ -232,7 +232,7 @@ export const TopCustomerGroupBySales: React.FC<
     {isLoading ? (
       <BarChartSkeleton />
     ) : data?.customer_group && data.customer_group.length > 0 ? (
-      <div className="max-w-80 mx-auto aspect-video">
+      <div className="max-w-72 mx-auto flex-1 aspect-video">
         <BarChart
           data={data.customer_group}
           xAxisDataKey="name"

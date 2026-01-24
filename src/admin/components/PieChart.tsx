@@ -46,6 +46,9 @@ export const PieChart: React.FC<PieChartProps> = ({ data, dataKey }) => {
           data={data}
           label={({ percent }) => `${((percent || 0) * 100).toFixed(0)}%`}
           dataKey={dataKey}
+          cx="50%"
+          cy="50%"
+          outerRadius="70%"
         >
           {data &&
             data.map((_, index) => (

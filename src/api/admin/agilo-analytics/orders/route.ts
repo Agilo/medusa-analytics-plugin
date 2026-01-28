@@ -223,7 +223,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     count,
   }));
 
-  const orderData = {
+  res.json({
     total_orders: orders.length,
     prev_orders_percent: percentOrders,
     regions: regionsArray,
@@ -233,7 +233,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     order_sales: salesArray,
     order_count: orderCountArray,
     currency_code: currencyCode,
-  };
-
-  res.json(orderData);
+  } satisfies OrderAnalyticsResponse);
 }
+
+export type OrderAnalyticsResponse = {
+  total_orders: number;
+  regions: { name: string; sales: number }[];
+  total_sales: number;
+  statuses: { name: string; count: number }[];
+  order_sales: { name: string; sales: number }[];
+  prev_sales_percent: number;
+  order_count: { name: string; count: number }[];
+  prev_orders_percent: number;
+  currency_code: string;
+};

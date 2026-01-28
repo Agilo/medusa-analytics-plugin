@@ -33,7 +33,7 @@ export const useCustomerAnalytics = (
   >,
 ) => {
   return useQuery({
-    queryKey: ['customer-analytics', query?.from, query?.to],
+    queryKey: ['customer-analytics', JSON.stringify(query)],
     queryFn: async () => {
       const data = await retrieveCustomersAnalytics(query);
       return data;

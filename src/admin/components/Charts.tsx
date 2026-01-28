@@ -22,7 +22,7 @@ export const TopSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-[9.375rem]">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -69,14 +69,14 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
   data,
   isLoading,
 }) => (
-  <Container className="flex flex-col min-h-[9.375rem]">
+  <Container className="flex flex-col min-h-44">
     <div className="flex justify-between">
       <div>
         <Text size="large" weight="plus">
           Low Stock Variants
         </Text>
         <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-          Variants with low inventory levels in the selected time period
+          Products with inventory below threshold{' '}
         </Text>
       </div>
 
@@ -121,8 +121,8 @@ export const BottomSellingProducts: React.FC<BarChartTypes> = ({
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-[9.375rem]">
-      <div className="flex justify-between ">
+    <Container className="flex flex-col min-h-44">
+      <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
             Bottom-Selling Products
@@ -174,14 +174,14 @@ export const NewVsReturningCustomers: React.FC<
     { count: data?.returning_customers, name: 'Returning Customers' },
   ];
   return (
-    <Container className="flex flex-col min-h-[9.375rem]">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
             New vs Returning Customers
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Customer breakdown in the selected time period
+            Distribution of new and returning customers in the selected period
           </Text>
         </div>
 
@@ -194,7 +194,7 @@ export const NewVsReturningCustomers: React.FC<
       {isLoading ? (
         <BarChartSkeleton />
       ) : data ? (
-        <div className="max-w-72 mx-auto flex-1 aspect-video">
+        <div className="max-w-72 min-h-32 mx-auto flex-1 aspect-video">
           <PieChart data={pieChartCustomers} dataKey="count" />
         </div>
       ) : (
@@ -212,14 +212,14 @@ export const NewVsReturningCustomers: React.FC<
 export const TopCustomerGroupBySales: React.FC<
   BarChartTypes<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => (
-  <Container className="flex flex-col min-h-[9.375rem]">
+  <Container className="flex flex-col min-h-44">
     <div className="flex justify-between">
       <div>
         <Text size="large" weight="plus">
           Top Customer Groups by Sales
         </Text>
         <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-          Sales breakdown by customer group in the selected time period
+          Sales breakdown by customer group in the selected period
         </Text>
       </div>
 
@@ -232,7 +232,7 @@ export const TopCustomerGroupBySales: React.FC<
     {isLoading ? (
       <BarChartSkeleton />
     ) : data?.customer_group && data.customer_group.length > 0 ? (
-      <div className="max-w-72 mx-auto flex-1 aspect-video">
+      <div className="max-w-72 mx-auto flex-1 aspect-video min-w-60">
         <BarChart
           data={data.customer_group}
           xAxisDataKey="name"
@@ -249,7 +249,10 @@ export const TopCustomerGroupBySales: React.FC<
         />
       </div>
     ) : (
-      <Text size="xsmall" className="text-ui-fg-muted text-center">
+      <Text
+        size="xsmall"
+        className="text-ui-fg-muted flex items-center justify-center flex-1"
+      >
         No data available for the selected period.
       </Text>
     )}

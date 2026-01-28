@@ -19,7 +19,7 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
     1 + ordersChange === 0 ? 0 : (1 + salesChange) / (1 + ordersChange) - 1;
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between items-center">
         <Text size="large">Average order value</Text>
         <a href="/app/analytics?range=this-month&tab=orders#:~:text=Orders%20Over%20Time">
@@ -69,7 +69,7 @@ export const ReturningCustomers: React.FC<
   KPIProps<CustomerAnalyticsResponse>
 > = ({ data, isLoading }) => {
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between items-center">
         <Text size="large">Returning Customers</Text>
         <a href="/app/analytics?tab=customers">
@@ -114,7 +114,7 @@ export const ReturningCustomers: React.FC<
 
 export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
   return (
-    <Container>
+    <Container className="min-h-44">
       <div className="flex justify-between items-center">
         <Text size="large">Total Sales</Text>
         <a href="/app/analytics#:~:text=Sales%20Over%20Time">
@@ -161,7 +161,7 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
     .slice(0, 3);
 
   return (
-    <Container>
+    <Container className="min-h-44">
       <div className="flex justify-between items-center">
         <Text size="large">Total Orders</Text>
         <a href="/app/analytics?range=2025-09-01-2025-11-30#:~:text=Orders%20Over%20Time">
@@ -213,49 +213,47 @@ export const AverageSalesPerCustomer: React.FC<
         ).toFixed(2)
       : 0;
   return (
-    <>
-      <Container>
-        <div className="flex justify-between items-center">
-          <Text size="large">Average Sales per Customer</Text>
-          <a href="/app/analytics#:~:text=Sales%20Over%20Time">
-            <Button variant="transparent" className="text-ui-fg-muted text-xs">
-              View more
-            </Button>
-          </a>
-        </div>
-        {isLoading ? (
-          <SmallCardSkeleton />
-        ) : (
-          <div className="flex gap-4 justify-between flex-1">
-            <div>
-              <Text size="xlarge" weight="plus">
-                {new Intl.NumberFormat('en-US', {
-                  currency: data?.customersData?.currency_code || 'EUR',
-                  style: 'currency',
-                }).format(averageSalesPerCustomer)}
-              </Text>
-              <Text size="xsmall" className="text-ui-fg-muted">
-                in the selected time period
-              </Text>
-            </div>
-
-            <div className="aspect-video flex-1 mt-2.5 max-w-64">
-              <LineChart
-                // TODO: Put maybe the other fields to show trend over time?
-                data={[
-                  {
-                    count: averageSalesPerCustomer,
-                    name: 'Customers',
-                  },
-                ]}
-                xAxisDataKey="name"
-                yAxisDataKey="count"
-                lineColor="#82ca9d"
-              />
-            </div>
+    <Container className="min-h-44">
+      <div className="flex justify-between items-center">
+        <Text size="large">Average Sales per Customer</Text>
+        <a href="/app/analytics#:~:text=Sales%20Over%20Time">
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
+      {isLoading ? (
+        <SmallCardSkeleton />
+      ) : (
+        <div className="flex gap-4 justify-between flex-1">
+          <div>
+            <Text size="xlarge" weight="plus">
+              {new Intl.NumberFormat('en-US', {
+                currency: data?.customersData?.currency_code || 'EUR',
+                style: 'currency',
+              }).format(averageSalesPerCustomer)}
+            </Text>
+            <Text size="xsmall" className="text-ui-fg-muted">
+              in the selected time period
+            </Text>
           </div>
-        )}
-      </Container>
-    </>
+
+          <div className="aspect-video flex-1 mt-2.5 max-w-64">
+            <LineChart
+              // TODO: Put maybe the other fields to show trend over time?
+              data={[
+                {
+                  count: averageSalesPerCustomer,
+                  name: 'Customers',
+                },
+              ]}
+              xAxisDataKey="name"
+              yAxisDataKey="count"
+              lineColor="#82ca9d"
+            />
+          </div>
+        </div>
+      )}
+    </Container>
   );
 };

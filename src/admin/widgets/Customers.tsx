@@ -1,6 +1,6 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
-import { AverageSalesPerCustomer, ReturningCustomers } from '../components/KPI';
+import { AverageSalesPerCustomer } from '../components/KPI';
 import {
   NewVsReturningCustomers,
   TopCustomerGroupBySales,

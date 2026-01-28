@@ -5,21 +5,20 @@ import {
   TopSellingProducts,
   BottomSellingProducts,
 } from '../components/Charts';
-import { useIntervalRange } from '../hooks/use-interval-range';
+import {
+  useIntervalRange,
+  withIntervalRange,
+} from '../hooks/use-interval-range';
 import { SelectInterval } from '../components/SelectInterval';
 
-export const ProductWidget = () => {
-  const { interval, onIntervalChange, range } = useIntervalRange();
-
+export const ProductWidget = withIntervalRange(() => {
+  const { range } = useIntervalRange();
   const { data: products, isLoading } = useProductAnalytics(range);
 
   return (
     <>
       <div className="flex justify-end">
-        <SelectInterval
-          interval={interval}
-          onIntervalChange={onIntervalChange}
-        />
+        <SelectInterval />
       </div>
 
       <div className="flex gap-4 flex-col lg:flex-row items-stretch">
@@ -29,7 +28,7 @@ export const ProductWidget = () => {
       </div>
     </>
   );
-};
+});
 
 export const config = defineWidgetConfig({
   zone: 'product.list.before',

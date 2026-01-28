@@ -1,18 +1,16 @@
-import { Button, Container, Text } from '@medusajs/ui';
-import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
-import { OrderAnalyticsResponse } from '../hooks/order-analytics';
+import { Button, clx, Container, Text } from '@medusajs/ui';
+import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
-import { BarChart } from './BarChart';
 import { LineChart } from './LineChart';
-import { MoveUpRight, MoveDownRight } from 'lucide-react';
-
-type KPIProps<T = OrderAnalyticsResponse> = {
-  data: T | undefined;
-  isLoading: boolean;
-};
+import { useIntervalRange } from '../hooks/use-interval-range';
+import { useOrderAnalytics } from '../hooks/order-analytics';
+import { ArrowDownMini, ArrowUpMini } from '@medusajs/icons';
 
 // KPIS
-export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
+export const AverageOrderValue: React.FC = () => {
+  const { interval, range } = useIntervalRange();
+  const { data, isLoading } = useOrderAnalytics(interval, range);
+
   const salesChange = (data?.prev_sales_percent ?? 0) / 100;
   const ordersChange = (data?.prev_orders_percent ?? 0) / 100;
   const aovChangeFormula =
@@ -34,7 +32,7 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
-              {new Intl.NumberFormat('en-US', {
+              {new Intl.NumberFormat(undefined, {
                 style: 'currency',
                 currency: (data?.currency_code || 'EUR').toUpperCase(),
               }).format(
@@ -43,66 +41,25 @@ export const AverageOrderValue: React.FC<KPIProps> = ({ isLoading, data }) => {
                   : 0,
               )}
             </Text>
-            <Text size="xsmall" className="text-ui-fg-muted">
-              {aovChangeFormula > 0 ? '+' : '-'}
-              {new Intl.NumberFormat('en-US', {
-                style: 'percent',
-                maximumFractionDigits: 2,
-              }).format(aovChangeFormula)}
+            <Text size="small" className="text-ui-fg-muted">
+              <span
+                className={clx(
+                  aovChangeFormula > 0 ? 'text-green-600' : 'text-red-600',
+                  'inline-flex items-center gap-0.5',
+                )}
+              >
+                {aovChangeFormula > 0 ? (
+                  <ArrowUpMini className="size-3" viewBox="0 0 15 15" />
+                ) : (
+                  <ArrowDownMini className="size-3" viewBox="0 0 15 15" />
+                )}
+                {new Intl.NumberFormat(undefined, {
+                  style: 'percent',
+                  maximumFractionDigits: 2,
+                }).format(Math.abs(aovChangeFormula))}
+              </span>{' '}
               from the previous period
             </Text>
-          </div>
-          <div className="self-end mt-auto flex-1 flex justify-end">
-            {aovChangeFormula > 0 ? (
-              <MoveUpRight className="lg:size-24 size-16 text-ui-tag-green-text" />
-            ) : (
-              <MoveDownRight className="lg:size-24 size-16 text-ui-fg-error" />
-            )}
-          </div>
-        </div>
-      )}
-    </Container>
-  );
-};
-
-export const ReturningCustomers: React.FC<
-  KPIProps<CustomerAnalyticsResponse>
-> = ({ data, isLoading }) => {
-  return (
-    <Container className="flex flex-col min-h-44">
-      <div className="flex justify-between items-center">
-        <Text size="large">Returning Customers</Text>
-        <a href="/app/analytics?tab=customers">
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
-          </Button>
-        </a>
-      </div>
-      {isLoading ? (
-        <SmallCardSkeleton />
-      ) : (
-        <div className="flex gap-4 justify-between flex-1">
-          <div>
-            <Text size="xlarge" weight="plus">
-              {data?.returning_customers || 0}
-            </Text>
-            <Text size="xsmall" className="text-ui-fg-muted">
-              in the selected time period
-            </Text>
-          </div>
-          <div className="aspect-video flex-1 mt-2.5 self-end">
-            <BarChart
-              xAxisDataKey="name"
-              yAxisDataKey="count"
-              data={[
-                {
-                  name: `Returning customers (${data?.currency_code || 'EUR'})`,
-                  count: data?.returning_customers
-                    ? data.returning_customers
-                    : 0,
-                },
-              ]}
-            />
           </div>
         </div>
       )}
@@ -112,7 +69,10 @@ export const ReturningCustomers: React.FC<
 
 // KPI + Graphs
 
-export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
+export const TotalSales: React.FC = () => {
+  const { interval, range } = useIntervalRange();
+  const { data, isLoading } = useOrderAnalytics(interval, range);
+
   return (
     <Container className="min-h-44">
       <div className="flex justify-between items-center">
@@ -129,7 +89,7 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
         <div className="flex gap-4 justify-between">
           <div>
             <Text size="xlarge" weight="plus">
-              {new Intl.NumberFormat('en-US', {
+              {new Intl.NumberFormat(undefined, {
                 style: 'currency',
                 currency: data?.currency_code || 'EUR',
               }).format(data?.total_sales || 0)}
@@ -142,11 +102,11 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
 
           <div className="aspect-video flex-1 mt-2.5 max-w-64">
             <LineChart
-              data={data?.order_count
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 3)}
+              data={data?.order_count ?? []}
               xAxisDataKey="name"
               yAxisDataKey="count"
+              lineColor="#a1a1aa"
+              hideTooltip
             />
           </div>
         </div>
@@ -155,10 +115,11 @@ export const TotalSales: React.FC<KPIProps> = ({ data, isLoading }) => {
   );
 };
 
-export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
-  const topThreeOrders = data?.order_sales
-    .sort((a, b) => b.sales - a.sales)
-    .slice(0, 3);
+export const TotalOrders: React.FC = () => {
+  const { interval, range } = useIntervalRange();
+  const { data, isLoading } = useOrderAnalytics(interval, range);
+
+  const orderSales = data?.order_sales;
 
   return (
     <Container className="min-h-44">
@@ -186,10 +147,18 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
 
           <div className="aspect-video flex-1 mt-2.5 max-w-64">
             <LineChart
-              data={topThreeOrders}
+              data={orderSales}
               xAxisDataKey="name"
               yAxisDataKey="sales"
-              lineColor="#82ca9d"
+              lineColor="#a1a1aa"
+              yAxisTickFormatter={(value) =>
+                new Intl.NumberFormat(undefined, {
+                  style: 'currency',
+                  currency: data?.currency_code || 'EUR',
+                  maximumFractionDigits: 0,
+                }).format(value)
+              }
+              hideTooltip
             />
           </div>
         </div>
@@ -198,20 +167,21 @@ export const TotalOrders: React.FC<KPIProps> = ({ isLoading, data }) => {
   );
 };
 
-export const AverageSalesPerCustomer: React.FC<
-  KPIProps<{
-    customersData?: CustomerAnalyticsResponse;
-    ordersData?: OrderAnalyticsResponse;
-  }>
-> = ({ isLoading, data }) => {
+export const AverageSalesPerCustomer: React.FC = () => {
+  const { interval, range } = useIntervalRange();
+  const ordersQuery = useOrderAnalytics(interval, range);
+  const customersQuery = useCustomerAnalytics(range);
+
   const averageSalesPerCustomer =
-    data?.customersData?.total_customers &&
-    data.customersData.total_customers > 0
+    customersQuery.data?.total_customers &&
+    customersQuery.data.total_customers > 0
       ? +(
-          (data?.ordersData?.total_sales || 0) /
-          data.customersData.total_customers
+          (ordersQuery.data?.total_sales || 0) /
+          customersQuery.data.total_customers
         ).toFixed(2)
       : 0;
+  const isLoading = ordersQuery.isLoading || customersQuery.isLoading;
+
   return (
     <Container className="min-h-44">
       <div className="flex justify-between items-center">
@@ -228,8 +198,8 @@ export const AverageSalesPerCustomer: React.FC<
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
-              {new Intl.NumberFormat('en-US', {
-                currency: data?.customersData?.currency_code || 'EUR',
+              {new Intl.NumberFormat(undefined, {
+                currency: customersQuery.data?.currency_code || 'EUR',
                 style: 'currency',
               }).format(averageSalesPerCustomer)}
             </Text>

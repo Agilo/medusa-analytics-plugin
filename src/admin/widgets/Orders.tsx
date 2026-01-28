@@ -1,28 +1,21 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { useOrderAnalytics } from '../hooks/order-analytics';
 import { AverageOrderValue, TotalOrders, TotalSales } from '../components/KPI';
-import { useIntervalRange } from '../hooks/use-interval-range';
 import { SelectInterval } from '../components/SelectInterval';
+import { IntervalRangeContextProvider } from '../hooks/use-interval-range';
 
 const OrderWidget = () => {
-  const { interval, onIntervalChange, range } = useIntervalRange();
-  const { data: orders, isLoading } = useOrderAnalytics(interval, range);
-
   return (
-    <>
+    <IntervalRangeContextProvider>
       <div className="flex justify-end">
-        <SelectInterval
-          interval={interval}
-          onIntervalChange={onIntervalChange}
-        />
+        <SelectInterval />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
-        <TotalSales data={orders} isLoading={isLoading} />
-        <TotalOrders data={orders} isLoading={isLoading} />
-        <AverageOrderValue data={orders} isLoading={isLoading} />
+        <TotalSales />
+        <TotalOrders />
+        <AverageOrderValue />
       </div>
-    </>
+    </IntervalRangeContextProvider>
   );
 };
 

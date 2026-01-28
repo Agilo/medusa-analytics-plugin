@@ -80,7 +80,7 @@ export const LowStockVariants: React.FC<BarChartTypes> = ({
         </Text>
       </div>
 
-      <a href="/app/analytics?range=2025-09-01-2025-11-30&tab=products#:~:text=Out%2Dof%2DStock%20Variants">
+      <a href="/app/analytics?range=this-month&tab=products#:~:text=Out%2Dof%2DStock%20Variants">
         <Button variant="transparent" className="text-ui-fg-muted text-xs ">
           View more
         </Button>

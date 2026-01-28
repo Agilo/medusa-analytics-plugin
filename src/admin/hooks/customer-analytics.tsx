@@ -30,10 +30,10 @@ export const useCustomerAnalytics = (
   options?: Omit<
     UseQueryOptions<CustomerAnalyticsResponse | undefined, Error>,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) => {
   return useQuery({
-    queryKey: ['customer-analytics', query?.from, query?.to],
+    queryKey: ['customer-analytics', JSON.stringify(query)],
     queryFn: async () => {
       const data = await retrieveCustomersAnalytics(query);
       return data;

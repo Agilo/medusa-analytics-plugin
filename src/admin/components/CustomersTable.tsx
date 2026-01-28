@@ -166,9 +166,10 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   return (
     <DataTable instance={table}>
-      <DataTable.Toolbar className="px-0 pt-0">
+      <div className="flex items-center justify-end gap-2 mb-4">
         <DataTable.Search placeholder="Search..." />
-      </DataTable.Toolbar>
+        <DataTable.SortingMenu />
+      </div>
       <DataTable.Table
         emptyState={{
           filtered: {

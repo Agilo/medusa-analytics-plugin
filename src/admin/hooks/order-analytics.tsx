@@ -1,19 +1,10 @@
 import { DateRange } from 'react-day-picker';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
-import { retrieveOrderAnalytics } from '../lib/data/order-analytics';
-
-export type OrderAnalyticsResponse = {
-  total_orders: number;
-  regions: { name: string; sales: number }[];
-  total_sales: number;
-  statuses: { name: string; count: number }[];
-  order_sales: { name: string; sales: number }[];
-  prev_sales_percent: number;
-  order_count: { name: string; count: number }[];
-  prev_orders_percent: number;
-  currency_code: string;
-};
+import {
+  OrderAnalyticsResponse,
+  retrieveOrderAnalytics,
+} from '../lib/data/order-analytics';
 
 export const useOrderAnalytics = (
   preset: string,
@@ -24,7 +15,7 @@ export const useOrderAnalytics = (
   >,
 ) => {
   return useQuery({
-    queryKey: ['order-analytics', query?.from, query?.to],
+    queryKey: ['order-analytics', preset, JSON.stringify(query)],
     queryFn: async () => {
       const data = await retrieveOrderAnalytics(preset, query);
       return data;

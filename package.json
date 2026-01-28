@@ -35,7 +35,9 @@
     "dev": "medusa plugin:develop",
     "prepublishOnly": "medusa plugin:build",
     "test": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit"
+    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
   },
   "devDependencies": {
     "@medusajs/admin-sdk": "2.8.3",
@@ -62,6 +64,7 @@
     "jest": "^30.0.4",
     "pg": "^8.16.0",
     "pg-god": "^1.0.12",
+    "prettier": "^3.7.3",
     "prop-types": "^15.8.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

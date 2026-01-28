@@ -9,7 +9,7 @@ export type ProductAnalyticsResponse = {
     inventoryQuantity: number;
     variantName: string;
     variantId: string;
-    productId:string
+    productId: string;
   }[];
   variantQuantitySold: {
     title: string;
@@ -22,7 +22,7 @@ export const useProductAnalytics = (
   options?: Omit<
     UseQueryOptions<ProductAnalyticsResponse | undefined, Error>,
     'queryKey' | 'queryFn'
-  >
+  >,
 ) => {
   return useQuery({
     queryKey: ['product-analytics', query?.from, query?.to],

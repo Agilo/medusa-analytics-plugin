@@ -1,7 +1,9 @@
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { OrderAnalyticsResponse } from '../../hooks/order-analytics';
 import { sdk } from '../utils';
+import type { OrderAnalyticsResponse } from '../../../api/admin/agilo-analytics/orders/route';
+
+export type { OrderAnalyticsResponse };
 
 export async function retrieveOrderAnalytics(
   preset: string,

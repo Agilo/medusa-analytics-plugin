@@ -90,5 +90,10 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.8",
     "tw-animate-css": "^1.3.4"
+  },
+  "overrides": {
+    "@opentelemetry/resources": "^2.0.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
+    "@opentelemetry/sdk-trace-node": "^2.0.0"
   }
 }

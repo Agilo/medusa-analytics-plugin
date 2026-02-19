@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-      - run: yarn install --immutable --inline-mirrors
+      - run: yarn install --immutable
       - run: yarn test:unit
 
   integration-tests:
@@ -84,7 +84,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-      - run: yarn install --immutable --inline-mirrors
+      - run: yarn install --immutable
       - name: Install Medusa version ${{ matrix.medusa-version.version }}
         run: |
           yarn add -D \
@@ -113,7 +113,7 @@ jobs:
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
-      - run: yarn install --immutable --inline-mirrors
+      - run: yarn install --immutable
 
       - run: yarn npm publish
         env:

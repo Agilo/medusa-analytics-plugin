@@ -5,6 +5,7 @@ on:
 name: Publish Package
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   unit-tests:
@@ -15,28 +16,38 @@ jobs:
           - 22
           - 24
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm install
-      - run: npm run test:unit
+          cache: "yarn"
+      - run: yarn install --immutable
+      - run: yarn test:unit
 
   integration-tests:
-    needs: unit-tests
     strategy:
       matrix:
         node-version:
           - 20
           - 22
           - 24
+        medusa-version:
+          - version: "2.11.0"
+            swc-core: "1.5.7"
+          - version: "2.11.3"
+            swc-core: "1.7.42"
+          - version: "2.12.6"
+            swc-core: "1.7.42"
+          - version: "2.13.1"
+            swc-core: "1.7.42"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       redis:
@@ -52,7 +63,7 @@ jobs:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: ""
           POSTGRES_USER: postgres
           POSTGRES_DB: medusa_test
           POSTGRES_HOST_AUTH_METHOD: trust
@@ -66,29 +77,44 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm install
-      - run: npm test
+          cache: "yarn"
+      - run: yarn install --immutable
+      - name: Install Medusa version ${{ matrix.medusa-version.version }}
+        run: |
+          yarn add -D \
+            @medusajs/admin-sdk@${{ matrix.medusa-version.version }} \
+            @medusajs/cli@${{ matrix.medusa-version.version }} \
+            @medusajs/framework@${{ matrix.medusa-version.version }} \
+            @medusajs/icons@${{ matrix.medusa-version.version }} \
+            @medusajs/medusa@${{ matrix.medusa-version.version }} \
+            @medusajs/test-utils@${{ matrix.medusa-version.version }} \
+            @swc/core@${{ matrix.medusa-version.swc-core }}
+      - run: yarn test
         env:
           DB_TEMP_NAME: medusa_test
 
   publish:
     needs: integration-tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    environment: production
     steps:
       - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 24
+          cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
 
-      - run: npm install
+      - run: yarn install --immutable
 
-      - run: npm publish
+      - run: yarn npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

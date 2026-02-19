@@ -15,7 +15,11 @@
 
 The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa Admin dashboard. It provides store admins with a clear view of sales and product performance using focused KPIs, charts, and tables, all accessible directly within the Medusa Admin panel.
 
-✅ Compatible with Medusa v2
+✅ Compatible with Medusa v2.11.0 and above
+
+### Requirements
+
+- **Medusa v2.11.0+** - This plugin requires Medusa v2.11.0 or later due to its dependency on the [Caching Module](https://docs.medusajs.com/resources/infrastructure-modules/caching), which was introduced in that version.
 
 ## Features
 

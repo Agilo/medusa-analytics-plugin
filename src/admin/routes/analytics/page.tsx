@@ -461,11 +461,17 @@ const AnalyticsPage = () => {
                           xAxisDataKey="name"
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
-                          yAxisTickFormatter={(value: number) =>
+                          yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat('en-US', {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
-                            }).format(value)
+                            }).format(
+                              typeof value === 'number'
+                                ? value
+                                : typeof value === 'string'
+                                  ? Number(value)
+                                  : 0,
+                            )
                           }
                         />
                       </div>
@@ -500,11 +506,17 @@ const AnalyticsPage = () => {
                           lineColor="#82ca9d"
                           useStableColors={true}
                           colorKeyField="name"
-                          yAxisTickFormatter={(value: number) =>
+                          yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat('en-US', {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
-                            }).format(value)
+                            }).format(
+                              typeof value === 'number'
+                                ? value
+                                : typeof value === 'string'
+                                  ? Number(value)
+                                  : 0,
+                            )
                           }
                         />
                       </div>
@@ -737,11 +749,17 @@ const AnalyticsPage = () => {
                           useStableColors={true}
                           colorKeyField="name"
                           yAxisDataKey="total"
-                          yAxisTickFormatter={(value: number) =>
+                          yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat('en-US', {
                               currency: customers.currency_code || 'EUR',
                               maximumFractionDigits: 0,
-                            }).format(value)
+                            }).format(
+                              typeof value === 'number'
+                                ? value
+                                : typeof value === 'string'
+                                  ? Number(value)
+                                  : 0,
+                            )
                           }
                         />
                       </div>

@@ -8,6 +8,7 @@ module.exports = {
       {
         jsc: {
           parser: { syntax: 'typescript', decorators: true },
+          target: 'es2022',
         },
       },
     ],
@@ -22,6 +23,6 @@ module.exports = {
     process.env.TEST_TYPE === 'integration:http'
       ? ['<rootDir>/integration-tests/http/*.spec.[jt]s']
       : process.env.TEST_TYPE === 'unit'
-      ? ['<rootDir>/unit-tests/**/*.spec.[jt]s']
-      : undefined,
+        ? ['<rootDir>/unit-tests/**/*.spec.[jt]s']
+        : undefined,
 };

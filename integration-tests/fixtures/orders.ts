@@ -20,7 +20,7 @@ import {
 export const generatePublishableKey = async (container: MedusaContainer) => {
   const appContainer = container;
   const apiKeyModule = appContainer.resolve<IApiKeyModuleService>(
-    Modules.API_KEY
+    Modules.API_KEY,
   );
 
   return await apiKeyModule.createApiKeys({
@@ -58,7 +58,7 @@ export async function createOrderSeeder({
   fulfillmentSetsOverride,
   regionOverride,
   createdAt,
-  customerEmail
+  customerEmail,
 }: {
   api: any;
   container: MedusaContainer;
@@ -82,8 +82,8 @@ export async function createOrderSeeder({
   const shippingProfileOverrideArray = !shippingProfileOverride
     ? undefined
     : Array.isArray(shippingProfileOverride)
-    ? shippingProfileOverride
-    : [shippingProfileOverride];
+      ? shippingProfileOverride
+      : [shippingProfileOverride];
 
   const storeHeaders =
     storeHeaderOverride ??
@@ -97,7 +97,7 @@ export async function createOrderSeeder({
       await api.post(
         '/admin/regions',
         { name: 'Test region', currency_code: 'eur' },
-        adminHeaders
+        adminHeaders,
       )
     ).data.region;
 
@@ -107,7 +107,7 @@ export async function createOrderSeeder({
       await api.post(
         '/admin/sales-channels',
         { name: 'first channel', description: 'channel' },
-        adminHeaders
+        adminHeaders,
       )
     ).data.sales_channel;
 
@@ -117,7 +117,7 @@ export async function createOrderSeeder({
       await api.post(
         `/admin/stock-locations`,
         { name: 'test location' },
-        adminHeaders
+        adminHeaders,
       )
     ).data.stock_location;
 
@@ -127,7 +127,7 @@ export async function createOrderSeeder({
       await api.post(
         `/admin/inventory-items`,
         { sku: 'test-variant' },
-        adminHeaders
+        adminHeaders,
       )
     ).data.inventory_item;
   if (!inventoryItemOverride) {
@@ -137,14 +137,14 @@ export async function createOrderSeeder({
         location_id: stockLocation.id,
         stocked_quantity: 100,
       },
-      adminHeaders
+      adminHeaders,
     );
   }
   if (!stockChannelOverride) {
     await api.post(
       `/admin/stock-locations/${stockLocation.id}/sales-channels`,
       { add: [salesChannel.id] },
-      adminHeaders
+      adminHeaders,
     );
   }
 
@@ -154,7 +154,7 @@ export async function createOrderSeeder({
       await api.post(
         `/admin/shipping-profiles`,
         { name: `test-${stockLocation.id}`, type: 'default' },
-        adminHeaders
+        adminHeaders,
       )
     ).data.shipping_profile;
 
@@ -165,6 +165,7 @@ export async function createOrderSeeder({
         '/admin/products',
         {
           title: `Test fixture ${shippingProfile.id}`,
+          status: 'published',
           shipping_profile_id: withoutShipping ? undefined : shippingProfile.id,
           options: [
             { title: 'size', values: ['large', 'small'] },
@@ -193,7 +194,7 @@ export async function createOrderSeeder({
             },
           ],
         },
-        adminHeaders
+        adminHeaders,
       )
     ).data.product;
 
@@ -206,7 +207,7 @@ export async function createOrderSeeder({
           name: `Test-${shippingProfile.id}`,
           type: 'test-type',
         },
-        adminHeaders
+        adminHeaders,
       )
     ).data.stock_location.fulfillment_sets;
 
@@ -219,7 +220,7 @@ export async function createOrderSeeder({
           name: `Test-${shippingProfile.id}`,
           geo_zones: [{ type: 'country', country_code: 'us' }],
         },
-        adminHeaders
+        adminHeaders,
       )
     ).data.fulfillment_set;
 
@@ -227,7 +228,7 @@ export async function createOrderSeeder({
     await api.post(
       `/admin/stock-locations/${stockLocation.id}/fulfillment-providers`,
       { add: ['manual_test-provider'] },
-      adminHeaders
+      adminHeaders,
     );
   }
   /**
@@ -255,10 +256,10 @@ export async function createOrderSeeder({
             ],
             rules: [],
           },
-          adminHeaders
+          adminHeaders,
         )
       ).data.shipping_option;
-    })
+    }),
   );
 
   const shippingOption = shippingOptions[0];
@@ -292,7 +293,7 @@ export async function createOrderSeeder({
           ...(additionalProducts || []),
         ],
       },
-      storeHeaders
+      storeHeaders,
     )
   ).data.cart;
 
@@ -303,9 +304,9 @@ export async function createOrderSeeder({
         await api.post(
           `/store/carts/${cart.id}/shipping-methods`,
           { option_id: so.id },
-          storeHeaders
+          storeHeaders,
         );
-      })
+      }),
     );
   }
 
@@ -315,14 +316,14 @@ export async function createOrderSeeder({
       {
         cart_id: cart.id,
       },
-      storeHeaders
+      storeHeaders,
     )
   ).data.payment_collection;
 
   await api.post(
     `/store/payment-collections/${paymentCollection.id}/payment-sessions`,
     { provider_id: 'pp_system_default' },
-    storeHeaders
+    storeHeaders,
   );
 
   let order = (

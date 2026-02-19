@@ -115,6 +115,14 @@ jobs:
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
+      - name: Update version from release tag
+        run: |
+          VERSION=${{ github.ref_name }}
+          # Remove 'v' prefix if present
+          VERSION=${VERSION#v}
+          echo "Publishing version: $VERSION"
+          yarn npm pkg set version="$VERSION"
+
       - run: yarn install --immutable
 
       - run: yarn npm publish

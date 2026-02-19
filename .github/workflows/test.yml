@@ -39,6 +39,15 @@ jobs:
           - 20
           - 22
           - 24
+        medusa-version:
+          - version: "2.11.0"
+            swc-core: "1.5.7"
+          - version: "2.11.3"
+            swc-core: "1.7.42"
+          - version: "2.12.6"
+            swc-core: "1.7.42"
+          - version: "2.13.1"
+            swc-core: "1.7.42"
 
     runs-on: ubuntu-latest
 
@@ -78,6 +87,16 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
       - run: yarn install
+      - name: Install Medusa version ${{ matrix.medusa-version.version }}
+        run: |
+          yarn add -D \
+            @medusajs/admin-sdk@${{ matrix.medusa-version.version }} \
+            @medusajs/cli@${{ matrix.medusa-version.version }} \
+            @medusajs/framework@${{ matrix.medusa-version.version }} \
+            @medusajs/icons@${{ matrix.medusa-version.version }} \
+            @medusajs/medusa@${{ matrix.medusa-version.version }} \
+            @medusajs/test-utils@${{ matrix.medusa-version.version }} \
+            @swc/core@${{ matrix.medusa-version.swc-core }}
       - run: yarn test
         env:
           DB_TEMP_NAME: medusa_test

@@ -128,6 +128,7 @@ jobs:
       - name: Build plugin
         run: yarn build
 
-      - run: yarn npm publish
+      - name: Publish to npm
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

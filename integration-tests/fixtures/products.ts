@@ -21,7 +21,7 @@ export async function createProductVariant({
     await api.post(
       `/admin/inventory-items`,
       { sku: 'test-variant-2' },
-      adminHeaders
+      adminHeaders,
     )
   ).data.inventory_item;
 
@@ -31,13 +31,13 @@ export async function createProductVariant({
       location_id: stockLocation.id,
       stocked_quantity: 0,
     },
-    adminHeaders
+    adminHeaders,
   );
 
   await api.post(
     `/admin/stock-locations/${stockLocation.id}/sales-channels`,
     { add: [salesChannel.id] },
-    adminHeaders
+    adminHeaders,
   );
 
   const product =
@@ -47,6 +47,7 @@ export async function createProductVariant({
         '/admin/products',
         {
           title: `Test fixture 2`,
+          status: 'published',
           shipping_profile_id: undefined,
           options: [
             { title: 'size', values: ['large', 'small'] },
@@ -75,7 +76,7 @@ export async function createProductVariant({
             },
           ],
         },
-        adminHeaders
+        adminHeaders,
       )
     ).data.product;
   return {

@@ -16,7 +16,7 @@ jobs:
           - 22
           - 24
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-      - run: yarn install
+      - run: yarn install --immutable --inline-mirrors
       - run: yarn test:unit
 
   integration-tests:
@@ -47,7 +47,7 @@ jobs:
           - version: "2.13.1"
             swc-core: "1.7.42"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     services:
       redis:
@@ -84,7 +84,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-      - run: yarn install
+      - run: yarn install --immutable --inline-mirrors
       - name: Install Medusa version ${{ matrix.medusa-version.version }}
         run: |
           yarn add -D \
@@ -101,7 +101,7 @@ jobs:
 
   publish:
     needs: integration-tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +113,7 @@ jobs:
           cache: "yarn"
           registry-url: "https://registry.npmjs.org"
 
-      - run: yarn install
+      - run: yarn install --immutable --inline-mirrors
 
       - run: yarn npm publish
         env:

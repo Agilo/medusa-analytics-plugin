@@ -26,14 +26,12 @@ __metadata:
     "@types/node": "npm:^22.15.29"
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.2.25"
-    awilix: "npm:^8.0.1"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     date-fns: "npm:^4.1.0"
     jest: "npm:^29.7.0"
     lucide-react: "npm:^0.563.0"
     luxon: "npm:^3.6.1"
-    pg: "npm:^8.16.0"
     pg-god: "npm:^1.0.12"
     prop-types: "npm:^15.8.1"
     react: "npm:^18.0.0"
@@ -14786,7 +14784,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg@npm:^8.16.0, pg@npm:^8.16.3, pg@npm:^8.3.0":
+"pg@npm:^8.16.3, pg@npm:^8.3.0":
   version: 8.18.0
   resolution: "pg@npm:8.18.0"
   dependencies:

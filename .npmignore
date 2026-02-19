@@ -2,6 +2,11 @@
 src/
 tsconfig.json
 
+# Medusa server files
+!.medusa/
+!.medusa/server/
+!.medusa/server/**
+
 # Tests
 integration-tests/
 unit-tests/

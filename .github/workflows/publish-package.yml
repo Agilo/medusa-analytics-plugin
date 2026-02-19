@@ -100,7 +100,9 @@ jobs:
           DB_TEMP_NAME: medusa_test
 
   publish:
-    needs: integration-tests
+    needs:
+      - unit-tests
+      - integration-tests
     runs-on: ubuntu-22.04
     environment: production
     steps:

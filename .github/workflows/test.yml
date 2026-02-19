@@ -32,7 +32,6 @@ jobs:
       - run: yarn test:unit
 
   integration-tests:
-    needs: unit-tests
     strategy:
       matrix:
         node-version:

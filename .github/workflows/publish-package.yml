@@ -121,7 +121,7 @@ jobs:
           # Remove 'v' prefix if present
           VERSION=${VERSION#v}
           echo "Publishing version: $VERSION"
-          yarn npm pkg set version="$VERSION"
+          npm pkg set version="$VERSION"
 
       - run: yarn install --immutable
 

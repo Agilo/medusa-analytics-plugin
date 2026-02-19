@@ -11,13 +11,14 @@ import {
 } from 'recharts';
 import { useDarkMode } from '../hooks/use-dark-mode';
 import { generateColorsForData } from '../lib/utils';
+import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 type BarChartProps<T extends Record<string, unknown>> = {
   data: T[] | undefined;
   xAxisDataKey: keyof T;
   yAxisDataKey: keyof T;
   lineColor?: string;
-  yAxisTickFormatter?: (value: number) => string;
+  yAxisTickFormatter?: (value: ValueType | undefined) => string;
   useStableColors?: boolean;
   colorKeyField?: keyof T;
 };
@@ -66,9 +67,7 @@ export const BarChart = <T extends Record<string, unknown>>({
           cursor={{
             fill: isDark ? 'rgba(55, 65, 81, 0.2)' : 'rgba(243, 244, 246, 0.5)',
           }}
-          formatter={(value: number) =>
-            yAxisTickFormatter ? yAxisTickFormatter(value) : value
-          }
+          formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
           contentStyle={{
             backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
             border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,

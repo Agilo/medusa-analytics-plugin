@@ -139,5 +139,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   res.json({
     lowStockVariants,
     variantQuantitySold: sortedVariantQuantitySold.slice(0, 10),
-  });
+  } satisfies ProductAnalyticsResponse);
 }
+
+export type ProductAnalyticsResponse = {
+  lowStockVariants: {
+    sku: string;
+    inventoryQuantity: number;
+    variantName: string;
+    variantId: string;
+    productId: string;
+  }[];
+  variantQuantitySold: {
+    title: string;
+    quantity: number;
+  }[];
+};

@@ -6,6 +6,32 @@ import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini } from '@medusajs/icons';
 
+const KPITimelineLabel: React.FC<{
+  percentage: number;
+}> = ({ percentage }) => {
+  return (
+    <Text size="small" className="text-ui-fg-muted">
+      <span
+        className={clx(
+          percentage > 0 ? 'text-ui-tag-green-text' : 'text-ui-fg-error',
+          'inline-flex items-baseline gap-0.5',
+        )}
+      >
+        {percentage > 0 ? (
+          <ArrowUpMini className="size-3 self-center" viewBox="0 0 15 15" />
+        ) : (
+          <ArrowDownMini className="size-3 self-center" viewBox="0 0 15 15" />
+        )}
+        {new Intl.NumberFormat(undefined, {
+          style: 'percent',
+          maximumFractionDigits: 2,
+        }).format(Math.abs(percentage))}
+      </span>{' '}
+      from the previous period
+    </Text>
+  );
+};
+
 // KPIS
 export const AverageOrderValue: React.FC = () => {
   const { interval, range } = useIntervalRange();
@@ -41,25 +67,7 @@ export const AverageOrderValue: React.FC = () => {
                   : 0,
               )}
             </Text>
-            <Text size="small" className="text-ui-fg-muted">
-              <span
-                className={clx(
-                  aovChangeFormula > 0 ? 'text-green-600' : 'text-red-600',
-                  'inline-flex items-center gap-0.5',
-                )}
-              >
-                {aovChangeFormula > 0 ? (
-                  <ArrowUpMini className="size-3" viewBox="0 0 15 15" />
-                ) : (
-                  <ArrowDownMini className="size-3" viewBox="0 0 15 15" />
-                )}
-                {new Intl.NumberFormat(undefined, {
-                  style: 'percent',
-                  maximumFractionDigits: 2,
-                }).format(Math.abs(aovChangeFormula))}
-              </span>{' '}
-              from the previous period
-            </Text>
+            <KPITimelineLabel percentage={aovChangeFormula} />
           </div>
         </div>
       )}
@@ -68,7 +76,6 @@ export const AverageOrderValue: React.FC = () => {
 };
 
 // KPI + Graphs
-
 export const TotalSales: React.FC = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
@@ -94,15 +101,14 @@ export const TotalSales: React.FC = () => {
                 currency: data?.currency_code || 'EUR',
               }).format(data?.total_sales || 0)}
             </Text>
-            <Text size="xsmall" className="text-ui-fg-muted">
-              {(data?.prev_sales_percent || 0) > 0 && '+'}
-              {data?.prev_sales_percent || 0}% from previous period
-            </Text>
+            <KPITimelineLabel
+              percentage={(data?.prev_sales_percent ?? 0) / 100}
+            />
           </div>
 
           <div className="aspect-video flex-1 mt-2.5 max-w-64">
             <LineChart
-              data={data?.order_count ?? []}
+              data={data?.order_sales ?? []}
               xAxisDataKey="name"
               yAxisDataKey="count"
               lineColor="#a1a1aa"
@@ -118,8 +124,6 @@ export const TotalSales: React.FC = () => {
 export const TotalOrders: React.FC = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
-
-  const orderSales = data?.order_sales;
 
   return (
     <Container className="min-h-44">
@@ -139,17 +143,16 @@ export const TotalOrders: React.FC = () => {
             <Text size="xlarge" weight="plus">
               {data?.total_orders || 0}
             </Text>
-            <Text size="xsmall" className="text-ui-fg-muted">
-              {(data?.prev_orders_percent || 0) > 0 && '+'}
-              {data?.prev_orders_percent || 0}% from previous period
-            </Text>
+            <KPITimelineLabel
+              percentage={(data?.prev_orders_percent ?? 0) / 100}
+            />
           </div>
 
           <div className="aspect-video flex-1 mt-2.5 max-w-64">
             <LineChart
-              data={orderSales}
+              data={data?.order_count}
               xAxisDataKey="name"
-              yAxisDataKey="sales"
+              yAxisDataKey="count"
               lineColor="#a1a1aa"
               yAxisTickFormatter={(value) =>
                 new Intl.NumberFormat(undefined, {

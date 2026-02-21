@@ -256,5 +256,27 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     currency_code: currencyCode,
   };
 
-  res.json(customerData);
+  res.json(customerData satisfies CustomerAnalyticsResponse);
 }
+
+export type CustomerAnalyticsResponse = {
+  total_customers: number;
+  new_customers: number;
+  returning_customers: number;
+  customer_count: {
+    name: string;
+    returning_customers: number;
+    new_customers: number;
+  }[];
+  customer_group: { name: string; total: number }[];
+  customer_sales: {
+    customer_id: string;
+    sales: number;
+    name: string;
+    groups: string[];
+    order_count: number;
+    last_order: Date;
+    email: string;
+  }[];
+  currency_code: string;
+};

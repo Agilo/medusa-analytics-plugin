@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
-import { ProductAnalyticsResponse } from '../hooks/product-analytics';
+import { ProductAnalyticsResponse } from '../../api/admin/agilo-analytics/products/route';
 import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
-import { CustomerAnalyticsResponse } from '../hooks/customer-analytics';
+import { CustomerAnalyticsResponse } from '../../api/admin/agilo-analytics/customers/route';
 import { PieChart } from './PieChart';
 
 export type BarChartTypes<T = ProductAnalyticsResponse> = {

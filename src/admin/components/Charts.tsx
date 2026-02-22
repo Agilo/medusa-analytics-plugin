@@ -17,7 +17,7 @@ export const TopSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -72,7 +72,7 @@ export const LowStockVariants = () => {
   const { data, isLoading } = useProductAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -130,7 +130,7 @@ export const BottomSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -189,8 +189,10 @@ export const NewVsReturningCustomers = () => {
     { count: data?.new_customers, name: 'New Customers' },
     { count: data?.returning_customers, name: 'Returning Customers' },
   ];
+
+  console.log('new vs returning customers', data, pieChartCustomers);
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -216,13 +218,21 @@ export const NewVsReturningCustomers = () => {
         <div className="flex-1 aspect-video">
           <Skeleton className="w-full h-40" />
         </div>
-      ) : data ? (
-        <div className="w-full max-w-72 min-h-32 mx-auto flex-1 aspect-video">
+      ) : data?.customer_group && data.customer_group.length > 0 ? (
+        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+          {/* <LineChart
+            // TODO: Put maybe the other fields to show trend over time?
+            data={pieChartCustomers}
+            xAxisDataKey="name"
+            yAxisDataKey="count"
+            lineColor="#a1a1aa"
+            hideTooltip
+          /> */}
           <PieChart data={pieChartCustomers} dataKey="count" />
         </div>
       ) : (
         <Text
-          size="small"
+          size="xsmall"
           className="text-ui-fg-muted flex items-center justify-center flex-1"
         >
           No data available for the selected period.
@@ -237,7 +247,7 @@ export const TopCustomerGroupBySales = () => {
   const { data, isLoading } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -273,7 +283,7 @@ export const TopCustomerGroupBySales = () => {
             colorKeyField="name"
             yAxisDataKey="total"
             yAxisTickFormatter={(value: number) =>
-              new Intl.NumberFormat('en-US', {
+              new Intl.NumberFormat(undefined, {
                 currency: data.currency_code || 'EUR',
                 maximumFractionDigits: 0,
               }).format(value)

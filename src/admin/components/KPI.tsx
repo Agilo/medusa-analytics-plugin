@@ -35,7 +35,7 @@ const KPITimelineLabel: React.FC<{
 };
 
 // KPIS
-export const AverageOrderValue: React.FC = () => {
+export const AverageOrderValue = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
 
@@ -43,6 +43,19 @@ export const AverageOrderValue: React.FC = () => {
   const ordersChange = (data?.prev_orders_percent ?? 0) / 100;
   const aovChangeFormula =
     1 + ordersChange === 0 ? 0 : (1 + salesChange) / (1 + ordersChange) - 1;
+
+  const orderSales = data?.order_sales ?? [];
+  const orderCount = data?.order_count ?? [];
+
+  const aovTimeline = orderSales.map((point, index) => {
+    const count = orderCount[index].count;
+    const sales = point.sales;
+
+    return {
+      name: point.name,
+      value: count > 0 ? sales / count : 0,
+    };
+  });
 
   return (
     <Container className="flex flex-col">
@@ -60,17 +73,11 @@ export const AverageOrderValue: React.FC = () => {
         </a>
       </div>
       {isLoading ? (
-        <SmallCardSkeleton />
+        <div className="flex gap-4 justify-between flex-1">
+          <SmallCardSkeleton />
+          <Skeleton className="aspect-video w-64 mt-2.5" />
+        </div>
       ) : (
-        //  <div className="flex gap-4 justify-between flex-1">
-        //   <div>
-        //     <SmallCardSkeleton />
-        //   </div>
-
-        //   <div className="aspect-video flex-1 mt-2.5 max-w-72">
-        //     <Skeleton className="w-full h-full" />
-        //   </div>
-        // </div>
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
@@ -85,6 +92,25 @@ export const AverageOrderValue: React.FC = () => {
             </Text>
             <KPITimelineLabel percentage={aovChangeFormula} />
           </div>
+
+          <div className="flex-1 flex mt-2.5">
+            <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
+              <LineChart
+                data={aovTimeline}
+                xAxisDataKey="name"
+                yAxisDataKey="value"
+                lineColor="#a1a1aa"
+                yAxisTickFormatter={(value) =>
+                  new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: (data?.currency_code || 'EUR').toUpperCase(),
+                    maximumFractionDigits: 0,
+                  }).format(value)
+                }
+                hideTooltip
+              />
+            </div>
+          </div>
         </div>
       )}
     </Container>
@@ -92,7 +118,7 @@ export const AverageOrderValue: React.FC = () => {
 };
 
 // KPI + Graphs
-export const TotalSales: React.FC = () => {
+export const TotalSales = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
 
@@ -112,14 +138,9 @@ export const TotalSales: React.FC = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1 h-40">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-
-          <div className="aspect-video flex-1 mt-2.5 max-w-72">
-            <Skeleton className="w-full h-full" />
-          </div>
+        <div className="flex gap-4 justify-between flex-1">
+          <SmallCardSkeleton />
+          <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
         <div className="flex gap-4 justify-between flex-1">
@@ -135,21 +156,23 @@ export const TotalSales: React.FC = () => {
             />
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-h-40">
-            <LineChart
-              data={data?.order_sales ?? []}
-              xAxisDataKey="name"
-              yAxisDataKey="sales"
-              lineColor="#a1a1aa"
-              yAxisTickFormatter={(value) =>
-                new Intl.NumberFormat(undefined, {
-                  style: 'currency',
-                  currency: data?.currency_code || 'EUR',
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
-              hideTooltip
-            />
+          <div className="flex-1 flex mt-2.5">
+            <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
+              <LineChart
+                data={data?.order_sales ?? []}
+                xAxisDataKey="name"
+                yAxisDataKey="sales"
+                lineColor="#a1a1aa"
+                yAxisTickFormatter={(value) =>
+                  new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: data?.currency_code || 'EUR',
+                    maximumFractionDigits: 0,
+                  }).format(value)
+                }
+                hideTooltip
+              />
+            </div>
           </div>
         </div>
       )}
@@ -157,7 +180,7 @@ export const TotalSales: React.FC = () => {
   );
 };
 
-export const TotalOrders: React.FC = () => {
+export const TotalOrders = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
 
@@ -177,14 +200,9 @@ export const TotalOrders: React.FC = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1 h-40">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-
-          <div className="aspect-video flex-1 mt-2.5 max-h-40">
-            <Skeleton className="w-full h-full" />
-          </div>
+        <div className="flex gap-4 justify-between flex-1">
+          <SmallCardSkeleton />
+          <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
         <div className="flex gap-4 justify-between flex-1">
@@ -197,14 +215,16 @@ export const TotalOrders: React.FC = () => {
             />
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-h-40">
-            <LineChart
-              data={data?.order_count}
-              xAxisDataKey="name"
-              yAxisDataKey="count"
-              lineColor="#a1a1aa"
-              hideTooltip
-            />
+          <div className="flex-1 flex mt-2.5">
+            <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
+              <LineChart
+                data={data?.order_count}
+                xAxisDataKey="name"
+                yAxisDataKey="count"
+                lineColor="#a1a1aa"
+                hideTooltip
+              />
+            </div>
           </div>
         </div>
       )}
@@ -212,7 +232,7 @@ export const TotalOrders: React.FC = () => {
   );
 };
 
-export const AverageSalesPerCustomer: React.FC = () => {
+export const AverageSalesPerCustomer = () => {
   const { interval, range } = useIntervalRange();
   const ordersQuery = useOrderAnalytics(interval, range);
   const customersQuery = useCustomerAnalytics(range);
@@ -243,17 +263,12 @@ export const AverageSalesPerCustomer: React.FC = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1 h-40">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-
-          <div className="aspect-video flex-1 mt-2.5 max-h-40">
-            <Skeleton className="w-full h-full" />
-          </div>
+        <div className="flex gap-4 justify-between flex-1">
+          <SmallCardSkeleton />
+          <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
-        <div className="flex gap-4 justify-between flex-1 h-40">
+        <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
               {new Intl.NumberFormat(undefined, {
@@ -265,20 +280,22 @@ export const AverageSalesPerCustomer: React.FC = () => {
               in the selected time period
             </Text>
           </div>
-
-          <div className="aspect-video flex-1 mt-2.5 max-h-40">
-            <LineChart
-              // TODO: Put maybe the other fields to show trend over time?
-              data={[
-                {
-                  count: averageSalesPerCustomer,
-                  name: 'Customers',
-                },
-              ]}
-              xAxisDataKey="name"
-              yAxisDataKey="count"
-              lineColor="#82ca9d"
-            />
+          <div className="flex-1 flex mt-2.5">
+            <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
+              <LineChart
+                // TODO: Put maybe the other fields to show trend over time?
+                data={[
+                  {
+                    count: averageSalesPerCustomer,
+                    name: 'Customers',
+                  },
+                ]}
+                xAxisDataKey="name"
+                yAxisDataKey="count"
+                lineColor="#a1a1aa"
+                hideTooltip
+              />
+            </div>
           </div>
         </div>
       )}

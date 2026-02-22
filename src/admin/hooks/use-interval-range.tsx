@@ -57,14 +57,3 @@ export const IntervalRangeContextProvider: React.FC<{
 };
 
 export const useIntervalRange = () => React.useContext(IntervalRangeContext);
-
-// TODO: remove this HOC once all widgets are converted to use the provider directly
-export const withIntervalRange = <P extends object>(
-  Component: React.ComponentType<P>,
-) => {
-  return (props: P) => (
-    <IntervalRangeContextProvider>
-      <Component {...props} />
-    </IntervalRangeContextProvider>
-  );
-};

@@ -4,13 +4,10 @@ import {
   TopSellingProducts,
   BottomSellingProducts,
 } from '../components/Charts';
-import {
-  IntervalRangeContextProvider,
-  withIntervalRange,
-} from '../hooks/use-interval-range';
+import { IntervalRangeContextProvider } from '../hooks/use-interval-range';
 import { SelectInterval } from '../components/SelectInterval';
 
-export const ProductWidget = withIntervalRange(() => {
+export const ProductWidget = () => {
   return (
     <IntervalRangeContextProvider>
       <div className="flex justify-end">
@@ -24,7 +21,7 @@ export const ProductWidget = withIntervalRange(() => {
       </div>
     </IntervalRangeContextProvider>
   );
-});
+};
 
 export const config = defineWidgetConfig({
   zone: 'product.list.before',

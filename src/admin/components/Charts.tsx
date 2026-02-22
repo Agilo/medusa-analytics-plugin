@@ -17,7 +17,7 @@ export const TopSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -40,9 +40,7 @@ export const TopSellingProducts = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex-1 text-xs aspect-video">
-          <Skeleton className="w-full h-44" />
-        </div>
+        <Skeleton className="w-full h-44" />
       ) : topThreeSellers && topThreeSellers.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
@@ -72,7 +70,7 @@ export const LowStockVariants = () => {
   const { data, isLoading } = useProductAnalytics(range);
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -95,9 +93,7 @@ export const LowStockVariants = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex-1 text-xs aspect-video">
-          <Skeleton className="w-full h-44" />
-        </div>
+        <Skeleton className="w-full h-44" />
       ) : data?.lowStockVariants && data?.lowStockVariants?.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
@@ -130,7 +126,7 @@ export const BottomSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -153,9 +149,7 @@ export const BottomSellingProducts = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex-1 text-xs aspect-video">
-          <Skeleton className="w-full h-44" />
-        </div>
+        <Skeleton className="w-full h-44" />
       ) : topThreeWorstSellingProducts &&
         topThreeWorstSellingProducts.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
@@ -192,7 +186,7 @@ export const NewVsReturningCustomers = () => {
 
   console.log('new vs returning customers', data, pieChartCustomers);
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -215,9 +209,7 @@ export const NewVsReturningCustomers = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex-1 aspect-video">
-          <Skeleton className="w-full h-40" />
-        </div>
+        <Skeleton className="w-full h-44" />
       ) : data?.customer_group && data.customer_group.length > 0 ? (
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           {/* <LineChart
@@ -247,7 +239,7 @@ export const TopCustomerGroupBySales = () => {
   const { data, isLoading } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -270,9 +262,7 @@ export const TopCustomerGroupBySales = () => {
         </a>
       </div>
       {isLoading ? (
-        <div className="flex-1 aspect-video">
-          <Skeleton className="w-full h-40" />
-        </div>
+        <Skeleton className="w-full h-44" />
       ) : data?.customer_group && data.customer_group.length > 0 ? (
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           <BarChart

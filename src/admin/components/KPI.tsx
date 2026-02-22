@@ -2,9 +2,11 @@ import { Button, clx, Container, Text } from '@medusajs/ui';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 import { LineChart } from './LineChart';
+import { Skeleton } from './Skeleton';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini } from '@medusajs/icons';
+import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
 
 const KPITimelineLabel: React.FC<{
   percentage: number;
@@ -43,10 +45,15 @@ export const AverageOrderValue: React.FC = () => {
     1 + ordersChange === 0 ? 0 : (1 + salesChange) / (1 + ordersChange) - 1;
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Average order value</Text>
-        <a href="/app/analytics?range=this-month&tab=orders#:~:text=Orders%20Over%20Time">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=orders#:~:text=Orders%20Over%20Time',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
             View more
           </Button>
@@ -55,6 +62,15 @@ export const AverageOrderValue: React.FC = () => {
       {isLoading ? (
         <SmallCardSkeleton />
       ) : (
+        //  <div className="flex gap-4 justify-between flex-1">
+        //   <div>
+        //     <SmallCardSkeleton />
+        //   </div>
+
+        //   <div className="aspect-video flex-1 mt-2.5 max-w-72">
+        //     <Skeleton className="w-full h-full" />
+        //   </div>
+        // </div>
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
@@ -81,19 +97,32 @@ export const TotalSales: React.FC = () => {
   const { data, isLoading } = useOrderAnalytics(interval, range);
 
   return (
-    <Container className="min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Total Sales</Text>
-        <a href="/app/analytics#:~:text=Sales%20Over%20Time">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics#:~:text=Sales%20Over%20Time',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <SmallCardSkeleton />
+        <div className="flex gap-4 justify-between flex-1 h-40">
+          <div>
+            <SmallCardSkeleton />
+          </div>
+
+          <div className="aspect-video flex-1 mt-2.5 max-w-72">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </div>
       ) : (
-        <div className="flex gap-4 justify-between">
+        <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
               {new Intl.NumberFormat(undefined, {
@@ -106,7 +135,7 @@ export const TotalSales: React.FC = () => {
             />
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-w-64">
+          <div className="aspect-video flex-1 mt-2.5 max-h-40">
             <LineChart
               data={data?.order_sales ?? []}
               xAxisDataKey="name"
@@ -133,19 +162,32 @@ export const TotalOrders: React.FC = () => {
   const { data, isLoading } = useOrderAnalytics(interval, range);
 
   return (
-    <Container className="min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Total Orders</Text>
-        <a href="/app/analytics?range=2025-09-01-2025-11-30#:~:text=Orders%20Over%20Time">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics#:~:text=Orders%20Over%20Time',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <SmallCardSkeleton />
+        <div className="flex gap-4 justify-between flex-1 h-40">
+          <div>
+            <SmallCardSkeleton />
+          </div>
+
+          <div className="aspect-video flex-1 mt-2.5 max-h-40">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </div>
       ) : (
-        <div className="flex gap-4 justify-between">
+        <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
               {data?.total_orders || 0}
@@ -155,7 +197,7 @@ export const TotalOrders: React.FC = () => {
             />
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-w-64">
+          <div className="aspect-video flex-1 mt-2.5 max-h-40">
             <LineChart
               data={data?.order_count}
               xAxisDataKey="name"
@@ -186,19 +228,32 @@ export const AverageSalesPerCustomer: React.FC = () => {
   const isLoading = ordersQuery.isLoading || customersQuery.isLoading;
 
   return (
-    <Container className="min-h-44">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Average Sales per Customer</Text>
-        <a href="/app/analytics#:~:text=Sales%20Over%20Time">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics#:~:text=Sales%20Over%20Time',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <SmallCardSkeleton />
+        <div className="flex gap-4 justify-between flex-1 h-40">
+          <div>
+            <SmallCardSkeleton />
+          </div>
+
+          <div className="aspect-video flex-1 mt-2.5 max-h-40">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </div>
       ) : (
-        <div className="flex gap-4 justify-between flex-1">
+        <div className="flex gap-4 justify-between flex-1 h-40">
           <div>
             <Text size="xlarge" weight="plus">
               {new Intl.NumberFormat(undefined, {
@@ -211,7 +266,7 @@ export const AverageSalesPerCustomer: React.FC = () => {
             </Text>
           </div>
 
-          <div className="aspect-video flex-1 mt-2.5 max-w-64">
+          <div className="aspect-video flex-1 mt-2.5 max-h-40">
             <LineChart
               // TODO: Put maybe the other fields to show trend over time?
               data={[

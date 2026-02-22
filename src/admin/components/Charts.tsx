@@ -1,10 +1,11 @@
 import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
-import { BarChartSkeleton } from '../skeletons/BarChartSkeleton';
 import { PieChart } from './PieChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
+import { Skeleton } from './Skeleton';
+import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
 
 // Orders
 export const TopSellingProducts = () => {
@@ -27,14 +28,21 @@ export const TopSellingProducts = () => {
           </Text>
         </div>
 
-        <a href="/app/analytics?tab=products">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=products',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <BarChartSkeleton />
+        <div className="flex-1 text-xs aspect-video">
+          <Skeleton className="w-full h-44" />
+        </div>
       ) : topThreeSellers && topThreeSellers.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
@@ -75,14 +83,21 @@ export const LowStockVariants = () => {
           </Text>
         </div>
 
-        <a href="/app/analytics?range=this-month&tab=products#:~:text=Out%2Dof%2DStock%20Variants">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=products#:~:text=Low%20Stock%20Variants',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <BarChartSkeleton />
+        <div className="flex-1 text-xs aspect-video">
+          <Skeleton className="w-full h-44" />
+        </div>
       ) : data?.lowStockVariants && data?.lowStockVariants?.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
@@ -126,14 +141,21 @@ export const BottomSellingProducts = () => {
           </Text>
         </div>
 
-        <a href="/app/analytics?tab=products">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=products',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <BarChartSkeleton />
+        <div className="flex-1 text-xs aspect-video">
+          <Skeleton className="w-full h-44" />
+        </div>
       ) : topThreeWorstSellingProducts &&
         topThreeWorstSellingProducts.length > 0 ? (
         <div className="max-w-72 flex-1 text-xs aspect-video">
@@ -179,16 +201,23 @@ export const NewVsReturningCustomers = () => {
           </Text>
         </div>
 
-        <a href="/app/analytics?range=this-month&tab=orders#:~:text=Order%20Status%20Breakdown">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=orders#:~:text=Order%20Status%20Breakdown',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <BarChartSkeleton />
+        <div className="flex-1 aspect-video">
+          <Skeleton className="w-full h-40" />
+        </div>
       ) : data ? (
-        <div className="max-w-72 min-h-32 mx-auto flex-1 aspect-video">
+        <div className="w-full max-w-72 min-h-32 mx-auto flex-1 aspect-video">
           <PieChart data={pieChartCustomers} dataKey="count" />
         </div>
       ) : (
@@ -219,16 +248,23 @@ export const TopCustomerGroupBySales = () => {
           </Text>
         </div>
 
-        <a href="/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales">
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales',
+            range,
+          )}
+        >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
             View more
           </Button>
         </a>
       </div>
       {isLoading ? (
-        <BarChartSkeleton />
+        <div className="flex-1 aspect-video">
+          <Skeleton className="w-full h-40" />
+        </div>
       ) : data?.customer_group && data.customer_group.length > 0 ? (
-        <div className="max-w-72 mx-auto flex-1 aspect-video min-w-60">
+        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           <BarChart
             data={data.customer_group}
             xAxisDataKey="name"

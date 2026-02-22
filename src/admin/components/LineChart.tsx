@@ -11,13 +11,14 @@ import {
   Bar,
 } from 'recharts';
 import { useDarkMode } from '../hooks/use-dark-mode';
+import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 type LineChartProps = {
   data: any[] | undefined;
   xAxisDataKey: string;
   yAxisDataKey: string;
   lineColor?: string;
-  yAxisTickFormatter?: (value: number) => string;
+  yAxisTickFormatter?: (value: ValueType | undefined) => string;
   hideTooltip?: boolean;
 };
 
@@ -64,9 +65,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                   ? 'rgba(55, 65, 81, 0.2)'
                   : 'rgba(243, 244, 246, 0.5)',
               }}
-              formatter={(value: number) =>
-                yAxisTickFormatter ? yAxisTickFormatter(value) : value
-              }
+              formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
               contentStyle={{
                 backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
                 border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
@@ -125,9 +124,7 @@ export const LineChart: React.FC<LineChartProps> = ({
                 ? 'rgba(55, 65, 81, 0.2)'
                 : 'rgba(243, 244, 246, 0.5)',
             }}
-            formatter={(value: number) =>
-              yAxisTickFormatter ? yAxisTickFormatter(value) : value
-            }
+            formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
             contentStyle={{
               backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
               border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,

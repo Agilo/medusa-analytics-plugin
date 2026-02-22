@@ -1,0 +1,50 @@
+# Source files (only built files should be published)
+src/
+tsconfig.json
+
+# Medusa server files
+!.medusa/
+!.medusa/server/
+!.medusa/server/**
+
+# Tests
+integration-tests/
+unit-tests/
+jest.config.js
+coverage/
+
+# Development configuration
+.yarnrc.yml
+yarn.lock
+.env
+.env.*
+medusa-config.js
+
+# Yarn
+.yarn/
+.pnp.*
+yarn-error.log
+yarn-debug.log*
+
+# Git
+.git/
+.github/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+
+# Build artifacts not in .medusa/server
+/dist
+/build
+.cache
+
+# Misc
+globals.css

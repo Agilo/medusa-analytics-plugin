@@ -47,6 +47,7 @@ export async function createProductVariant({
         '/admin/products',
         {
           title: `Test fixture 2`,
+          status: 'published',
           shipping_profile_id: undefined,
           options: [
             { title: 'size', values: ['large', 'small'] },

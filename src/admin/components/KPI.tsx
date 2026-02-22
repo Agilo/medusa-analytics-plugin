@@ -105,7 +105,13 @@ export const AverageOrderValue = () => {
                     style: 'currency',
                     currency: (data?.currency_code || 'EUR').toUpperCase(),
                     maximumFractionDigits: 0,
-                  }).format(value)
+                  }).format(
+                    typeof value === 'number'
+                      ? value
+                      : typeof value === 'string'
+                        ? Number(value)
+                        : 0,
+                  )
                 }
                 hideTooltip
               />
@@ -168,7 +174,13 @@ export const TotalSales = () => {
                     style: 'currency',
                     currency: data?.currency_code || 'EUR',
                     maximumFractionDigits: 0,
-                  }).format(value)
+                  }).format(
+                    typeof value === 'number'
+                      ? value
+                      : typeof value === 'string'
+                        ? Number(value)
+                        : 0,
+                  )
                 }
                 hideTooltip
               />

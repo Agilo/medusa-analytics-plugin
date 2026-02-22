@@ -110,8 +110,15 @@ export const TotalSales: React.FC = () => {
             <LineChart
               data={data?.order_sales ?? []}
               xAxisDataKey="name"
-              yAxisDataKey="count"
+              yAxisDataKey="sales"
               lineColor="#a1a1aa"
+              yAxisTickFormatter={(value) =>
+                new Intl.NumberFormat(undefined, {
+                  style: 'currency',
+                  currency: data?.currency_code || 'EUR',
+                  maximumFractionDigits: 0,
+                }).format(value)
+              }
               hideTooltip
             />
           </div>
@@ -154,13 +161,6 @@ export const TotalOrders: React.FC = () => {
               xAxisDataKey="name"
               yAxisDataKey="count"
               lineColor="#a1a1aa"
-              yAxisTickFormatter={(value) =>
-                new Intl.NumberFormat(undefined, {
-                  style: 'currency',
-                  currency: data?.currency_code || 'EUR',
-                  maximumFractionDigits: 0,
-                }).format(value)
-              }
               hideTooltip
             />
           </div>

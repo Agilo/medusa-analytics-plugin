@@ -74,7 +74,9 @@ export const AverageOrderValue = () => {
       </div>
       {isLoading ? (
         <div className="flex gap-4 justify-between flex-1">
-          <SmallCardSkeleton />
+          <div>
+            <SmallCardSkeleton />
+          </div>
           <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
@@ -139,7 +141,9 @@ export const TotalSales = () => {
       </div>
       {isLoading ? (
         <div className="flex gap-4 justify-between flex-1">
-          <SmallCardSkeleton />
+          <div>
+            <SmallCardSkeleton />
+          </div>
           <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
@@ -201,7 +205,9 @@ export const TotalOrders = () => {
       </div>
       {isLoading ? (
         <div className="flex gap-4 justify-between flex-1">
-          <SmallCardSkeleton />
+          <div>
+            <SmallCardSkeleton />
+          </div>
           <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
@@ -237,6 +243,12 @@ export const AverageSalesPerCustomer = () => {
   const ordersQuery = useOrderAnalytics(interval, range);
   const customersQuery = useCustomerAnalytics(range);
 
+  const currencyCode = (
+    ordersQuery.data?.currency_code ||
+    customersQuery.data?.currency_code ||
+    'EUR'
+  ).toUpperCase();
+
   const averageSalesPerCustomer =
     customersQuery.data?.total_customers &&
     customersQuery.data.total_customers > 0
@@ -245,6 +257,30 @@ export const AverageSalesPerCustomer = () => {
           customersQuery.data.total_customers
         ).toFixed(2)
       : 0;
+
+  const customersPerBucket = new Map(
+    (customersQuery.data?.customer_count ?? []).map((point) => [
+      point.name,
+      (point.new_customers ?? 0) + (point.returning_customers ?? 0),
+    ]),
+  );
+
+  const averageSalesPerCustomerTimeline = (
+    ordersQuery.data?.order_sales ?? []
+  ).map((point) => {
+    const customersInBucket =
+      customersPerBucket.get(point.name) ??
+      customersQuery.data?.total_customers ??
+      0;
+
+    return {
+      name: point.name,
+      value:
+        customersInBucket > 0
+          ? Number((point.sales / customersInBucket).toFixed(2))
+          : 0,
+    };
+  });
   const isLoading = ordersQuery.isLoading || customersQuery.isLoading;
 
   return (
@@ -264,7 +300,9 @@ export const AverageSalesPerCustomer = () => {
       </div>
       {isLoading ? (
         <div className="flex gap-4 justify-between flex-1">
-          <SmallCardSkeleton />
+          <div>
+            <SmallCardSkeleton />
+          </div>
           <Skeleton className="aspect-video w-64 mt-2.5" />
         </div>
       ) : (
@@ -272,27 +310,26 @@ export const AverageSalesPerCustomer = () => {
           <div>
             <Text size="xlarge" weight="plus">
               {new Intl.NumberFormat(undefined, {
-                currency: customersQuery.data?.currency_code || 'EUR',
+                currency: currencyCode,
                 style: 'currency',
               }).format(averageSalesPerCustomer)}
             </Text>
-            <Text size="xsmall" className="text-ui-fg-muted">
-              in the selected time period
-            </Text>
+            <KPITimelineLabel percentage={averageSalesPerCustomer / 100} />
           </div>
           <div className="flex-1 flex mt-2.5">
             <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
               <LineChart
-                // TODO: Put maybe the other fields to show trend over time?
-                data={[
-                  {
-                    count: averageSalesPerCustomer,
-                    name: 'Customers',
-                  },
-                ]}
+                data={averageSalesPerCustomerTimeline}
                 xAxisDataKey="name"
-                yAxisDataKey="count"
+                yAxisDataKey="value"
                 lineColor="#a1a1aa"
+                yAxisTickFormatter={(value) =>
+                  new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: currencyCode,
+                    maximumFractionDigits: 0,
+                  }).format(value)
+                }
                 hideTooltip
               />
             </div>

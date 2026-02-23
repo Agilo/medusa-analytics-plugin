@@ -16,8 +16,9 @@ import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 type LineChartProps = {
   data: any[] | undefined;
   xAxisDataKey: string;
-  yAxisDataKey: string;
+  yAxisDataKey?: string;
   lineColor?: string;
+  series?: { dataKey: string; color?: string }[];
   yAxisTickFormatter?: (value: ValueType | undefined) => string;
   hideTooltip?: boolean;
 };
@@ -27,10 +28,22 @@ export const LineChart: React.FC<LineChartProps> = ({
   xAxisDataKey,
   yAxisDataKey,
   lineColor = '#3B82F6',
+  series,
   yAxisTickFormatter,
   hideTooltip = false,
 }) => {
   const isDark = useDarkMode();
+
+  const resolvedSeries =
+    series && series.length > 0
+      ? series
+      : yAxisDataKey
+        ? [{ dataKey: yAxisDataKey, color: lineColor }]
+        : [];
+
+  if (resolvedSeries.length === 0) {
+    return null;
+  }
 
   // Check if we have only one data point
   const isSingleDataPoint = data && data.length === 1;
@@ -59,34 +72,39 @@ export const LineChart: React.FC<LineChartProps> = ({
               axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
               tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
             />
-            <Tooltip
-              cursor={{
-                fill: isDark
-                  ? 'rgba(55, 65, 81, 0.2)'
-                  : 'rgba(243, 244, 246, 0.5)',
-              }}
-              formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
-              contentStyle={{
-                backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-                border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-                borderRadius: '0.5rem',
-                color: isDark ? '#F9FAFB' : '#111827',
-                boxShadow: isDark
-                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-                  : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              }}
-              labelStyle={{
-                color: isDark ? '#F9FAFB' : '#111827',
-                fontWeight: '500',
-                marginBottom: '4px',
-              }}
-            />
-            <Bar
-              dataKey={yAxisDataKey}
-              fill={lineColor}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={60}
-            />
+            {!hideTooltip && (
+              <Tooltip
+                cursor={{
+                  fill: isDark
+                    ? 'rgba(55, 65, 81, 0.2)'
+                    : 'rgba(243, 244, 246, 0.5)',
+                }}
+                formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
+                contentStyle={{
+                  backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+                  border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+                  borderRadius: '0.5rem',
+                  color: isDark ? '#F9FAFB' : '#111827',
+                  boxShadow: isDark
+                    ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+                    : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                }}
+                labelStyle={{
+                  color: isDark ? '#F9FAFB' : '#111827',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                }}
+              />
+            )}
+            {resolvedSeries.map((s, idx) => (
+              <Bar
+                key={`${s.dataKey}_${idx}`}
+                dataKey={s.dataKey}
+                fill={s.color || lineColor}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={60}
+              />
+            ))}
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>
@@ -141,24 +159,31 @@ export const LineChart: React.FC<LineChartProps> = ({
             }}
           />
         )}
-        <Line
-          type="monotone"
-          dataKey={yAxisDataKey}
-          stroke={lineColor}
-          activeDot={{
-            r: 5,
-            fill: lineColor,
-            stroke: isDark ? '#1F2937' : '#FFFFFF',
-            strokeWidth: 2,
-          }}
-          strokeWidth={2}
-          dot={{
-            r: 4,
-            fill: lineColor,
-            stroke: isDark ? '#1F2937' : '#FFFFFF',
-            strokeWidth: 1,
-          }}
-        />
+        {resolvedSeries.map((s, idx) => {
+          const color = s.color || lineColor;
+
+          return (
+            <Line
+              key={`${s.dataKey}_${idx}`}
+              type="monotone"
+              dataKey={s.dataKey}
+              stroke={color}
+              activeDot={{
+                r: 5,
+                fill: color,
+                stroke: isDark ? '#1F2937' : '#FFFFFF',
+                strokeWidth: 2,
+              }}
+              strokeWidth={2}
+              dot={{
+                r: 4,
+                fill: color,
+                stroke: isDark ? '#1F2937' : '#FFFFFF',
+                strokeWidth: 1,
+              }}
+            />
+          );
+        })}
       </RechartsLineChart>
     </ResponsiveContainer>
   );

@@ -340,7 +340,13 @@ export const AverageSalesPerCustomer = () => {
                     style: 'currency',
                     currency: currencyCode,
                     maximumFractionDigits: 0,
-                  }).format(value)
+                  }).format(
+                    typeof value === 'number'
+                      ? value
+                      : typeof value === 'string'
+                        ? Number(value)
+                        : 0,
+                  )
                 }
                 hideTooltip
               />

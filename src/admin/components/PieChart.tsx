@@ -11,6 +11,7 @@ import { useDarkMode } from '../hooks/use-dark-mode';
 type PieChartProps = {
   data: any[] | undefined;
   dataKey: string;
+  hideTooltip?: boolean;
 };
 
 const COLORS = [
@@ -35,7 +36,11 @@ const DARK_COLORS = [
   '#FB923C', // orange-400
 ];
 
-export const PieChart: React.FC<PieChartProps> = ({ data, dataKey }) => {
+export const PieChart: React.FC<PieChartProps> = ({
+  data,
+  dataKey,
+  hideTooltip = false,
+}) => {
   const isDark = useDarkMode();
   const colors = isDark ? DARK_COLORS : COLORS;
 
@@ -58,25 +63,27 @@ export const PieChart: React.FC<PieChartProps> = ({ data, dataKey }) => {
               />
             ))}
         </Pie>
-        <Tooltip
-          contentStyle={{
-            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-            border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-            borderRadius: '0.5rem',
-            color: isDark ? '#F9FAFB' : '#111827',
-            boxShadow: isDark
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-              : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          }}
-          labelStyle={{
-            color: isDark ? '#F9FAFB' : '#111827',
-            fontWeight: '500',
-            marginBottom: '4px',
-          }}
-          itemStyle={{
-            color: isDark ? '#F9FAFB' : '#111827',
-          }}
-        />
+        {!hideTooltip && (
+          <Tooltip
+            contentStyle={{
+              backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+              border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+              borderRadius: '0.5rem',
+              color: isDark ? '#F9FAFB' : '#111827',
+              boxShadow: isDark
+                ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+                : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            }}
+            labelStyle={{
+              color: isDark ? '#F9FAFB' : '#111827',
+              fontWeight: '500',
+              marginBottom: '4px',
+            }}
+            itemStyle={{
+              color: isDark ? '#F9FAFB' : '#111827',
+            }}
+          />
+        )}
       </RechartsPieChart>
     </ResponsiveContainer>
   );

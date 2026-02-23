@@ -1,6 +1,7 @@
 import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
 import { PieChart } from './PieChart';
+import { LineChart } from './LineChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
@@ -51,6 +52,7 @@ export const TopSellingProducts = () => {
             lineColor="#82ca9d"
             useStableColors={true}
             colorKeyField="title"
+            hideTooltip
           />
         </div>
       ) : (
@@ -104,6 +106,7 @@ export const LowStockVariants = () => {
             lineColor="#82ca9d"
             useStableColors={true}
             colorKeyField="variantName"
+            hideTooltip
           />
         </div>
       ) : (
@@ -117,6 +120,7 @@ export const LowStockVariants = () => {
     </Container>
   );
 };
+
 export const BottomSellingProducts = () => {
   const { range } = useIntervalRange();
   const { data, isLoading } = useProductAnalytics(range);
@@ -161,6 +165,7 @@ export const BottomSellingProducts = () => {
             lineColor="#82ca9d"
             useStableColors={true}
             colorKeyField="title"
+            hideTooltip
           />
         </div>
       ) : (
@@ -179,12 +184,13 @@ export const BottomSellingProducts = () => {
 export const NewVsReturningCustomers = () => {
   const { range } = useIntervalRange();
   const { data, isLoading } = useCustomerAnalytics(range);
-  const pieChartCustomers = [
-    { count: data?.new_customers, name: 'New Customers' },
-    { count: data?.returning_customers, name: 'Returning Customers' },
-  ];
 
-  console.log('new vs returning customers', data, pieChartCustomers);
+  //  Replace line chart with pie chart (optional - data)
+  // const pieChartCustomers = [
+  //   { count: data?.new_customers, name: 'New Customers' },
+  //   { count: data?.returning_customers, name: 'Returning Customers' },
+  // ];
+
   return (
     <Container className="flex flex-col min-h-44">
       <div className="flex justify-between">
@@ -193,13 +199,13 @@ export const NewVsReturningCustomers = () => {
             New vs Returning Customers
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Distribution of new and returning customers in the selected period
+            New and returning customers over time in the selected period
           </Text>
         </div>
 
         <a
           href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=orders#:~:text=Order%20Status%20Breakdown',
+            '/app/analytics?tab=customers',
             range,
           )}
         >
@@ -210,19 +216,25 @@ export const NewVsReturningCustomers = () => {
       </div>
       {isLoading ? (
         <Skeleton className="w-full h-44" />
-      ) : data?.customer_group && data.customer_group.length > 0 ? (
+      ) : data?.customer_count && data.customer_count.length > 0 ? (
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          {/* <LineChart
-            // TODO: Put maybe the other fields to show trend over time?
-            data={pieChartCustomers}
+          <LineChart
+            data={data.customer_count}
             xAxisDataKey="name"
-            yAxisDataKey="count"
-            lineColor="#a1a1aa"
+            series={[
+              { dataKey: 'new_customers', color: '#82ca9d' },
+              { dataKey: 'returning_customers', color: '#a1a1aa' },
+            ]}
             hideTooltip
-          /> */}
-          <PieChart data={pieChartCustomers} dataKey="count" />
+          />
         </div>
       ) : (
+        //  Replace line chart with pie chart (optional - apparence)
+        //  (
+        //   <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+        //     <PieChart data={pieChartCustomers} dataKey="count" hideTooltip />
+        //   </div>
+        // )
         <Text
           size="xsmall"
           className="text-ui-fg-muted flex items-center justify-center flex-1"
@@ -272,12 +284,19 @@ export const TopCustomerGroupBySales = () => {
             useStableColors={true}
             colorKeyField="name"
             yAxisDataKey="total"
-            yAxisTickFormatter={(value: number) =>
+            yAxisTickFormatter={(value) =>
               new Intl.NumberFormat(undefined, {
                 currency: data.currency_code || 'EUR',
                 maximumFractionDigits: 0,
-              }).format(value)
+              }).format(
+                typeof value === 'number'
+                  ? value
+                  : typeof value === 'string'
+                    ? Number(value)
+                    : 0,
+              )
             }
+            hideTooltip
           />
         </div>
       ) : (

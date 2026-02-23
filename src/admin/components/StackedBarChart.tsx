@@ -20,6 +20,7 @@ type StackedBarChartProps<T extends Record<string, unknown>> = {
   useStableColors?: boolean;
   colorKeyField?: keyof T;
   dataKeys: (keyof T)[];
+  hideTooltip?: boolean;
 };
 
 export const StackedBarChart = <T extends Record<string, unknown>>({
@@ -29,6 +30,7 @@ export const StackedBarChart = <T extends Record<string, unknown>>({
   useStableColors = false,
   colorKeyField,
   dataKeys,
+  hideTooltip = false,
 }: StackedBarChartProps<T>) => {
   const isDark = useDarkMode();
 
@@ -61,26 +63,30 @@ export const StackedBarChart = <T extends Record<string, unknown>>({
           axisLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
           tickLine={{ stroke: isDark ? '#4B5563' : '#D1D5DB' }}
         />
-        <Tooltip
-          cursor={{
-            fill: isDark ? 'rgba(55, 65, 81, 0.2)' : 'rgba(243, 244, 246, 0.5)',
-          }}
-          formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
-          contentStyle={{
-            backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
-            border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
-            borderRadius: '0.5rem',
-            color: isDark ? '#F9FAFB' : '#111827',
-            boxShadow: isDark
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-              : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          }}
-          labelStyle={{
-            color: isDark ? '#F9FAFB' : '#111827',
-            fontWeight: '500',
-            marginBottom: '4px',
-          }}
-        />
+        {!hideTooltip && (
+          <Tooltip
+            cursor={{
+              fill: isDark
+                ? 'rgba(55, 65, 81, 0.2)'
+                : 'rgba(243, 244, 246, 0.5)',
+            }}
+            formatter={yAxisTickFormatter ? yAxisTickFormatter : undefined}
+            contentStyle={{
+              backgroundColor: isDark ? '#1F2937' : '#FFFFFF',
+              border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+              borderRadius: '0.5rem',
+              color: isDark ? '#F9FAFB' : '#111827',
+              boxShadow: isDark
+                ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+                : '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            }}
+            labelStyle={{
+              color: isDark ? '#F9FAFB' : '#111827',
+              fontWeight: '500',
+              marginBottom: '4px',
+            }}
+          />
+        )}
         {dataKeys?.map((key, index) => (
           <Bar
             key={String(key)}

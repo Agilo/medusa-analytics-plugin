@@ -20,6 +20,7 @@ __metadata:
     "@radix-ui/react-slot": "npm:^1.2.3"
     "@swc/core": "npm:1.12.2"
     "@swc/jest": "npm:^0.2.38"
+    "@tanstack/react-query": "npm:5.64.2"
     "@types/jest": "npm:^29.5.13"
     "@types/jsonwebtoken": "npm:^9.0.10"
     "@types/luxon": "npm:^3.6.2"

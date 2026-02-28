@@ -8,7 +8,7 @@ import { Skeleton } from './Skeleton';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
 import { useOrderAnalytics } from '../hooks/order-analytics.tsx';
 
-// Orders
+// Products
 export const TopSellingProducts = () => {
   const { range } = useIntervalRange();
   const { data, isLoading } = useProductAnalytics(range);

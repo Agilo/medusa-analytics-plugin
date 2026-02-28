@@ -33,7 +33,7 @@ const KPITimelineLabel: React.FC<{
   );
 };
 
-// KPIS
+// Orders
 export const AverageOrderValue = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);
@@ -124,7 +124,6 @@ export const AverageOrderValue = () => {
   );
 };
 
-// KPI + Graphs
 export const TotalSales = () => {
   const { interval, range } = useIntervalRange();
   const { data, isLoading } = useOrderAnalytics(interval, range);

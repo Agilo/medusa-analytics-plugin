@@ -115,7 +115,7 @@ export const calculateDateRangeMethod: Record<
 export function getWeekRangeKeyForDate(
   date: Date,
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
 ): string {
   const start = startOfDay(parseISO(dateFrom));
   const end = endOfDay(parseISO(dateTo));
@@ -203,32 +203,36 @@ export function getDateGroupingKey(
   date: Date,
   groupBy: 'day' | 'week' | 'month',
   dateFrom?: string,
-  dateTo?: string
+  dateTo?: string,
 ) {
   if (groupBy === 'month') {
     return format(
       startOfMonth(
         new Date(
-          Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-        )
+          Date.UTC(
+            date.getUTCFullYear(),
+            date.getUTCMonth(),
+            date.getUTCDate(),
+          ),
+        ),
       ),
-      'yyyy-MM'
+      'yyyy-MM',
     );
   }
   if (groupBy === 'week' && dateFrom && dateTo) {
     return getWeekRangeKeyForDate(
       new Date(
-        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+        Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
       ),
       dateFrom,
-      dateTo
+      dateTo,
     );
   }
   return format(
     new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
     ),
-    'yyyy-MM-dd'
+    'yyyy-MM-dd',
   );
 }
 
@@ -243,14 +247,14 @@ export function getDateGroupingKey(
 export function getAllDateGroupingKeys(
   groupBy: 'day' | 'week' | 'month',
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
 ): string[] {
   const start = parseISO(dateFrom);
   const end = parseISO(dateTo);
 
   if (groupBy === 'day') {
     return eachDayOfInterval({ start, end }).map((d) =>
-      format(d, 'yyyy-MM-dd')
+      format(d, 'yyyy-MM-dd'),
     );
   }
 

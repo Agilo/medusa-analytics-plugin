@@ -1,4 +1,3 @@
-// Utilities
 import { twMerge } from 'tailwind-merge';
 
 export const Skeleton: React.FC<React.ComponentProps<'div'>> = ({

@@ -10,7 +10,7 @@ describe('date utils', () => {
       const key = getWeekRangeKeyForDate(
         new Date('2024-06-05'),
         '2024-06-01',
-        '2024-06-30'
+        '2024-06-30',
       );
       expect(key).toBe('1.-7.6');
     });
@@ -18,7 +18,7 @@ describe('date utils', () => {
       const key = getWeekRangeKeyForDate(
         new Date('2024-06-01'),
         '2024-06-01',
-        '2024-06-30'
+        '2024-06-30',
       );
       expect(key).toBe('1.-7.6');
     });
@@ -26,7 +26,7 @@ describe('date utils', () => {
       const key = getWeekRangeKeyForDate(
         new Date('2024-06-07'),
         '2024-06-01',
-        '2024-06-30'
+        '2024-06-30',
       );
       expect(key).toBe('1.-7.6');
     });
@@ -35,7 +35,7 @@ describe('date utils', () => {
       const key = getWeekRangeKeyForDate(
         new Date('2020-01-01'),
         '2024-06-01',
-        '2024-06-30'
+        '2024-06-30',
       );
       expect(key).toBe('2020-01-01');
     });
@@ -43,7 +43,7 @@ describe('date utils', () => {
       const key = getWeekRangeKeyForDate(
         new Date('2024-04-30'),
         '2024-04-29',
-        '2024-05-30'
+        '2024-05-30',
       );
       expect(key).toBe('29.4-5.5');
     });
@@ -66,7 +66,7 @@ describe('date utils', () => {
           date,
           'week',
           '2024-06-01',
-          '2024-06-30'
+          '2024-06-30',
         );
         expect(key).toBe('15.-21.6');
       });
@@ -87,7 +87,7 @@ describe('date utils', () => {
           date,
           'week',
           '2024-06-01',
-          '2024-06-30'
+          '2024-06-30',
         );
         expect(key).toMatch('1.-7.6');
       });
@@ -108,7 +108,7 @@ describe('date utils', () => {
           date,
           'week',
           '2024-06-01',
-          '2024-06-30'
+          '2024-06-30',
         );
         expect(key).toMatch('29.-30.6');
       });
@@ -125,7 +125,7 @@ describe('date utils', () => {
       const result = getAllDateGroupingKeys(
         'month',
         '2024-04-01',
-        '2024-06-01'
+        '2024-06-01',
       );
       expect(result).toEqual(['2024-04', '2024-05', '2024-06']);
     });

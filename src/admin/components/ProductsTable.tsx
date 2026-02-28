@@ -67,7 +67,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
   const [search, setSearch] = React.useState<string>('');
 
   const [sorting, setSorting] = React.useState<DataTableSortingState | null>(
-    null
+    null,
   );
 
   const navigate = useNavigate();
@@ -76,7 +76,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
     let filtered = products.filter(
       (product) =>
         product.variantName.toLowerCase().includes(search.toLowerCase()) ||
-        product.sku.toLowerCase().includes(search.toLowerCase())
+        product.sku.toLowerCase().includes(search.toLowerCase()),
     );
 
     if (sorting && sorting.id) {
@@ -97,7 +97,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
 
     return filtered.slice(
       pagination.pageIndex * pagination.pageSize,
-      (pagination.pageIndex + 1) * pagination.pageSize
+      (pagination.pageIndex + 1) * pagination.pageSize,
     );
   }, [products, search, sorting, pagination]);
 
@@ -119,8 +119,10 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
       onSortingChange: setSorting,
     },
     onRowClick: (_, row) => {
-      // @ts-expect-error
-      navigate(`/products/${row.original.productId}/variants/${row.original.variantId}`);
+      navigate(
+        // @ts-expect-error - original missing in the row type
+        `/products/${row.original.productId}/variants/${row.original.variantId}`,
+      );
     },
   });
 

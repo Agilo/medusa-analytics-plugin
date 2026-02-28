@@ -20,7 +20,7 @@ export async function createTestCustomer({
   const response = await api.post(
     '/admin/customers',
     customerData,
-    adminHeaders
+    adminHeaders,
   );
 
   return response.data.customer;
@@ -40,7 +40,7 @@ export async function createCustomerGroup({
     {
       name: name || 'Test Group',
     },
-    adminHeaders
+    adminHeaders,
   );
 
   return response.data.customer_group;
@@ -62,7 +62,7 @@ export async function addCustomerToGroup({
     {
       add: groupId,
     },
-    adminHeaders
+    adminHeaders,
   );
 
   return response.data;

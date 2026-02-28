@@ -18,7 +18,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', ')
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
   const validatedQuery = result.data;
@@ -30,7 +30,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const pluginConfig = config.plugins.find((p) =>
     typeof p === 'string'
       ? p === '@agilo/medusa-analytics-plugin'
-      : p.resolve === '@agilo/medusa-analytics-plugin'
+      : p.resolve === '@agilo/medusa-analytics-plugin',
   );
 
   const threshold =
@@ -87,13 +87,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     {
       stocked_quantity: { $lte: threshold },
     },
-    { select: ['id', 'inventory_item_id', 'stocked_quantity'] }
+    { select: ['id', 'inventory_item_id', 'stocked_quantity'] },
   );
   const inventoryItems = await inventoryService.listInventoryItems(
     {
       id: inventoryLevel.map((i) => i.inventory_item_id),
     },
-    { select: ['id', 'sku'] }
+    { select: ['id', 'sku'] },
   );
   const productVariants = await productService.listProductVariants(
     {
@@ -101,7 +101,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         .map((i) => i.sku)
         .filter((i) => i !== undefined && i !== null),
     },
-    { select: ['id', 'title', 'sku', 'product_id'] }
+    { select: ['id', 'title', 'sku', 'product_id'] },
   );
 
   const quantityByItemId: Record<string, number> = {};
@@ -139,5 +139,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   res.json({
     lowStockVariants,
     variantQuantitySold: sortedVariantQuantitySold.slice(0, 10),
-  });
+  } satisfies ProductAnalyticsResponse);
 }
+
+export type ProductAnalyticsResponse = {
+  lowStockVariants: {
+    sku: string;
+    inventoryQuantity: number;
+    variantName: string;
+    variantId: string;
+    productId: string;
+  }[];
+  variantQuantitySold: {
+    title: string;
+    quantity: number;
+  }[];
+};

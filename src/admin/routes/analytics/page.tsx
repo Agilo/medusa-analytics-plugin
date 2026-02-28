@@ -428,7 +428,7 @@ const AnalyticsPage = () => {
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
+                          {new Intl.NumberFormat(undefined, {
                             style: 'currency',
                             currency: orders?.currency_code || 'EUR',
                           }).format(orders?.total_sales || 0)}
@@ -462,7 +462,7 @@ const AnalyticsPage = () => {
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat(undefined, {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(
@@ -507,7 +507,7 @@ const AnalyticsPage = () => {
                           useStableColors={true}
                           colorKeyField="name"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat(undefined, {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(
@@ -678,7 +678,7 @@ const AnalyticsPage = () => {
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
+                          {new Intl.NumberFormat(undefined, {
                             currency: customers?.currency_code || 'EUR',
                             style: 'currency',
                           }).format(
@@ -750,7 +750,7 @@ const AnalyticsPage = () => {
                           colorKeyField="name"
                           yAxisDataKey="total"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat(undefined, {
                               currency: customers.currency_code || 'EUR',
                               maximumFractionDigits: 0,
                             }).format(

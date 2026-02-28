@@ -1,12 +1,12 @@
 import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
-import { PieChart } from './PieChart';
 import { LineChart } from './LineChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { Skeleton } from './Skeleton';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
+import { useOrderAnalytics } from '../hooks/order-analytics.tsx';
 
 // Orders
 export const TopSellingProducts = () => {
@@ -49,8 +49,7 @@ export const TopSellingProducts = () => {
             data={topThreeSellers}
             yAxisDataKey="quantity"
             xAxisDataKey="title"
-            lineColor="#82ca9d"
-            useStableColors={true}
+            lineColor="#a1a1aa"
             colorKeyField="title"
             hideTooltip
           />
@@ -103,8 +102,7 @@ export const LowStockVariants = () => {
             data={data?.lowStockVariants}
             xAxisDataKey="variantName"
             yAxisDataKey="inventoryQuantity"
-            lineColor="#82ca9d"
-            useStableColors={true}
+            lineColor="#a1a1aa"
             colorKeyField="variantName"
             hideTooltip
           />
@@ -162,8 +160,7 @@ export const BottomSellingProducts = () => {
             data={topThreeWorstSellingProducts}
             yAxisDataKey="quantity"
             xAxisDataKey="title"
-            lineColor="#82ca9d"
-            useStableColors={true}
+            lineColor="#a1a1aa"
             colorKeyField="title"
             hideTooltip
           />
@@ -184,12 +181,6 @@ export const BottomSellingProducts = () => {
 export const NewVsReturningCustomers = () => {
   const { range } = useIntervalRange();
   const { data, isLoading } = useCustomerAnalytics(range);
-
-  //  Replace line chart with pie chart (optional - data)
-  // const pieChartCustomers = [
-  //   { count: data?.new_customers, name: 'New Customers' },
-  //   { count: data?.returning_customers, name: 'Returning Customers' },
-  // ];
 
   return (
     <Container className="flex flex-col min-h-44">
@@ -219,7 +210,7 @@ export const NewVsReturningCustomers = () => {
       ) : data?.customer_count && data.customer_count.length > 0 ? (
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           <LineChart
-            data={data.customer_count}
+            data={data?.customer_count}
             xAxisDataKey="name"
             series={[
               { dataKey: 'new_customers', color: '#82ca9d' },
@@ -229,12 +220,6 @@ export const NewVsReturningCustomers = () => {
           />
         </div>
       ) : (
-        //  Replace line chart with pie chart (optional - apparence)
-        //  (
-        //   <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-        //     <PieChart data={pieChartCustomers} dataKey="count" hideTooltip />
-        //   </div>
-        // )
         <Text
           size="xsmall"
           className="text-ui-fg-muted flex items-center justify-center flex-1"
@@ -277,16 +262,95 @@ export const TopCustomerGroupBySales = () => {
         <Skeleton className="w-full h-44" />
       ) : data?.customer_group && data.customer_group.length > 0 ? (
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          <BarChart
+          <LineChart
             data={data.customer_group}
             xAxisDataKey="name"
-            lineColor="#82ca9d"
-            useStableColors={true}
-            colorKeyField="name"
             yAxisDataKey="total"
+            lineColor="#a1a1aa"
+            hideTooltip
+          />
+        </div>
+      ) : (
+        <Text
+          size="xsmall"
+          className="text-ui-fg-muted flex items-center justify-center flex-1"
+        >
+          No data available for the selected period.
+        </Text>
+      )}
+    </Container>
+  );
+};
+
+export const AverageSalesPerCustomer = () => {
+  const { interval, range } = useIntervalRange();
+  const ordersQuery = useOrderAnalytics(interval, range);
+  const customersQuery = useCustomerAnalytics(range);
+
+  const currencyCode =
+    ordersQuery.data?.currency_code ||
+    customersQuery.data?.currency_code ||
+    'EUR';
+
+  const customersPerBucket = new Map(
+    (customersQuery.data?.customer_count ?? []).map((point) => [
+      point.name,
+      (point.new_customers ?? 0) + (point.returning_customers ?? 0),
+    ]),
+  );
+
+  const averageSalesPerCustomerTimeline = (
+    ordersQuery.data?.order_sales ?? []
+  ).map((point) => {
+    const customersInBucket =
+      customersPerBucket.get(point.name) ??
+      customersQuery.data?.total_customers ??
+      0;
+
+    return {
+      name: point.name,
+      value:
+        customersInBucket > 0
+          ? Number((point.sales / customersInBucket).toFixed(2))
+          : 0,
+    };
+  });
+
+  return (
+    <Container className="flex flex-col min-h-44">
+      <div className="flex justify-between">
+        <div>
+          <Text size="large" weight="plus">
+            Average Sales per Customer
+          </Text>
+          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
+            Average sales per customer over time in the selected period
+          </Text>
+        </div>
+        <a
+          href={withOptionalAnalyticsRange(
+            '/app/analytics#:~:text=Sales%20Over%20Time',
+            range,
+          )}
+        >
+          <Button variant="transparent" className="text-ui-fg-muted text-xs">
+            View more
+          </Button>
+        </a>
+      </div>
+      {ordersQuery.isLoading || customersQuery.isLoading ? (
+        <Skeleton className="w-full h-44" />
+      ) : averageSalesPerCustomerTimeline.length > 0 ? (
+        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+          <LineChart
+            data={averageSalesPerCustomerTimeline}
+            xAxisDataKey="name"
+            yAxisDataKey="value"
+            lineColor="#a1a1aa"
             yAxisTickFormatter={(value) =>
               new Intl.NumberFormat(undefined, {
-                currency: data.currency_code || 'EUR',
+                style: 'currency',
+                currency: currencyCode,
                 maximumFractionDigits: 0,
               }).format(
                 typeof value === 'number'

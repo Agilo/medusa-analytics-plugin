@@ -1,5 +1,5 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { AverageSalesPerCustomer } from '../components/KPI';
+import { AverageSalesPerCustomer } from '../components/Charts';
 import {
   NewVsReturningCustomers,
   TopCustomerGroupBySales,

@@ -42,14 +42,14 @@ medusaIntegrationTestRunner({
         const userModuleService = container.resolve('user');
 
         const user = await userModuleService.createUsers({
-          email: 'test@test.com',
+          email: `test-orders-${Date.now()}@test.com`,
         });
 
         const authIdentity = await authModuleService.createAuthIdentities({
           provider_identities: [
             {
               provider: 'emailpass',
-              entity_id: 'test@test.com',
+              entity_id: user.email,
               provider_metadata: {
                 password: process.env.JWT_SECRET || 'test',
               },

@@ -51,7 +51,6 @@ __metadata:
   peerDependencies:
     "@medusajs/admin-sdk": ">=2.11.0 <3.0.0"
     "@medusajs/framework": ">=2.11.0 <3.0.0"
-    "@medusajs/icons": ">=2.11.0 <3.0.0"
     "@medusajs/medusa": ">=2.11.0 <3.0.0"
     "@medusajs/ui": ">=4.0.0 <5.0.0"
   languageName: unknown

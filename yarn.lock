@@ -12,7 +12,7 @@ __metadata:
     "@medusajs/admin-sdk": "npm:2.13.1"
     "@medusajs/cli": "npm:2.13.1"
     "@medusajs/framework": "npm:2.13.1"
-    "@medusajs/icons": "npm:2.13.1"
+    "@medusajs/icons": "npm:^2.13.3"
     "@medusajs/medusa": "npm:2.13.1"
     "@medusajs/test-utils": "npm:2.13.1"
     "@medusajs/ui": "npm:4.1.1"
@@ -52,7 +52,6 @@ __metadata:
   peerDependencies:
     "@medusajs/admin-sdk": ">=2.11.0 <3.0.0"
     "@medusajs/framework": ">=2.11.0 <3.0.0"
-    "@medusajs/icons": ">=2.11.0 <3.0.0"
     "@medusajs/medusa": ">=2.11.0 <3.0.0"
     "@medusajs/ui": ">=4.0.0 <5.0.0"
   languageName: unknown
@@ -2825,6 +2824,15 @@ __metadata:
   peerDependencies:
     react: ^18.3.1
   checksum: 10c0/5d66b4ebd5faf6ac2044970173955e73793e9a653f9f8a027914f0141bbcb7a2d98a528ded55b146ced1ee38131d4f2f172d38c80d51ec32bf81def0ac9600d0
+  languageName: node
+  linkType: hard
+
+"@medusajs/icons@npm:^2.13.3":
+  version: 2.13.3
+  resolution: "@medusajs/icons@npm:2.13.3"
+  peerDependencies:
+    react: ^18.3.1
+  checksum: 10c0/2a4ed01c990288ecbee03121e79b4f2e79b2aa65cc284e60e4d63b24aea93fb1921b193f7969aaf30ff7b7abcd91d7e76804bd9aa9cab4723358e3943ec7d2b8
   languageName: node
   linkType: hard
 

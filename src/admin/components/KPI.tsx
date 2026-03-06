@@ -4,9 +4,8 @@ import { LineChart } from './LineChart';
 import { Skeleton } from './Skeleton';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
-import { ArrowDownMini, ArrowUpMini } from '@medusajs/icons';
+import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
-import { Equal } from 'lucide-react';
 
 const KPITimelineLabel: React.FC<{
   percentage: number;
@@ -24,9 +23,9 @@ const KPITimelineLabel: React.FC<{
         {percentage > 0 && (
           <ArrowUpMini className="size-3 self-center" viewBox="0 0 15 15" />
         )}
-
-        {/* Equals (icon) is never exported from medusa components, so it can't be used */}
-        {percentage === 0 && <Equal className="size-3 self-center" />}
+        {percentage === 0 && (
+          <Equals className="size-3 self-center" viewBox="0 0 15 15" />
+        )}
         {percentage < 0 && (
           <ArrowDownMini className="size-3 self-center" viewBox="0 0 15 15" />
         )}

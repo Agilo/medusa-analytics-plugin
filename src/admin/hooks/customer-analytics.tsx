@@ -2,7 +2,7 @@ import { DateRange } from 'react-day-picker';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { retrieveCustomersAnalytics } from '../lib/data/customer-analytics';
-import { CustomerAnalyticsResponse } from '../../api/admin/agilo-analytics/customers/route';
+import type { CustomerAnalyticsResponse } from '../../api/admin/agilo-analytics/customers/route';
 
 export const useCustomerAnalytics = (
   query: DateRange | undefined,

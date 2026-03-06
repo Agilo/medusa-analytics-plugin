@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { OrderDTO } from '@medusajs/framework/types';
 import {
   ContainerRegistrationKeys,
   MedusaError,
@@ -38,7 +39,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       ? DEFAULT_THRESHOLD
       : (pluginConfig?.options?.stock_threshold as number) || DEFAULT_THRESHOLD;
 
-  const { data: orders } = await query.graph({
+  const { data: orders } = (await query.graph({
     entity: 'order',
     fields: [
       'id',
@@ -60,21 +61,21 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       },
       status: { $nin: ['draft'] },
     },
-  });
+  })) as { data: OrderDTO[] };
 
   let variantQuantitySold: Record<string, { title: string; quantity: number }> =
     {};
 
   orders.forEach((o) => {
     o.items?.forEach((i) => {
-      if (i?.variant?.id) {
-        if (!variantQuantitySold[i?.variant?.id]) {
-          variantQuantitySold[i?.variant.id] = {
-            title: i.product?.title + ' ' + i.variant.title,
+      if (i?.variant_id) {
+        if (!variantQuantitySold[i?.variant_id]) {
+          variantQuantitySold[i?.variant_id] = {
+            title: i.product_title + ' ' + i.variant_title,
             quantity: 0,
           };
         }
-        variantQuantitySold[i.variant.id].quantity += i.quantity;
+        variantQuantitySold[i.variant_id].quantity += i.quantity;
       }
     });
   });

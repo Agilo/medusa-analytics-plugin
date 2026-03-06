@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
+import { CustomerDTO, OrderDTO } from '@medusajs/framework/types';
 import {
   ContainerRegistrationKeys,
   MedusaError,
@@ -66,7 +67,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       result.error.errors.map((err) => err.message).join(', '),
     );
   }
-  const { data: orders } = await query.graph({
+  const { data: orders } = (await query.graph({
     entity: 'order',
     fields: [
       'id',
@@ -84,15 +85,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       },
       status: { $nin: ['draft', 'canceled'] },
     },
-  });
+  })) as { data: (OrderDTO & { customer?: CustomerDTO | null })[] };
 
   const customers = Object.values(
-    orders.reduce((acc, { customer }) => {
-      if (customer && !acc[customer.id]) {
-        acc[customer.id] = customer;
-      }
-      return acc;
-    }, {}),
+    orders.reduce(
+      (acc, { customer }) => {
+        if (customer && !acc[customer.id]) {
+          acc[customer.id] = customer;
+        }
+        return acc;
+      },
+      {} as Record<string, CustomerDTO>,
+    ),
   );
 
   const newCustomers = customers.filter(
@@ -174,7 +178,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       order.customer.id &&
       newCustomers.some(
         (c) =>
-          c && typeof c === 'object' && 'id' in c && c.id === order.customer.id,
+          c &&
+          typeof c === 'object' &&
+          'id' in c &&
+          c.id === order.customer?.id,
       )
     ) {
       groupedByKey[key].newCustomers.add(order.customer.id);

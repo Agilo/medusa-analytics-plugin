@@ -9,7 +9,7 @@ import {
   AdminShippingProfile,
   AdminStockLocation,
 } from '@medusajs/framework/types';
-import jwt from 'jsonwebtoken';
+import { generateJwtToken } from '@medusajs/framework/utils';
 import { createOrderSeeder } from '../fixtures/orders';
 import { createProductVariant } from '../fixtures/products';
 
@@ -60,14 +60,16 @@ medusaIntegrationTestRunner({
           },
         });
 
-        const token = jwt.sign(
+        const token = generateJwtToken(
           {
             actor_id: user.id,
             actor_type: 'user',
             auth_identity_id: authIdentity.id,
           },
-          process.env.JWT_SECRET || 'test',
-          { expiresIn: '1d' },
+          {
+            secret: process.env.JWT_SECRET || 'test',
+            expiresIn: '1d',
+          },
         );
 
         headers['Authorization'] = `Bearer ${token}`;

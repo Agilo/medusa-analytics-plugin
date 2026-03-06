@@ -40,7 +40,7 @@ __metadata:
     react-aria-components: "npm:^1.10.1"
     react-day-picker: "npm:^9.13.2"
     react-dom: "npm:^18.0.0"
-    recharts: "npm:^3.1.0"
+    recharts: "npm:^3.7.0"
     tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^4.1.8"
     ts-jest: "npm:^29.4.0"
@@ -15671,7 +15671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^3.1.0":
+"recharts@npm:^3.7.0":
   version: 3.7.0
   resolution: "recharts@npm:3.7.0"
   dependencies:

@@ -17,7 +17,7 @@ type CustomersTableProps = {
     email: string;
     order_count: number;
     sales: number;
-    last_order: Date | null;
+    last_order: Date | string | null;
     groups: string[];
   }[];
   currencyCode: string;

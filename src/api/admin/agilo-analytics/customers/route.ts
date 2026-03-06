@@ -282,7 +282,7 @@ export type CustomerAnalyticsResponse = {
     name: string;
     groups: string[];
     order_count: number;
-    last_order: Date;
+    last_order: Date | string;
     email: string;
   }[];
   currency_code: string;

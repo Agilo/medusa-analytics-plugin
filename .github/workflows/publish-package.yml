@@ -44,8 +44,8 @@ jobs:
             swc-core: "1.7.42"
           - version: "2.12.6"
             swc-core: "1.7.42"
-          - version: "2.13.1"
-            swc-core: "1.7.42"
+          - version: "2.13.3"
+            swc-core: "1.15.18"
 
     runs-on: ubuntu-22.04
 

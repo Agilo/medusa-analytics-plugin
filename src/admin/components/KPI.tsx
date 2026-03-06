@@ -6,6 +6,7 @@ import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini } from '@medusajs/icons';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
+import { Equal } from 'lucide-react';
 
 const KPITimelineLabel: React.FC<{
   percentage: number;
@@ -14,13 +15,19 @@ const KPITimelineLabel: React.FC<{
     <Text size="small" className="text-ui-fg-muted">
       <span
         className={clx(
-          percentage > 0 ? 'text-ui-tag-green-text' : 'text-ui-fg-error',
+          percentage > 0 && 'text-ui-tag-green-text',
+          percentage === 0 && 'text-ui-fg-muted',
+          percentage < 0 && 'text-ui-fg-error',
           'inline-flex items-baseline gap-0.5',
         )}
       >
-        {percentage > 0 ? (
+        {percentage > 0 && (
           <ArrowUpMini className="size-3 self-center" viewBox="0 0 15 15" />
-        ) : (
+        )}
+
+        {/* Equals (icon) is never exported from medusa components, so it can't be used */}
+        {percentage === 0 && <Equal className="size-3 self-center" />}
+        {percentage < 0 && (
           <ArrowDownMini className="size-3 self-center" viewBox="0 0 15 15" />
         )}
         {new Intl.NumberFormat(undefined, {

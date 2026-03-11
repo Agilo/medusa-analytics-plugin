@@ -1,0 +1,87 @@
+{
+    "analytics": {
+        "title": "Analytique",
+        "dateRange": "Plage de dates",
+        "presets": {
+            "thisMonth": "Ce mois-ci",
+            "lastMonth": "Le mois dernier",
+            "last3Months": "Les 3 derniers mois",
+            "custom": "Personnalisé"
+        },
+        "tabs": {
+            "orders": "Commandes",
+            "products": "Produits",
+            "customers": "Clients"
+        },
+        "noData": "Aucune donnée disponible pour la période sélectionnée.",
+        "fromPreviousPeriod": "% par rapport à la période précédente",
+        "orders": {
+            "totalOrders": "Total des commandes",
+            "totalSales": "Total des ventes",
+            "ordersOverTime": "Commandes dans le temps",
+            "ordersOverTimeDesc": "Nombre total de commandes sur la période sélectionnée",
+            "salesOverTime": "Ventes dans le temps",
+            "salesOverTimeDesc": "Total des ventes sur la période sélectionnée ({{currency}})",
+            "topRegions": "Meilleures régions par ventes",
+            "topRegionsDesc": "Répartition des ventes par région sur la période sélectionnée",
+            "statusBreakdown": "Répartition des statuts de commandes",
+            "statusBreakdownDesc": "Distribution des commandes par statut sur la période sélectionnée"
+        },
+        "products": {
+            "topSelling": "Produits les plus vendus",
+            "topSellingDesc": "Produits par quantité vendue sur la période sélectionnée",
+            "outOfStock": "Variantes en rupture de stock",
+            "outOfStockDesc": "Produits avec un inventaire nul",
+            "lowStock": "Variantes en stock faible",
+            "lowStockDesc": "Produits avec un inventaire en dessous du seuil",
+            "outOfStockLabel": "Rupture de stock"
+        },
+        "customers": {
+            "totalCustomers": "Total des clients",
+            "newCustomers": "Nouveaux clients",
+            "returningCustomers": "Clients fidèles",
+            "avgSalesPerCustomer": "Ventes moyennes par client",
+            "newVsReturning": "Nouveaux vs. Clients fidèles",
+            "newVsReturningDesc": "Distribution des nouveaux clients et des clients fidèles sur la période sélectionnée",
+            "topGroups": "Meilleurs groupes de clients par ventes",
+            "topGroupsDesc": "Répartition des ventes par groupe de clients sur la période sélectionnée",
+            "topCustomers": "Meilleurs clients par ventes",
+            "topCustomersDesc": "Clients par ventes sur la période sélectionnée",
+            "noGroup": "Sans groupe"
+        },
+        "table": {
+            "search": "Rechercher...",
+            "customers": {
+                "name": "Nom",
+                "email": "E-mail",
+                "orderCount": "Nombre de commandes",
+                "totalSales": "Total des ventes",
+                "groups": "Groupes",
+                "lastOrder": "Dernière commande",
+                "noGroup": "Sans groupe",
+                "noOrders": "Aucune commande",
+                "noCustomersFound": "Aucun client trouvé",
+                "noCustomersAvailable": "Aucun client disponible",
+                "sortAZ": "A-Z",
+                "sortZA": "Z-A",
+                "sortLowHigh": "Croissant",
+                "sortHighLow": "Décroissant",
+                "sortOldNew": "Du plus ancien au plus récent",
+                "sortNewOld": "Du plus récent au plus ancien"
+            },
+            "products": {
+                "sku": "Référence",
+                "variantName": "Nom de la variante",
+                "inventory": "Inventaire",
+                "noProductsFound": "Aucun produit trouvé",
+                "noProductsAvailable": "Aucun produit disponible",
+                "sortAZ": "A-Z",
+                "sortZA": "Z-A",
+                "sortLowHigh": "Croissant",
+                "sortHighLow": "Décroissant",
+                "sortOldNew": "Du plus ancien au plus récent",
+                "sortNewOld": "Du plus récent au plus ancien"
+            }
+        }
+    }
+}

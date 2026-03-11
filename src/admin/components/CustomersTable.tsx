@@ -1,14 +1,15 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   createDataTableColumnHelper,
   useDataTable,
   DataTable,
   DataTablePaginationState,
   DataTableSortingState,
-} from '@medusajs/ui';
+} from "@medusajs/ui";
 
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 type CustomersTableProps = {
   customers: {
@@ -24,7 +25,7 @@ type CustomersTableProps = {
 };
 
 const columnHelper =
-  createDataTableColumnHelper<CustomersTableProps['customers'][number]>();
+  createDataTableColumnHelper<CustomersTableProps["customers"][number]>();
 
 const PAGE_SIZE = 10;
 
@@ -32,12 +33,13 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
   customers,
   currencyCode,
 }) => {
+  const { t } = useTranslation();
   const [pagination, setPagination] = React.useState<DataTablePaginationState>({
     pageSize: PAGE_SIZE,
     pageIndex: 0,
   });
 
-  const [search, setSearch] = React.useState<string>('');
+  const [search, setSearch] = React.useState<string>("");
 
   const [sorting, setSorting] = React.useState<DataTableSortingState | null>(
     null,
@@ -76,69 +78,77 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const columns = React.useMemo(
     () => [
-      columnHelper.accessor('name', {
-        header: 'Name',
+      columnHelper.accessor("name", {
+        header: t("analytics.table.customers.name"),
         enableSorting: true,
-        sortLabel: 'Name',
-        sortAscLabel: 'A-Z',
-        sortDescLabel: 'Z-A',
+        sortLabel: t("analytics.table.customers.name"),
+        sortAscLabel: t("analytics.table.customers.sortAZ"),
+        sortDescLabel: t("analytics.table.customers.sortZA"),
       }),
-      columnHelper.accessor('email', {
-        header: 'Email',
+      columnHelper.accessor("email", {
+        header: t("analytics.table.customers.email"),
         enableSorting: true,
-        sortLabel: 'Email',
-        sortAscLabel: 'A-Z',
-        sortDescLabel: 'Z-A',
+        sortLabel: t("analytics.table.customers.email"),
+        sortAscLabel: t("analytics.table.customers.sortAZ"),
+        sortDescLabel: t("analytics.table.customers.sortZA"),
       }),
-      columnHelper.accessor('order_count', {
-        header: 'Order Count',
+      columnHelper.accessor("order_count", {
+        header: t("analytics.table.customers.orderCount"),
         enableSorting: true,
-        sortLabel: 'Order Count',
-        sortAscLabel: 'Low to High',
-        sortDescLabel: 'High to Low',
+        sortLabel: t("analytics.table.customers.orderCount"),
+        sortAscLabel: t("analytics.table.customers.sortLowHigh"),
+        sortDescLabel: t("analytics.table.customers.sortHighLow"),
       }),
-      columnHelper.accessor('sales', {
-        header: 'Total Sales',
+      columnHelper.accessor("sales", {
+        header: t("analytics.table.customers.totalSales"),
         enableSorting: true,
-        sortLabel: 'Total Sales',
-        sortAscLabel: 'Low to High',
-        sortDescLabel: 'High to Low',
+        sortLabel: t("analytics.table.customers.totalSales"),
+        sortAscLabel: t("analytics.table.customers.sortLowHigh"),
+        sortDescLabel: t("analytics.table.customers.sortHighLow"),
         cell: ({ getValue }) => {
           const sales = getValue();
           return (
             <p>
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: currencyCode || 'EUR',
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: currencyCode || "EUR",
               }).format(sales || 0)}
             </p>
           );
         },
       }),
-      columnHelper.accessor('groups', {
-        header: 'Groups',
+      columnHelper.accessor("groups", {
+        header: t("analytics.table.customers.groups"),
         cell: ({ getValue }) => {
           const groups = getValue();
-          return <p>{groups.length ? groups.join(', ') : 'No Group'}</p>;
+          return (
+            <p>
+              {groups.length
+                ? groups.join(", ")
+                : t("analytics.table.customers.noGroup")}
+            </p>
+          );
         },
       }),
-      columnHelper.accessor('last_order', {
-        header: 'Last Order',
+      columnHelper.accessor("last_order", {
+        header: t("analytics.table.customers.lastOrder"),
         enableSorting: true,
-        sortLabel: 'Last Order',
-        sortAscLabel: 'Oldest to Newest',
-        sortDescLabel: 'Newest to Oldest',
+        sortLabel: t("analytics.table.customers.lastOrder"),
+        sortAscLabel: t("analytics.table.customers.sortOldNew"),
+        sortDescLabel: t("analytics.table.customers.sortNewOld"),
         cell: ({ getValue }) => {
           const date = getValue();
           return (
             <p>
-              {date ? format(new Date(date), 'MMM dd, yyyy') : 'No orders yet'}
+              {date
+                ? format(new Date(date), "MMM dd, yyyy")
+                : t("analytics.table.customers.noOrders")}
             </p>
           );
         },
       }),
     ],
-    [currencyCode],
+    [currencyCode, t],
   );
 
   const table = useDataTable({
@@ -167,15 +177,15 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
   return (
     <DataTable instance={table}>
       <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder="Search..." />
+        <DataTable.Search placeholder={t("analytics.table.search")} />
       </DataTable.Toolbar>
       <DataTable.Table
         emptyState={{
           filtered: {
-            heading: 'No customers found',
+            heading: t("analytics.table.customers.noCustomersFound"),
           },
           empty: {
-            heading: 'No customers available',
+            heading: t("analytics.table.customers.noCustomersAvailable"),
           },
         }}
       />

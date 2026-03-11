@@ -1,0 +1,85 @@
+{
+    "analytics": {
+        "title": "Analytics",
+        "dateRange": "Date range",
+        "presets": {
+            "thisMonth": "This Month",
+            "lastMonth": "Last Month",
+            "last3Months": "Last 3 Months",
+            "custom": "Custom"
+        },
+        "tabs": {
+            "orders": "Orders",
+            "products": "Products",
+            "customers": "Customers"
+        },
+        "noData": "No data available for the selected period.",
+        "fromPreviousPeriod": "% from previous period",
+        "orders": {
+            "totalOrders": "Total Orders",
+            "totalSales": "Total Sales",
+            "ordersOverTime": "Orders Over Time",
+            "ordersOverTimeDesc": "Total number of orders in the selected period",
+            "salesOverTime": "Sales Over Time",
+            "salesOverTimeDesc": "Total sales in the selected period ({{currency}})",
+            "topRegions": "Top Regions by Sales",
+            "topRegionsDesc": "Sales breakdown by region in the selected period",
+            "statusBreakdown": "Order Status Breakdown",
+            "statusBreakdownDesc": "Distribution of orders by status in the selected period"
+        },
+        "products": {
+            "topSelling": "Top-Selling Products",
+            "topSellingDesc": "Products by quantity sold in selected period",
+            "outOfStock": "Out-of-Stock Variants",
+            "outOfStockDesc": "Products with zero inventory",
+            "lowStock": "Low Stock Variants",
+            "lowStockDesc": "Products with inventory below threshold",
+            "outOfStockLabel": "Out of Stock"
+        },
+        "customers": {
+            "totalCustomers": "Total Customers",
+            "newCustomers": "New Customers",
+            "returningCustomers": "Returning Customers",
+            "avgSalesPerCustomer": "Average Sales per Customer",
+            "newVsReturning": "New vs. Returning Customers",
+            "newVsReturningDesc": "Distribution of new and returning customers in the selected period",
+            "topGroups": "Top Customer Groups by Sales",
+            "topGroupsDesc": "Sales breakdown by customer group in the selected period",
+            "topCustomers": "Top Customers by Sales",
+            "topCustomersDesc": "Customers by sales in the selected period",
+            "noGroup": "No Group"
+        },
+        "table": {
+            "search": "Search...",
+            "customers": {
+                "name": "Name",
+                "email": "Email",
+                "orderCount": "Order Count",
+                "totalSales": "Total Sales",
+                "groups": "Groups",
+                "lastOrder": "Last Order",
+                "noGroup": "No Group",
+                "noOrders": "No orders yet",
+                "noCustomersFound": "No customers found",
+                "noCustomersAvailable": "No customers available",
+                "sortAZ": "A-Z",
+                "sortZA": "Z-A",
+                "sortLowHigh": "Low to High",
+                "sortHighLow": "High to Low",
+                "sortOldNew": "Oldest to Newest",
+                "sortNewOld": "Newest to Oldest"
+            },
+            "products": {
+                "sku": "SKU",
+                "variantName": "Variant Name",
+                "inventory": "Inventory",
+                "noProductsFound": "No products found",
+                "noProductsAvailable": "No products available",
+                "sortAZ": "A-Z",
+                "sortZA": "Z-A",
+                "sortLowHigh": "Low to High",
+                "sortHighLow": "High to Low"
+            }
+        }
+    }
+}

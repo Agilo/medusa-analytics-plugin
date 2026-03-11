@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { defineRouteConfig } from '@medusajs/admin-sdk';
+import * as React from "react";
+import { defineRouteConfig } from "@medusajs/admin-sdk";
 import {
   Container,
   DateRange,
@@ -7,7 +7,7 @@ import {
   Select,
   Tabs,
   Text,
-} from '@medusajs/ui';
+} from "@medusajs/ui";
 import {
   ChartBar,
   ShoppingCart,
@@ -16,9 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-} from '@medusajs/icons';
-import { ChartNoAxesCombined } from 'lucide-react';
-import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
+} from "@medusajs/icons";
+import { ChartNoAxesCombined } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { subMonths, startOfMonth, endOfMonth, format, parse } from "date-fns";
 import {
   Button,
   CalendarCell,
@@ -32,26 +33,26 @@ import {
   Popover,
   RangeCalendar,
   DateValue,
-} from 'react-aria-components';
-import { CalendarDate } from '@internationalized/date';
-import type { RangeValue } from '@react-types/shared';
-import { useSearchParams } from 'react-router-dom';
+} from "react-aria-components";
+import { CalendarDate } from "@internationalized/date";
+import type { RangeValue } from "@react-types/shared";
+import { useSearchParams } from "react-router-dom";
 
-import { LineChart } from '../../components/LineChart';
-import { BarChart } from '../../components/BarChart';
-import { PieChart } from '../../components/PieChart';
-import { ProductsTable } from '../../components/ProductsTable';
-import { useProductAnalytics } from '../../hooks/product-analytics';
-import { useOrderAnalytics } from '../../hooks/order-analytics';
-import { SmallCardSkeleton } from '../../skeletons/SmallCardSkeleton';
-import { LineChartSkeleton } from '../../skeletons/LineChartSkeleton';
-import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
-import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
-import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
-import { useCustomerAnalytics } from '../../hooks/customer-analytics';
-import { StackedBarChart } from '../../components/StackedBarChart';
-import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
-import { CustomersTable } from '../../components/CustomersTable';
+import { LineChart } from "../../components/LineChart";
+import { BarChart } from "../../components/BarChart";
+import { PieChart } from "../../components/PieChart";
+import { ProductsTable } from "../../components/ProductsTable";
+import { useProductAnalytics } from "../../hooks/product-analytics";
+import { useOrderAnalytics } from "../../hooks/order-analytics";
+import { SmallCardSkeleton } from "../../skeletons/SmallCardSkeleton";
+import { LineChartSkeleton } from "../../skeletons/LineChartSkeleton";
+import { BarChartSkeleton } from "../../skeletons/BarChartSkeleton";
+import { PieChartSkeleton } from "../../skeletons/PieChartSkeleton";
+import { ProductsTableSkeleton } from "../../skeletons/ProductsTableSkeleton";
+import { useCustomerAnalytics } from "../../hooks/customer-analytics";
+import { StackedBarChart } from "../../components/StackedBarChart";
+import { CustomersTableSkeleton } from "../../skeletons/CustomerTableSkeleton";
+import { CustomersTable } from "../../components/CustomersTable";
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -64,10 +65,10 @@ function dateToCalendarDate(date: Date): CalendarDate {
 
 function calendarDateToDate(calendarDate: DateValue): Date {
   const year =
-    'year' in calendarDate ? calendarDate.year : new Date().getFullYear();
+    "year" in calendarDate ? calendarDate.year : new Date().getFullYear();
   const month =
-    'month' in calendarDate ? calendarDate.month : new Date().getMonth() + 1;
-  const day = 'day' in calendarDate ? calendarDate.day : new Date().getDate();
+    "month" in calendarDate ? calendarDate.month : new Date().getMonth() + 1;
+  const day = "day" in calendarDate ? calendarDate.day : new Date().getDate();
   return new Date(year, month - 1, day);
 }
 
@@ -94,11 +95,11 @@ function rangeValueToDateRange(
 }
 
 function presetToDateRange(
-  preset: 'this-month' | 'last-month' | 'last-3-months',
+  preset: "this-month" | "last-month" | "last-3-months",
 ): DateRange {
   const today = new Date();
-  if (preset === 'this-month') return { from: startOfMonth(today), to: today };
-  if (preset === 'last-month')
+  if (preset === "this-month") return { from: startOfMonth(today), to: today };
+  if (preset === "last-month")
     return {
       from: startOfMonth(subMonths(today, 1)),
       to: endOfMonth(subMonths(today, 1)),
@@ -113,22 +114,23 @@ function presetToDateRange(
 const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
 
 const AnalyticsPage = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const rangeParam = searchParams.get('range') || 'this-month';
+  const rangeParam = searchParams.get("range") || "this-month";
 
   const date: DateRange | undefined = React.useMemo(() => {
     if (
-      rangeParam === 'this-month' ||
-      rangeParam === 'last-month' ||
-      rangeParam === 'last-3-months'
+      rangeParam === "this-month" ||
+      rangeParam === "last-month" ||
+      rangeParam === "last-3-months"
     ) {
       return presetToDateRange(rangeParam);
     }
 
     const dates = rangeParam.match(DATE_RANGE_REGEX);
     if (dates) {
-      const from = parse(dates[1], 'yyyy-MM-dd', new Date());
-      const to = parse(dates[2], 'yyyy-MM-dd', new Date());
+      const from = parse(dates[1], "yyyy-MM-dd", new Date());
+      const to = parse(dates[2], "yyyy-MM-dd", new Date());
       return { from, to };
     }
 
@@ -142,9 +144,9 @@ const AnalyticsPage = () => {
     useCustomerAnalytics(date);
 
   const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
-    ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
+    ["this-month", "last-month", "last-3-months"].includes(rangeParam)
       ? rangeParam
-      : 'custom',
+      : "custom",
     date,
   );
 
@@ -169,29 +171,29 @@ const AnalyticsPage = () => {
       const params = new URLSearchParams(searchParams.toString());
 
       switch (preset) {
-        case 'this-month':
-          params.set('range', 'this-month');
+        case "this-month":
+          params.set("range", "this-month");
 
           break;
-        case 'last-month':
-          params.set('range', 'last-month');
+        case "last-month":
+          params.set("range", "last-month");
           break;
-        case 'last-3-months':
-          params.set('range', 'last-3-months');
+        case "last-3-months":
+          params.set("range", "last-3-months");
           break;
-        case 'custom':
+        case "custom":
         default:
           if (
-            rangeParam === 'this-month' ||
-            rangeParam === 'last-month' ||
-            rangeParam === 'last-3-months'
+            rangeParam === "this-month" ||
+            rangeParam === "last-month" ||
+            rangeParam === "last-3-months"
           ) {
             const currentDate = presetToDateRange(rangeParam);
             params.set(
-              'range',
-              `${format(currentDate.from || new Date(), 'yyyy-MM-dd')}-${format(
+              "range",
+              `${format(currentDate.from || new Date(), "yyyy-MM-dd")}-${format(
                 currentDate.to || new Date(),
-                'yyyy-MM-dd',
+                "yyyy-MM-dd",
               )}`,
             );
           }
@@ -207,10 +209,10 @@ const AnalyticsPage = () => {
       const params = new URLSearchParams(searchParams.toString());
       if (value?.from && value?.to) {
         params.set(
-          'range',
-          `${format(value.from, 'yyyy-MM-dd')}-${format(
+          "range",
+          `${format(value.from, "yyyy-MM-dd")}-${format(
             value.to,
-            'yyyy-MM-dd',
+            "yyyy-MM-dd",
           )}`,
         );
       }
@@ -231,7 +233,7 @@ const AnalyticsPage = () => {
   return (
     <Container className="divide-y p-0">
       <div className="flex flex-wrap gap-x-2 gap-y-4 items-center justify-between px-6 py-4">
-        <Heading level="h1">Analytics</Heading>
+        <Heading level="h1">{t("analytics.title")}</Heading>
 
         <div className="flex flex-wrap gap-2">
           <div className="w-[170px]">
@@ -239,11 +241,11 @@ const AnalyticsPage = () => {
               disabled={isLoadingOrders || isLoadingProducts}
               defaultValue="this-month"
               value={
-                ['this-month', 'last-month', 'last-3-months'].includes(
+                ["this-month", "last-month", "last-3-months"].includes(
                   rangeParam,
                 )
                   ? rangeParam
-                  : 'custom'
+                  : "custom"
               }
               onValueChange={updateDatePreset}
             >
@@ -251,10 +253,18 @@ const AnalyticsPage = () => {
                 <Select.Value />
               </Select.Trigger>
               <Select.Content>
-                <Select.Item value="this-month">This Month</Select.Item>
-                <Select.Item value="last-month">Last Month</Select.Item>
-                <Select.Item value="last-3-months">Last 3 Months</Select.Item>
-                <Select.Item value="custom">Custom</Select.Item>
+                <Select.Item value="this-month">
+                  {t("analytics.presets.thisMonth")}
+                </Select.Item>
+                <Select.Item value="last-month">
+                  {t("analytics.presets.lastMonth")}
+                </Select.Item>
+                <Select.Item value="last-3-months">
+                  {t("analytics.presets.last3Months")}
+                </Select.Item>
+                <Select.Item value="custom">
+                  {t("analytics.presets.custom")}
+                </Select.Item>
               </Select.Content>
             </Select>
           </div>
@@ -262,7 +272,7 @@ const AnalyticsPage = () => {
             value={dateRangeToRangeValue(date)}
             onChange={handleDateRangeChange}
             isDisabled={isLoadingOrders || isLoadingProducts}
-            aria-label="Date range"
+            aria-label={t("analytics.dateRange")}
           >
             <Group className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small h-8 text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-ui-bg-field-component dark:border-ui-border-base dark:hover:bg-ui-bg-field-hover px-4 border cursor-pointer">
               <CalendarIcon className="h-4 w-4 text-ui-fg-muted group-disabled:text-ui-fg-disabled flex-shrink-0" />
@@ -339,10 +349,10 @@ const AnalyticsPage = () => {
       </div>
       <div className="px-6 py-4">
         <Tabs
-          value={searchParams.get('tab') || 'orders'}
+          value={searchParams.get("tab") || "orders"}
           onValueChange={(value) => {
             const params = new URLSearchParams(searchParams.toString());
-            params.set('tab', value);
+            params.set("tab", value);
             setSearchParams(params);
           }}
         >
@@ -351,19 +361,19 @@ const AnalyticsPage = () => {
               value="orders"
               disabled={isLoadingOrders || isLoadingProducts}
             >
-              Orders
+              {t("analytics.tabs.orders")}
             </Tabs.Trigger>
             <Tabs.Trigger
               value="products"
               disabled={isLoadingOrders || isLoadingProducts}
             >
-              Products
+              {t("analytics.tabs.products")}
             </Tabs.Trigger>
             <Tabs.Trigger
               value="customers"
               disabled={isLoadingOrders || isLoadingProducts}
             >
-              Customers
+              {t("analytics.tabs.customers")}
             </Tabs.Trigger>
           </Tabs.List>
           <div className="mt-8">
@@ -372,7 +382,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Total Orders</Text>
+                    <Text size="small">
+                      {t("analytics.orders.totalOrders")}
+                    </Text>{" "}
                     {isLoadingOrders ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -381,9 +393,9 @@ const AnalyticsPage = () => {
                           {orders?.total_orders || 0}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_orders_percent || 0) > 0 && '+'}
-                          {orders?.prev_orders_percent || 0}% from previous
-                          period
+                          {(orders?.prev_orders_percent || 0) > 0 && "+"}
+                          {orders?.prev_orders_percent || 0}
+                          {t("analytics.fromPreviousPeriod")}
                         </Text>
                       </>
                     )}
@@ -391,17 +403,17 @@ const AnalyticsPage = () => {
 
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Orders Over Time
+                      {t("analytics.orders.ordersOverTime")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Total number of orders in the selected period
+                      {t("analytics.orders.ordersOverTimeDesc")}
                     </Text>
                     {isLoadingOrders ? (
                       <LineChartSkeleton />
                     ) : orders?.order_count &&
                       orders?.order_count?.length > 0 &&
                       someOrderCountsGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <LineChart
                           data={orders?.order_count}
                           xAxisDataKey="name"
@@ -413,7 +425,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -422,21 +434,21 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-                    <Text size="small">Total Sales</Text>
+                    <Text size="small">{t("analytics.orders.totalSales")}</Text>
                     {isLoadingOrders ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: orders?.currency_code || 'EUR',
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: orders?.currency_code || "EUR",
                           }).format(orders?.total_sales || 0)}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_sales_percent || 0) > 0 && '+'}
-                          {orders?.prev_sales_percent || 0}% from previous
-                          period
+                          {(orders?.prev_sales_percent || 0) > 0 && "+"}
+                          {orders?.prev_sales_percent || 0}
+                          {t("analytics.fromPreviousPeriod")}
                         </Text>
                       </>
                     )}
@@ -444,31 +456,32 @@ const AnalyticsPage = () => {
 
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Sales Over Time
+                      {t("analytics.orders.salesOverTime")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Total sales in the selected period (
-                      {orders?.currency_code})
+                      {t("analytics.orders.salesOverTimeDesc", {
+                        currency: orders?.currency_code,
+                      })}
                     </Text>
                     {isLoadingOrders ? (
                       <LineChartSkeleton />
                     ) : orders?.order_sales &&
                       orders?.order_sales?.length > 0 &&
                       someOrderSalesGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <LineChart
                           data={orders.order_sales}
                           xAxisDataKey="name"
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat("en-US", {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(
-                              typeof value === 'number'
+                              typeof value === "number"
                                 ? value
-                                : typeof value === 'string'
+                                : typeof value === "string"
                                   ? Number(value)
                                   : 0,
                             )
@@ -480,7 +493,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -490,15 +503,15 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Top Regions by Sales
+                      {t("analytics.orders.topRegions")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Sales breakdown by region in the selected period
+                      {t("analytics.orders.topRegionsDesc")}
                     </Text>
                     {isLoadingOrders ? (
                       <BarChartSkeleton />
                     ) : orders?.regions && orders?.regions?.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <BarChart
                           data={orders.regions}
                           xAxisDataKey="name"
@@ -507,13 +520,13 @@ const AnalyticsPage = () => {
                           useStableColors={true}
                           colorKeyField="name"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
+                            new Intl.NumberFormat("en-US", {
                               currency: orders.currency_code,
                               maximumFractionDigits: 0,
                             }).format(
-                              typeof value === 'number'
+                              typeof value === "number"
                                 ? value
-                                : typeof value === 'string'
+                                : typeof value === "string"
                                   ? Number(value)
                                   : 0,
                             )
@@ -525,7 +538,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -533,15 +546,15 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Order Status Breakdown
+                      {t("analytics.orders.statusBreakdown")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Distribution of orders by status in the selected period
+                      {t("analytics.orders.statusBreakdownDesc")}
                     </Text>
                     {isLoadingOrders ? (
                       <PieChartSkeleton />
                     ) : orders?.statuses && orders?.statuses?.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <PieChart data={orders?.statuses} dataKey="count" />
                       </div>
                     ) : (
@@ -549,7 +562,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -559,16 +572,16 @@ const AnalyticsPage = () => {
             <Tabs.Content value="products">
               <Container className="mb-4 min-h-[9.375rem]">
                 <Text size="xlarge" weight="plus">
-                  Top-Selling Products
+                  {t("analytics.products.topSelling")}
                 </Text>
                 <Text size="small" className="mb-8 text-ui-fg-muted">
-                  Products by quantity sold in selected period
+                  {t("analytics.products.topSellingDesc")}
                 </Text>
                 {isLoadingProducts ? (
                   <BarChartSkeleton />
                 ) : products?.variantQuantitySold &&
                   someTopSellingProductsGreaterThanZero ? (
-                  <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                  <div className="w-full" style={{ aspectRatio: "16/9" }}>
                     <BarChart
                       data={products.variantQuantitySold}
                       xAxisDataKey="title"
@@ -580,17 +593,17 @@ const AnalyticsPage = () => {
                   </div>
                 ) : (
                   <Text size="small" className="text-ui-fg-muted text-center">
-                    No data available for the selected period.
+                    {t("analytics.noData")}
                   </Text>
                 )}
               </Container>
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Out-of-Stock Variants
+                    {t("analytics.products.outOfStock")}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Products with zero inventory
+                    {t("analytics.products.outOfStockDesc")}
                   </Text>
                   {isLoadingProducts ? (
                     <ProductsTableSkeleton />
@@ -606,10 +619,10 @@ const AnalyticsPage = () => {
                 </Container>
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Low Stock Variants
+                    {t("analytics.products.lowStock")}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Products with inventory below threshold
+                    {t("analytics.products.lowStockDesc")}
                   </Text>
                   {isLoadingProducts ? (
                     <ProductsTableSkeleton />
@@ -630,7 +643,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Total Customers</Text>
+                    <Text size="small">
+                      {t("analytics.customers.totalCustomers")}
+                    </Text>
                     {isLoadingCustomers ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -643,7 +658,9 @@ const AnalyticsPage = () => {
                   </Container>
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">New Customers</Text>
+                    <Text size="small">
+                      {t("analytics.customers.newCustomers")}
+                    </Text>
                     {isLoadingCustomers ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -659,7 +676,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-                    <Text size="small">Returning Customers</Text>
+                    <Text size="small">
+                      {t("analytics.customers.returningCustomers")}
+                    </Text>
                     {isLoadingCustomers ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -672,15 +691,17 @@ const AnalyticsPage = () => {
                   </Container>
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Average Sales per Customer</Text>
+                    <Text size="small">
+                      {t("analytics.customers.avgSalesPerCustomer")}
+                    </Text>
                     {isLoadingCustomers || isLoadingOrders ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {new Intl.NumberFormat('en-US', {
-                            currency: customers?.currency_code || 'EUR',
-                            style: 'currency',
+                          {new Intl.NumberFormat("en-US", {
+                            currency: customers?.currency_code || "EUR",
+                            style: "currency",
                           }).format(
                             customers?.total_customers &&
                               customers.total_customers > 0
@@ -698,25 +719,24 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      New vs. Returning Customers
+                      {t("analytics.customers.newVsReturning")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Distribution of new and returning customers in the
-                      selected period
+                      {t("analytics.customers.newVsReturningDesc")}
                     </Text>
                     {isLoadingCustomers ? (
                       <BarChartSkeleton />
                     ) : customers?.customer_count &&
                       customers.customer_count.length > 0 &&
                       someCustomerCountsGreaterThanZero ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <StackedBarChart
                           data={customers.customer_count}
                           xAxisDataKey="name"
                           lineColor="#82ca9d"
                           useStableColors={true}
                           colorKeyField="returning_customers"
-                          dataKeys={['new_customers', 'returning_customers']}
+                          dataKeys={["new_customers", "returning_customers"]}
                         />
                       </div>
                     ) : (
@@ -724,7 +744,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -732,16 +752,16 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Top Customer Groups by Sales
+                      {t("analytics.customers.topGroups")}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Sales breakdown by customer group in the selected period
+                      {t("analytics.customers.topGroupsDesc")}
                     </Text>
                     {isLoadingCustomers ? (
                       <BarChartSkeleton />
                     ) : customers?.customer_group &&
                       customers.customer_group.length > 0 ? (
-                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                      <div className="w-full" style={{ aspectRatio: "16/9" }}>
                         <BarChart
                           data={customers.customer_group}
                           xAxisDataKey="name"
@@ -750,13 +770,13 @@ const AnalyticsPage = () => {
                           colorKeyField="name"
                           yAxisDataKey="total"
                           yAxisTickFormatter={(value) =>
-                            new Intl.NumberFormat('en-US', {
-                              currency: customers.currency_code || 'EUR',
+                            new Intl.NumberFormat("en-US", {
+                              currency: customers.currency_code || "EUR",
                               maximumFractionDigits: 0,
                             }).format(
-                              typeof value === 'number'
+                              typeof value === "number"
                                 ? value
-                                : typeof value === 'string'
+                                : typeof value === "string"
                                   ? Number(value)
                                   : 0,
                             )
@@ -768,7 +788,7 @@ const AnalyticsPage = () => {
                         size="small"
                         className="text-ui-fg-muted text-center"
                       >
-                        No data available for the selected period.
+                        {t("analytics.noData")}
                       </Text>
                     )}
                   </Container>
@@ -777,17 +797,17 @@ const AnalyticsPage = () => {
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Top Customers by Sales
+                    {t("analytics.customers.topCustomers")}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Customers by sales in the selected period
+                    {t("analytics.customers.topCustomersDesc")}
                   </Text>
                   {isLoadingCustomers ? (
                     <CustomersTableSkeleton />
                   ) : (
                     <CustomersTable
                       customers={customers?.customer_sales || []}
-                      currencyCode={customers?.currency_code || 'EUR'}
+                      currencyCode={customers?.currency_code || "EUR"}
                     />
                   )}
                 </Container>
@@ -801,7 +821,8 @@ const AnalyticsPage = () => {
 };
 
 export const config = defineRouteConfig({
-  label: 'Analytics',
+  label: "analytics.title",
+  translationNs: "translation",
   icon: ChartBar,
 });
 

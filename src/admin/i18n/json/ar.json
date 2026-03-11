@@ -1,0 +1,85 @@
+{
+    "analytics": {
+        "title": "التحليلات",
+        "dateRange": "نطاق التاريخ",
+        "presets": {
+            "thisMonth": "هذا الشهر",
+            "lastMonth": "الشهر الماضي",
+            "last3Months": "آخر 3 أشهر",
+            "custom": "مخصص"
+        },
+        "tabs": {
+            "orders": "الطلبات",
+            "products": "المنتجات",
+            "customers": "العملاء"
+        },
+        "noData": "لا تتوفر بيانات للفترة المحددة.",
+        "fromPreviousPeriod": "% مقارنة بالفترة السابقة",
+        "orders": {
+            "totalOrders": "إجمالي الطلبات",
+            "totalSales": "إجمالي المبيعات",
+            "ordersOverTime": "الطلبات عبر الزمن",
+            "ordersOverTimeDesc": "إجمالي عدد الطلبات في الفترة المحددة",
+            "salesOverTime": "المبيعات عبر الزمن",
+            "salesOverTimeDesc": "إجمالي المبيعات في الفترة المحددة ({{currency}})",
+            "topRegions": "أفضل المناطق من حيث المبيعات",
+            "topRegionsDesc": "توزيع المبيعات حسب المنطقة في الفترة المحددة",
+            "statusBreakdown": "توزيع حالات الطلبات",
+            "statusBreakdownDesc": "توزيع الطلبات حسب الحالة في الفترة المحددة"
+        },
+        "products": {
+            "topSelling": "المنتجات الأكثر مبيعاً",
+            "topSellingDesc": "المنتجات حسب الكمية المباعة في الفترة المحددة",
+            "outOfStock": "متغيرات نفدت من المخزون",
+            "outOfStockDesc": "المنتجات ذات المخزون الصفري",
+            "lowStock": "متغيرات المخزون المنخفض",
+            "lowStockDesc": "المنتجات التي يقل مخزونها عن الحد الأدنى",
+            "outOfStockLabel": "نفد من المخزون"
+        },
+        "customers": {
+            "totalCustomers": "إجمالي العملاء",
+            "newCustomers": "عملاء جدد",
+            "returningCustomers": "عملاء عائدون",
+            "avgSalesPerCustomer": "متوسط المبيعات لكل عميل",
+            "newVsReturning": "العملاء الجدد مقابل العائدين",
+            "newVsReturningDesc": "توزيع العملاء الجدد والعائدين في الفترة المحددة",
+            "topGroups": "أفضل مجموعات العملاء من حيث المبيعات",
+            "topGroupsDesc": "توزيع المبيعات حسب مجموعة العملاء في الفترة المحددة",
+            "topCustomers": "أفضل العملاء من حيث المبيعات",
+            "topCustomersDesc": "العملاء حسب المبيعات في الفترة المحددة",
+            "noGroup": "بدون مجموعة"
+        },
+        "table": {
+            "search": "بحث...",
+            "customers": {
+                "name": "الاسم",
+                "email": "البريد الإلكتروني",
+                "orderCount": "عدد الطلبات",
+                "totalSales": "إجمالي المبيعات",
+                "groups": "المجموعات",
+                "lastOrder": "آخر طلب",
+                "noGroup": "بدون مجموعة",
+                "noOrders": "لا توجد طلبات بعد",
+                "noCustomersFound": "لم يتم العثور على عملاء",
+                "noCustomersAvailable": "لا يوجد عملاء متاحون",
+                "sortAZ": "أ-ي",
+                "sortZA": "ي-أ",
+                "sortLowHigh": "من الأقل إلى الأعلى",
+                "sortHighLow": "من الأعلى إلى الأقل",
+                "sortOldNew": "من الأقدم إلى الأحدث",
+                "sortNewOld": "من الأحدث إلى الأقدم"
+            },
+            "products": {
+                "sku": "رمز المنتج",
+                "variantName": "اسم المتغير",
+                "inventory": "المخزون",
+                "noProductsFound": "لم يتم العثور على منتجات",
+                "noProductsAvailable": "لا توجد منتجات متاحة",
+                "sortAZ": "أ-ي",
+                "sortZA": "ي-أ",
+                "sortLowHigh": "من الأقل إلى الأعلى",
+                "sortHighLow": "من الأعلى إلى الأقل"
+            }
+        }
+    }
+}

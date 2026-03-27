@@ -3,18 +3,20 @@ import { Skeleton } from './Skeleton';
 import { Text } from '@medusajs/ui';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 
-export const ChartStateWrapper: React.FC<{
+type BaseStateWrapperProps = {
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
-  isEmpty: boolean;
+  isEmpty?: boolean;
   emptyText?: string;
   children: React.ReactNode;
-}> = ({
+};
+
+export const ChartStateWrapper: React.FC<BaseStateWrapperProps> = ({
   isLoading,
   isError,
   errorMessage,
-  isEmpty,
+  isEmpty = false,
   emptyText = 'No data available for the selected period.',
   children,
 }) => {
@@ -22,9 +24,9 @@ export const ChartStateWrapper: React.FC<{
     return <Skeleton className="w-full h-44" />;
   }
 
-  if (!isError) {
+  if (isError) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center aspect-video w-full mt-2.5 max-h-44">
         <Text size="xsmall" className="text-ui-fg-error">
           Unable to load chart data.
         </Text>
@@ -40,7 +42,7 @@ export const ChartStateWrapper: React.FC<{
     return (
       <Text
         size="xsmall"
-        className="text-ui-fg-muted flex items-center justify-center flex-1"
+        className="text-ui-fg-muted flex items-center justify-center flex-1 aspect-video w-full mt-2.5 max-h-44"
       >
         {emptyText}
       </Text>
@@ -50,14 +52,7 @@ export const ChartStateWrapper: React.FC<{
   return children;
 };
 
-export const KPIStateWrapper: React.FC<{
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  isEmpty?: boolean;
-  emptyText?: string;
-  children: React.ReactNode;
-}> = ({
+export const KPIStateWrapper: React.FC<BaseStateWrapperProps> = ({
   isLoading,
   isError,
   errorMessage,
@@ -71,14 +66,14 @@ export const KPIStateWrapper: React.FC<{
         <div>
           <SmallCardSkeleton />
         </div>
-        <Skeleton className="aspect-video w-64 mt-2.5" />
+        <Skeleton className="aspect-video w-full w-64 mt-2.5" />
       </div>
     );
   }
 
-  if (!isError) {
+  if (isError) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center py-4">
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center py-4 max-h-44 aspect-video w-full">
         <Text size="xsmall" className="text-ui-fg-error">
           Unable to load KPI data.
         </Text>
@@ -94,7 +89,7 @@ export const KPIStateWrapper: React.FC<{
     return (
       <Text
         size="xsmall"
-        className="text-ui-fg-muted flex items-center justify-center flex-1 py-4"
+        className="text-ui-fg-muted flex items-center justify-center flex-1 py-4 max-h-44 aspect-video w-full"
       >
         {emptyText}
       </Text>

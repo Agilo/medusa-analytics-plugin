@@ -18,7 +18,7 @@ export const TopSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -67,7 +67,7 @@ export const LowStockVariants = () => {
   const { data, isLoading, isError, error } = useProductAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -120,7 +120,7 @@ export const BottomSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -173,7 +173,7 @@ export const NewVsReturningCustomers = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -222,7 +222,7 @@ export const TopCustomerGroupBySales = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -294,7 +294,7 @@ export const AverageSalesPerCustomer = () => {
   });
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">

@@ -36,17 +36,14 @@ import {
 import { CalendarDate } from '@internationalized/date';
 import type { RangeValue } from '@react-types/shared';
 import { useSearchParams } from 'react-router-dom';
-
 import { LineChart } from '../../components/LineChart';
 import { BarChart } from '../../components/BarChart';
 import { PieChart } from '../../components/PieChart';
+import { ChartStateWrapper } from '../../components/StateWrappers';
 import { ProductsTable } from '../../components/ProductsTable';
 import { useProductAnalytics } from '../../hooks/product-analytics';
 import { useOrderAnalytics } from '../../hooks/order-analytics';
 import { SmallCardSkeleton } from '../../skeletons/SmallCardSkeleton';
-import { LineChartSkeleton } from '../../skeletons/LineChartSkeleton';
-import { BarChartSkeleton } from '../../skeletons/BarChartSkeleton';
-import { PieChartSkeleton } from '../../skeletons/PieChartSkeleton';
 import { ProductsTableSkeleton } from '../../skeletons/ProductsTableSkeleton';
 import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 import { StackedBarChart } from '../../components/StackedBarChart';
@@ -135,34 +132,33 @@ const AnalyticsPage = () => {
     return undefined;
   }, [rangeParam]);
 
-  const { data: products, isLoading: isLoadingProducts } =
-    useProductAnalytics(date);
+  const productQuery = useProductAnalytics(date);
 
-  const { data: customers, isLoading: isLoadingCustomers } =
-    useCustomerAnalytics(date);
+  const customerQuery = useCustomerAnalytics(date);
 
-  const { data: orders, isLoading: isLoadingOrders } = useOrderAnalytics(
+  const orderQuery = useOrderAnalytics(
     ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
       ? rangeParam
       : 'custom',
     date,
   );
 
-  const someOrderCountsGreaterThanZero = orders?.order_count?.some(
+  const someOrderCountsGreaterThanZero = orderQuery.data?.order_count?.some(
     (item) => item.count > 0,
   );
 
-  const someOrderSalesGreaterThanZero = orders?.order_sales?.some(
+  const someOrderSalesGreaterThanZero = orderQuery.data?.order_sales?.some(
     (item) => item.sales > 0,
   );
 
   const someTopSellingProductsGreaterThanZero =
-    products?.variantQuantitySold?.some((item) => item.quantity > 0);
+    productQuery.data?.variantQuantitySold?.some((item) => item.quantity > 0);
 
-  const someCustomerCountsGreaterThanZero = customers?.customer_count?.some(
-    (item) =>
-      (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0,
-  );
+  const someCustomerCountsGreaterThanZero =
+    customerQuery.data?.customer_count?.some(
+      (item) =>
+        (item.new_customers || 0) > 0 || (item.returning_customers || 0) > 0,
+    );
 
   const updateDatePreset = React.useCallback(
     (preset: string) => {
@@ -236,7 +232,7 @@ const AnalyticsPage = () => {
         <div className="flex flex-wrap gap-2">
           <div className="w-[170px]">
             <Select
-              disabled={isLoadingOrders || isLoadingProducts}
+              disabled={orderQuery.isLoading || productQuery.isLoading}
               defaultValue="this-month"
               value={
                 ['this-month', 'last-month', 'last-3-months'].includes(
@@ -261,7 +257,7 @@ const AnalyticsPage = () => {
           <DateRangePicker
             value={dateRangeToRangeValue(date)}
             onChange={handleDateRangeChange}
-            isDisabled={isLoadingOrders || isLoadingProducts}
+            isDisabled={orderQuery.isLoading || productQuery.isLoading}
             aria-label="Date range"
           >
             <Group className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small h-8 text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-ui-bg-field-component dark:border-ui-border-base dark:hover:bg-ui-bg-field-hover px-4 border cursor-pointer">
@@ -349,19 +345,19 @@ const AnalyticsPage = () => {
           <Tabs.List>
             <Tabs.Trigger
               value="orders"
-              disabled={isLoadingOrders || isLoadingProducts}
+              disabled={orderQuery.isLoading || productQuery.isLoading}
             >
               Orders
             </Tabs.Trigger>
             <Tabs.Trigger
               value="products"
-              disabled={isLoadingOrders || isLoadingProducts}
+              disabled={orderQuery.isLoading || productQuery.isLoading}
             >
               Products
             </Tabs.Trigger>
             <Tabs.Trigger
               value="customers"
-              disabled={isLoadingOrders || isLoadingProducts}
+              disabled={orderQuery.isLoading || productQuery.isLoading}
             >
               Customers
             </Tabs.Trigger>
@@ -373,17 +369,18 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Total Orders</Text>
-                    {isLoadingOrders ? (
+                    {orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {orders?.total_orders || 0}
+                          {orderQuery.data?.total_orders || 0}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_orders_percent || 0) > 0 && '+'}
-                          {orders?.prev_orders_percent || 0}% from previous
-                          period
+                          {(orderQuery.data?.prev_orders_percent || 0) > 0 &&
+                            '+'}
+                          {orderQuery.data?.prev_orders_percent || 0}% from
+                          previous period
                         </Text>
                       </>
                     )}
@@ -396,26 +393,24 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Total number of orders in the selected period
                     </Text>
-                    {isLoadingOrders ? (
-                      <LineChartSkeleton />
-                    ) : orders?.order_count &&
-                      orders?.order_count?.length > 0 &&
-                      someOrderCountsGreaterThanZero ? (
+                    <ChartStateWrapper
+                      isLoading={orderQuery.isLoading}
+                      isError={orderQuery.isError}
+                      errorMessage={orderQuery.error?.message}
+                      isEmpty={
+                        !orderQuery.data?.order_count ||
+                        orderQuery.data.order_count.length === 0 ||
+                        !someOrderCountsGreaterThanZero
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <LineChart
-                          data={orders?.order_count}
+                          data={orderQuery.data?.order_count}
                           xAxisDataKey="name"
                           yAxisDataKey="count"
                         />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
 
@@ -423,20 +418,21 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
                     <Text size="small">Total Sales</Text>
-                    {isLoadingOrders ? (
+                    {orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
                           {new Intl.NumberFormat(undefined, {
                             style: 'currency',
-                            currency: orders?.currency_code || 'EUR',
-                          }).format(orders?.total_sales || 0)}
+                            currency: orderQuery.data?.currency_code || 'EUR',
+                          }).format(orderQuery.data?.total_sales || 0)}
                         </Text>
                         <Text size="xsmall" className="text-ui-fg-muted">
-                          {(orders?.prev_sales_percent || 0) > 0 && '+'}
-                          {orders?.prev_sales_percent || 0}% from previous
-                          period
+                          {(orderQuery.data?.prev_sales_percent || 0) > 0 &&
+                            '+'}
+                          {orderQuery.data?.prev_sales_percent || 0}% from
+                          previous period
                         </Text>
                       </>
                     )}
@@ -448,22 +444,27 @@ const AnalyticsPage = () => {
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Total sales in the selected period (
-                      {orders?.currency_code})
+                      {orderQuery.data?.currency_code})
                     </Text>
-                    {isLoadingOrders ? (
-                      <LineChartSkeleton />
-                    ) : orders?.order_sales &&
-                      orders?.order_sales?.length > 0 &&
-                      someOrderSalesGreaterThanZero ? (
+                    <ChartStateWrapper
+                      isLoading={orderQuery.isLoading}
+                      isError={orderQuery.isError}
+                      errorMessage={orderQuery.error?.message}
+                      isEmpty={
+                        !orderQuery.data?.order_sales ||
+                        orderQuery.data.order_sales.length === 0 ||
+                        !someOrderSalesGreaterThanZero
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <LineChart
-                          data={orders.order_sales}
+                          data={orderQuery.data?.order_sales ?? []}
                           xAxisDataKey="name"
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
                           yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat(undefined, {
-                              currency: orders.currency_code,
+                              currency: orderQuery.data?.currency_code || 'EUR',
                               maximumFractionDigits: 0,
                             }).format(
                               typeof value === 'number'
@@ -475,14 +476,7 @@ const AnalyticsPage = () => {
                           }
                         />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
               </div>
@@ -495,12 +489,18 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Sales breakdown by region in the selected period
                     </Text>
-                    {isLoadingOrders ? (
-                      <BarChartSkeleton />
-                    ) : orders?.regions && orders?.regions?.length > 0 ? (
+                    <ChartStateWrapper
+                      isLoading={orderQuery.isLoading}
+                      isError={orderQuery.isError}
+                      errorMessage={orderQuery.error?.message}
+                      isEmpty={
+                        !orderQuery.data?.regions ||
+                        orderQuery.data.regions.length === 0
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <BarChart
-                          data={orders.regions}
+                          data={orderQuery.data?.regions ?? []}
                           xAxisDataKey="name"
                           yAxisDataKey="sales"
                           lineColor="#82ca9d"
@@ -508,7 +508,7 @@ const AnalyticsPage = () => {
                           colorKeyField="name"
                           yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat(undefined, {
-                              currency: orders.currency_code,
+                              currency: orderQuery.data?.currency_code || 'EUR',
                               maximumFractionDigits: 0,
                             }).format(
                               typeof value === 'number'
@@ -520,14 +520,7 @@ const AnalyticsPage = () => {
                           }
                         />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
                 <div className="flex-1">
@@ -538,20 +531,22 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Distribution of orders by status in the selected period
                     </Text>
-                    {isLoadingOrders ? (
-                      <PieChartSkeleton />
-                    ) : orders?.statuses && orders?.statuses?.length > 0 ? (
+                    <ChartStateWrapper
+                      isLoading={orderQuery.isLoading}
+                      isError={orderQuery.isError}
+                      errorMessage={orderQuery.error?.message}
+                      isEmpty={
+                        !orderQuery.data?.statuses ||
+                        orderQuery.data.statuses.length === 0
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
-                        <PieChart data={orders?.statuses} dataKey="count" />
+                        <PieChart
+                          data={orderQuery.data?.statuses}
+                          dataKey="count"
+                        />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
               </div>
@@ -564,13 +559,19 @@ const AnalyticsPage = () => {
                 <Text size="small" className="mb-8 text-ui-fg-muted">
                   Products by quantity sold in selected period
                 </Text>
-                {isLoadingProducts ? (
-                  <BarChartSkeleton />
-                ) : products?.variantQuantitySold &&
-                  someTopSellingProductsGreaterThanZero ? (
+                <ChartStateWrapper
+                  isLoading={productQuery.isLoading}
+                  isError={productQuery.isError}
+                  errorMessage={productQuery.error?.message}
+                  isEmpty={
+                    !productQuery.data?.variantQuantitySold ||
+                    productQuery.data.variantQuantitySold.length === 0 ||
+                    !someTopSellingProductsGreaterThanZero
+                  }
+                >
                   <div className="w-full" style={{ aspectRatio: '16/9' }}>
                     <BarChart
-                      data={products.variantQuantitySold}
+                      data={productQuery.data?.variantQuantitySold ?? []}
                       xAxisDataKey="title"
                       yAxisDataKey="quantity"
                       lineColor="#82ca9d"
@@ -578,11 +579,7 @@ const AnalyticsPage = () => {
                       colorKeyField="title"
                     />
                   </div>
-                ) : (
-                  <Text size="small" className="text-ui-fg-muted text-center">
-                    No data available for the selected period.
-                  </Text>
-                )}
+                </ChartStateWrapper>
               </Container>
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
@@ -592,12 +589,12 @@ const AnalyticsPage = () => {
                   <Text size="small" className="mb-8 text-ui-fg-muted">
                     Products with zero inventory
                   </Text>
-                  {isLoadingProducts ? (
+                  {productQuery.isLoading ? (
                     <ProductsTableSkeleton />
                   ) : (
                     <ProductsTable
                       products={
-                        products?.lowStockVariants?.filter(
+                        productQuery.data?.lowStockVariants?.filter(
                           (product) => product.inventoryQuantity === 0,
                         ) || []
                       }
@@ -611,12 +608,12 @@ const AnalyticsPage = () => {
                   <Text size="small" className="mb-8 text-ui-fg-muted">
                     Products with inventory below threshold
                   </Text>
-                  {isLoadingProducts ? (
+                  {productQuery.isLoading ? (
                     <ProductsTableSkeleton />
                   ) : (
                     <ProductsTable
                       products={
-                        products?.lowStockVariants?.filter(
+                        productQuery.data?.lowStockVariants?.filter(
                           (product) => product.inventoryQuantity > 0,
                         ) || []
                       }
@@ -631,12 +628,12 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Total Customers</Text>
-                    {isLoadingCustomers ? (
+                    {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {customers?.total_customers || 0}
+                          {customerQuery.data?.total_customers || 0}
                         </Text>
                       </>
                     )}
@@ -644,12 +641,12 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">New Customers</Text>
-                    {isLoadingCustomers ? (
+                    {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {customers?.new_customers || 0}
+                          {customerQuery.data?.new_customers || 0}
                         </Text>
                       </>
                     )}
@@ -660,12 +657,12 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
                     <Text size="small">Returning Customers</Text>
-                    {isLoadingCustomers ? (
+                    {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
-                          {customers?.returning_customers || 0}
+                          {customerQuery.data?.returning_customers || 0}
                         </Text>
                       </>
                     )}
@@ -673,19 +670,20 @@ const AnalyticsPage = () => {
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
                     <Text size="small">Average Sales per Customer</Text>
-                    {isLoadingCustomers || isLoadingOrders ? (
+                    {customerQuery.isLoading || orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
                       <>
                         <Text size="xlarge" weight="plus">
                           {new Intl.NumberFormat(undefined, {
-                            currency: customers?.currency_code || 'EUR',
+                            currency:
+                              customerQuery.data?.currency_code || 'EUR',
                             style: 'currency',
                           }).format(
-                            customers?.total_customers &&
-                              customers.total_customers > 0
-                              ? (orders?.total_sales || 0) /
-                                  customers.total_customers
+                            customerQuery.data?.total_customers &&
+                              customerQuery.data.total_customers > 0
+                              ? (orderQuery.data?.total_sales || 0) /
+                                  customerQuery.data.total_customers
                               : 0,
                           )}
                         </Text>
@@ -704,14 +702,19 @@ const AnalyticsPage = () => {
                       Distribution of new and returning customers in the
                       selected period
                     </Text>
-                    {isLoadingCustomers ? (
-                      <BarChartSkeleton />
-                    ) : customers?.customer_count &&
-                      customers.customer_count.length > 0 &&
-                      someCustomerCountsGreaterThanZero ? (
+                    <ChartStateWrapper
+                      isLoading={customerQuery.isLoading}
+                      isError={customerQuery.isError}
+                      errorMessage={customerQuery.error?.message}
+                      isEmpty={
+                        !customerQuery.data?.customer_count ||
+                        customerQuery.data.customer_count.length === 0 ||
+                        !someCustomerCountsGreaterThanZero
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <StackedBarChart
-                          data={customers.customer_count}
+                          data={customerQuery.data?.customer_count ?? []}
                           xAxisDataKey="name"
                           lineColor="#82ca9d"
                           useStableColors={true}
@@ -719,14 +722,7 @@ const AnalyticsPage = () => {
                           dataKeys={['new_customers', 'returning_customers']}
                         />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
                 <div className="flex-1">
@@ -737,13 +733,18 @@ const AnalyticsPage = () => {
                     <Text size="small" className="mb-8 text-ui-fg-muted">
                       Sales breakdown by customer group in the selected period
                     </Text>
-                    {isLoadingCustomers ? (
-                      <BarChartSkeleton />
-                    ) : customers?.customer_group &&
-                      customers.customer_group.length > 0 ? (
+                    <ChartStateWrapper
+                      isLoading={customerQuery.isLoading}
+                      isError={customerQuery.isError}
+                      errorMessage={customerQuery.error?.message}
+                      isEmpty={
+                        !customerQuery.data?.customer_group ||
+                        customerQuery.data.customer_group.length === 0
+                      }
+                    >
                       <div className="w-full" style={{ aspectRatio: '16/9' }}>
                         <BarChart
-                          data={customers.customer_group}
+                          data={customerQuery.data?.customer_group ?? []}
                           xAxisDataKey="name"
                           lineColor="#82ca9d"
                           useStableColors={true}
@@ -751,7 +752,8 @@ const AnalyticsPage = () => {
                           yAxisDataKey="total"
                           yAxisTickFormatter={(value) =>
                             new Intl.NumberFormat(undefined, {
-                              currency: customers.currency_code || 'EUR',
+                              currency:
+                                customerQuery.data?.currency_code || 'EUR',
                               maximumFractionDigits: 0,
                             }).format(
                               typeof value === 'number'
@@ -763,14 +765,7 @@ const AnalyticsPage = () => {
                           }
                         />
                       </div>
-                    ) : (
-                      <Text
-                        size="small"
-                        className="text-ui-fg-muted text-center"
-                      >
-                        No data available for the selected period.
-                      </Text>
-                    )}
+                    </ChartStateWrapper>
                   </Container>
                 </div>
               </div>
@@ -782,12 +777,12 @@ const AnalyticsPage = () => {
                   <Text size="small" className="mb-8 text-ui-fg-muted">
                     Customers by sales in the selected period
                   </Text>
-                  {isLoadingCustomers ? (
+                  {customerQuery.isLoading ? (
                     <CustomersTableSkeleton />
                   ) : (
                     <CustomersTable
-                      customers={customers?.customer_sales || []}
-                      currencyCode={customers?.currency_code || 'EUR'}
+                      customers={customerQuery.data?.customer_sales || []}
+                      currencyCode={customerQuery.data?.currency_code || 'EUR'}
                     />
                   )}
                 </Container>

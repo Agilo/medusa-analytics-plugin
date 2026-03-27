@@ -65,7 +65,7 @@ export const AverageOrderValue = () => {
   });
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Average order value</Text>
         <a
@@ -137,7 +137,7 @@ export const TotalSales = () => {
   );
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Total Sales</Text>
         <a
@@ -207,7 +207,7 @@ export const TotalOrders = () => {
   );
 
   return (
-    <Container className="flex flex-col min-h-52">
+    <Container className="flex flex-col">
       <div className="flex justify-between items-center">
         <Text size="large">Total Orders</Text>
         <a

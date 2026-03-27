@@ -1,11 +1,10 @@
 import { Button, clx, Container, Text } from '@medusajs/ui';
-import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
 import { LineChart } from './LineChart';
-import { Skeleton } from './Skeleton';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
+import { KPIStateWrapper } from './StateWrappers';
 
 const KPITimelineLabel: React.FC<{
   percentage: number;
@@ -42,7 +41,10 @@ const KPITimelineLabel: React.FC<{
 // Orders
 export const AverageOrderValue = () => {
   const { interval, range } = useIntervalRange();
-  const { data, isLoading } = useOrderAnalytics(interval, range);
+  const { data, isLoading, isError, error } = useOrderAnalytics(
+    interval,
+    range,
+  );
 
   const salesChange = (data?.prev_sales_percent ?? 0) / 100;
   const ordersChange = (data?.prev_orders_percent ?? 0) / 100;
@@ -63,7 +65,7 @@ export const AverageOrderValue = () => {
   });
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between items-center">
         <Text size="large">Average order value</Text>
         <a
@@ -77,14 +79,11 @@ export const AverageOrderValue = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-          <Skeleton className="aspect-video w-64 mt-2.5" />
-        </div>
-      ) : (
+      <KPIStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+      >
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
@@ -125,17 +124,20 @@ export const AverageOrderValue = () => {
             </div>
           </div>
         </div>
-      )}
+      </KPIStateWrapper>
     </Container>
   );
 };
 
 export const TotalSales = () => {
   const { interval, range } = useIntervalRange();
-  const { data, isLoading } = useOrderAnalytics(interval, range);
+  const { data, isLoading, isError, error } = useOrderAnalytics(
+    interval,
+    range,
+  );
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between items-center">
         <Text size="large">Total Sales</Text>
         <a
@@ -149,14 +151,11 @@ export const TotalSales = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-          <Skeleton className="aspect-video w-64 mt-2.5" />
-        </div>
-      ) : (
+      <KPIStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+      >
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
@@ -195,17 +194,20 @@ export const TotalSales = () => {
             </div>
           </div>
         </div>
-      )}
+      </KPIStateWrapper>
     </Container>
   );
 };
 
 export const TotalOrders = () => {
   const { interval, range } = useIntervalRange();
-  const { data, isLoading } = useOrderAnalytics(interval, range);
+  const { data, isLoading, isError, error } = useOrderAnalytics(
+    interval,
+    range,
+  );
 
   return (
-    <Container className="flex flex-col">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between items-center">
         <Text size="large">Total Orders</Text>
         <a
@@ -219,14 +221,11 @@ export const TotalOrders = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <div className="flex gap-4 justify-between flex-1">
-          <div>
-            <SmallCardSkeleton />
-          </div>
-          <Skeleton className="aspect-video w-64 mt-2.5" />
-        </div>
-      ) : (
+      <KPIStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+      >
         <div className="flex gap-4 justify-between flex-1">
           <div>
             <Text size="xlarge" weight="plus">
@@ -249,7 +248,7 @@ export const TotalOrders = () => {
             </div>
           </div>
         </div>
-      )}
+      </KPIStateWrapper>
     </Container>
   );
 };

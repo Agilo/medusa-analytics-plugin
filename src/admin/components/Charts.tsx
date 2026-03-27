@@ -4,57 +4,9 @@ import { LineChart } from './LineChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
-import { Skeleton } from './Skeleton';
+import { ChartStateWrapper } from './StateWrappers';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
 import { useOrderAnalytics } from '../hooks/order-analytics';
-
-// Wrapper for chart error handling
-const ChartStateWrapper: React.FC<{
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  isEmpty: boolean;
-  emptyText?: string;
-  children: React.ReactNode;
-}> = ({
-  isLoading,
-  isError,
-  errorMessage,
-  isEmpty,
-  emptyText = 'No data available for the selected period.',
-  children,
-}) => {
-  if (isLoading) {
-    return <Skeleton className="w-full h-44" />;
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-        <Text size="xsmall" className="text-ui-fg-error">
-          Unable to load chart data.
-        </Text>
-
-        <Text size="xsmall" className="text-ui-fg-muted max-w-72 truncate">
-          {errorMessage}
-        </Text>
-      </div>
-    );
-  }
-
-  if (isEmpty) {
-    return (
-      <Text
-        size="xsmall"
-        className="text-ui-fg-muted flex items-center justify-center flex-1"
-      >
-        {emptyText}
-      </Text>
-    );
-  }
-
-  return children;
-};
 
 // Products
 export const TopSellingProducts = () => {
@@ -66,7 +18,7 @@ export const TopSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -115,7 +67,7 @@ export const LowStockVariants = () => {
   const { data, isLoading, isError, error } = useProductAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -168,7 +120,7 @@ export const BottomSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -221,7 +173,7 @@ export const NewVsReturningCustomers = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -270,7 +222,7 @@ export const TopCustomerGroupBySales = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
@@ -342,7 +294,7 @@ export const AverageSalesPerCustomer = () => {
   });
 
   return (
-    <Container className="flex flex-col min-h-44">
+    <Container className="flex flex-col min-h-52">
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">

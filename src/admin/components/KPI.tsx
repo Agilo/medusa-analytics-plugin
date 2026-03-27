@@ -240,7 +240,7 @@ export const TotalOrders = () => {
           <div className="flex-1 flex mt-2.5">
             <div className="aspect-video mt-auto w-full max-w-64 ml-auto">
               <LineChart
-                data={data?.order_count}
+                data={data?.order_count ?? []}
                 xAxisDataKey="name"
                 yAxisDataKey="count"
                 lineColor="#a1a1aa"

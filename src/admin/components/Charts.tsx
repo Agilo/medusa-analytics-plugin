@@ -5,13 +5,61 @@ import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { Skeleton } from './Skeleton';
-import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
-import { useOrderAnalytics } from '../hooks/order-analytics.tsx';
+import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
+import { useOrderAnalytics } from '../hooks/order-analytics';
+
+// Wrapper for chart error handling
+const ChartStateWrapper: React.FC<{
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  isEmpty: boolean;
+  emptyText?: string;
+  children: React.ReactNode;
+}> = ({
+  isLoading,
+  isError,
+  errorMessage,
+  isEmpty,
+  emptyText = 'No data available for the selected period.',
+  children,
+}) => {
+  if (isLoading) {
+    return <Skeleton className="w-full h-44" />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+        <Text size="xsmall" className="text-ui-fg-error">
+          Unable to load chart data.
+        </Text>
+
+        <Text size="xsmall" className="text-ui-fg-muted max-w-72 truncate">
+          {errorMessage}
+        </Text>
+      </div>
+    );
+  }
+
+  if (isEmpty) {
+    return (
+      <Text
+        size="xsmall"
+        className="text-ui-fg-muted flex items-center justify-center flex-1"
+      >
+        {emptyText}
+      </Text>
+    );
+  }
+
+  return children;
+};
 
 // Products
 export const TopSellingProducts = () => {
   const { range } = useIntervalRange();
-  const { data, isLoading } = useProductAnalytics(range);
+  const { data, isLoading, isError, error } = useProductAnalytics(range);
   const topThreeSellers = data?.variantQuantitySold
     ?.filter((item) => item.quantity > 0)
     .sort((a, b) => b.quantity - a.quantity)
@@ -40,9 +88,12 @@ export const TopSellingProducts = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : topThreeSellers && topThreeSellers.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+        isEmpty={!topThreeSellers || topThreeSellers.length === 0}
+      >
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
             isHorizontal
@@ -54,21 +105,14 @@ export const TopSellingProducts = () => {
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="xsmall"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };
 
 export const LowStockVariants = () => {
   const { range } = useIntervalRange();
-  const { data, isLoading } = useProductAnalytics(range);
+  const { data, isLoading, isError, error } = useProductAnalytics(range);
 
   return (
     <Container className="flex flex-col min-h-44">
@@ -93,9 +137,12 @@ export const LowStockVariants = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : data?.lowStockVariants && data?.lowStockVariants?.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+        isEmpty={!data?.lowStockVariants || data.lowStockVariants.length === 0}
+      >
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
             isHorizontal
@@ -107,21 +154,14 @@ export const LowStockVariants = () => {
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="small"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };
 
 export const BottomSellingProducts = () => {
   const { range } = useIntervalRange();
-  const { data, isLoading } = useProductAnalytics(range);
+  const { data, isLoading, isError, error } = useProductAnalytics(range);
   const topThreeWorstSellingProducts = data?.variantQuantitySold
     ?.filter((item) => item.quantity > 0)
     .sort((a, b) => a.quantity - b.quantity)
@@ -150,10 +190,15 @@ export const BottomSellingProducts = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : topThreeWorstSellingProducts &&
-        topThreeWorstSellingProducts.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+        isEmpty={
+          !topThreeWorstSellingProducts ||
+          topThreeWorstSellingProducts.length === 0
+        }
+      >
         <div className="max-w-72 flex-1 text-xs aspect-video">
           <BarChart
             isHorizontal
@@ -165,14 +210,7 @@ export const BottomSellingProducts = () => {
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="small"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };
@@ -180,7 +218,7 @@ export const BottomSellingProducts = () => {
 // Customers
 export const NewVsReturningCustomers = () => {
   const { range } = useIntervalRange();
-  const { data, isLoading } = useCustomerAnalytics(range);
+  const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
     <Container className="flex flex-col min-h-44">
@@ -205,9 +243,12 @@ export const NewVsReturningCustomers = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : data?.customer_count && data.customer_count.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+        isEmpty={!data?.customer_count || data.customer_count.length === 0}
+      >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           <LineChart
             data={data?.customer_count}
@@ -219,21 +260,14 @@ export const NewVsReturningCustomers = () => {
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="xsmall"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };
 
 export const TopCustomerGroupBySales = () => {
   const { range } = useIntervalRange();
-  const { data, isLoading } = useCustomerAnalytics(range);
+  const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
     <Container className="flex flex-col min-h-44">
@@ -258,26 +292,22 @@ export const TopCustomerGroupBySales = () => {
           </Button>
         </a>
       </div>
-      {isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : data?.customer_group && data.customer_group.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={isLoading}
+        isError={isError}
+        errorMessage={error?.message}
+        isEmpty={!data?.customer_group || data.customer_group.length === 0}
+      >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          <LineChart
-            data={data.customer_group}
+          <BarChart
+            data={data?.customer_group ?? []}
             xAxisDataKey="name"
             yAxisDataKey="total"
             lineColor="#a1a1aa"
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="xsmall"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };
@@ -286,11 +316,6 @@ export const AverageSalesPerCustomer = () => {
   const { interval, range } = useIntervalRange();
   const ordersQuery = useOrderAnalytics(interval, range);
   const customersQuery = useCustomerAnalytics(range);
-
-  const currencyCode =
-    ordersQuery.data?.currency_code ||
-    customersQuery.data?.currency_code ||
-    'EUR';
 
   const customersPerBucket = new Map(
     (customersQuery.data?.customer_count ?? []).map((point) => [
@@ -338,9 +363,14 @@ export const AverageSalesPerCustomer = () => {
           </Button>
         </a>
       </div>
-      {ordersQuery.isLoading || customersQuery.isLoading ? (
-        <Skeleton className="w-full h-44" />
-      ) : averageSalesPerCustomerTimeline.length > 0 ? (
+      <ChartStateWrapper
+        isLoading={ordersQuery.isLoading || customersQuery.isLoading}
+        isError={ordersQuery.isError || customersQuery.isError}
+        errorMessage={
+          ordersQuery.error?.message || customersQuery.error?.message
+        }
+        isEmpty={averageSalesPerCustomerTimeline.length === 0}
+      >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
           <LineChart
             data={averageSalesPerCustomerTimeline}
@@ -350,7 +380,7 @@ export const AverageSalesPerCustomer = () => {
             yAxisTickFormatter={(value) =>
               new Intl.NumberFormat(undefined, {
                 style: 'currency',
-                currency: currencyCode,
+                currency: ordersQuery.data?.currency_code || 'EUR',
                 maximumFractionDigits: 0,
               }).format(
                 typeof value === 'number'
@@ -363,14 +393,7 @@ export const AverageSalesPerCustomer = () => {
             hideTooltip
           />
         </div>
-      ) : (
-        <Text
-          size="xsmall"
-          className="text-ui-fg-muted flex items-center justify-center flex-1"
-        >
-          No data available for the selected period.
-        </Text>
-      )}
+      </ChartStateWrapper>
     </Container>
   );
 };

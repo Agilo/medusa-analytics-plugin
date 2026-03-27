@@ -1,6 +1,6 @@
 import { defineWidgetConfig } from '@medusajs/admin-sdk';
-import { AverageSalesPerCustomer } from '../components/Charts';
 import {
+  AverageSalesPerCustomer,
   NewVsReturningCustomers,
   TopCustomerGroupBySales,
 } from '../components/Charts';

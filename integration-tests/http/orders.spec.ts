@@ -199,7 +199,7 @@ medusaIntegrationTestRunner({
 
         expect(res.status).toEqual(200);
 
-        res.data.statuses.forEach((status) => {
+        res.data.statuses.forEach((status: { name: string; count: number }) => {
           expect(status).toHaveProperty('name');
           expect(status).toHaveProperty('count');
         });
@@ -232,7 +232,9 @@ medusaIntegrationTestRunner({
 
         expect(res.data.total_sales).toBeGreaterThanOrEqual(expectedTotal);
 
-        const anySalesAboveZero = res.data.order_sales.some((d) => d.sales > 0);
+        const anySalesAboveZero = res.data.order_sales.some(
+          (d: { sales: number }) => d.sales > 0,
+        );
         expect(anySalesAboveZero).toBe(true);
 
         expect(res.data.currency_code).toBe('EUR');
@@ -327,14 +329,20 @@ medusaIntegrationTestRunner({
         );
         const expectedTotal1 = order?.total * 3 || 0;
         const expectedTotal2 = order?.total * 2 || 0;
-        const sales1 = res1.data.order_sales.reduce((acc, curr) => {
-          acc += curr.sales;
-          return acc;
-        }, 0);
-        const sales2 = res2.data.order_sales.reduce((acc, curr) => {
-          acc += curr.sales;
-          return acc;
-        }, 0);
+        const sales1 = res1.data.order_sales.reduce(
+          (acc: number, curr: { sales: number }) => {
+            acc += curr.sales;
+            return acc;
+          },
+          0,
+        );
+        const sales2 = res2.data.order_sales.reduce(
+          (acc: number, curr: { sales: number }) => {
+            acc += curr.sales;
+            return acc;
+          },
+          0,
+        );
 
         expect(res1.status).toEqual(200);
         expect(res1.data.total_orders).toEqual(3);
@@ -384,14 +392,20 @@ medusaIntegrationTestRunner({
         );
 
         const expectedTotal = order?.total * 12 || 0;
-        const sales = res.data.order_sales.reduce((acc, curr) => {
-          acc += curr.sales;
-          return acc;
-        }, 0);
-        const count = res.data.order_count.reduce((acc, curr) => {
-          acc += curr.count;
-          return acc;
-        }, 0);
+        const sales = res.data.order_sales.reduce(
+          (acc: number, curr: { sales: number }) => {
+            acc += curr.sales;
+            return acc;
+          },
+          0,
+        );
+        const count = res.data.order_count.reduce(
+          (acc: number, curr: { count: number }) => {
+            acc += curr.count;
+            return acc;
+          },
+          0,
+        );
 
         expect(res.status).toEqual(200);
         expect(res.data.total_orders).toEqual(12);

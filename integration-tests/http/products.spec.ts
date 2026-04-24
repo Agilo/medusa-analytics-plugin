@@ -189,9 +189,11 @@ medusaIntegrationTestRunner({
         expect(res.status).toEqual(200);
         expect(Array.isArray(res.data.variantQuantitySold)).toBe(true);
 
-        const foundVariant = res.data.variantQuantitySold.find((v) => {
-          return v.title === variantTitle;
-        });
+        const foundVariant = res.data.variantQuantitySold.find(
+          (v: { title: string }) => {
+            return v.title === variantTitle;
+          },
+        );
 
         expect(foundVariant).toBeDefined();
         expect(foundVariant.quantity).toBeGreaterThanOrEqual(quantity);
@@ -234,7 +236,7 @@ medusaIntegrationTestRunner({
         const lowStockVariants = res.data.lowStockVariants;
 
         const foundVariant = lowStockVariants.find(
-          (v) => v.sku === variant.sku,
+          (v: { sku: string }) => v.sku === variant.sku,
         );
 
         expect(foundVariant).toBeDefined();

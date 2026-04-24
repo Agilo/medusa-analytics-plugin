@@ -415,7 +415,7 @@ medusaIntegrationTestRunner({
         expect(res.status).toEqual(200);
 
         const firstCustomer = res.data.customer_sales.find(
-          (c) => c.email === customer.email,
+          (c: { email: string }) => c.email === customer.email,
         );
 
         expect(firstCustomer).toBeDefined();
@@ -482,10 +482,10 @@ medusaIntegrationTestRunner({
 
         expect(res.status).toEqual(200);
         const groupData = res.data.customer_group.find(
-          (g) => g.name === group.name,
+          (g: { name: string }) => g.name === group.name,
         );
         const groupData2 = res.data.customer_group.find(
-          (g) => g.name === group2.name,
+          (g: { name: string }) => g.name === group2.name,
         );
         expect(groupData).toBeDefined();
         expect(groupData.total).toEqual(2400);

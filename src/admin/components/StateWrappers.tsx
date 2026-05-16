@@ -66,7 +66,7 @@ export const KPIStateWrapper: React.FC<BaseStateWrapperProps> = ({
         <div>
           <SmallCardSkeleton />
         </div>
-        <Skeleton className="aspect-video w-full w-64 mt-2.5" />
+        <Skeleton className="aspect-video w-full max-w-64 mt-2.5" />
       </div>
     );
   }

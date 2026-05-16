@@ -1,9 +1,10 @@
+import * as React from 'react';
 import { Button, clx, Container, Text } from '@medusajs/ui';
 import { LineChart } from './LineChart';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
-import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
+import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
 import { KPIStateWrapper } from './StateWrappers';
 
 const KPITimelineLabel: React.FC<{

@@ -38,6 +38,27 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
     - Out-of-Stock Variants (Table)
     - Low Stock Variants (Table)
 
+### Widgets
+
+The plugin also injects analytics widgets directly into existing admin list pages, so you can view key metrics without leaving your current context:
+
+- **Orders Widget** — appears at the top of the Orders list page (`order.list.before` zone):
+  - Total Sales (KPI)
+  - Total Orders (KPI)
+  - Average Order Value (KPI)
+
+- **Products Widget** — appears at the top of the Products list page (`product.list.before` zone):
+  - Top-Selling Products (Bar Chart)
+  - Low Stock Variants (Table)
+  - Bottom-Selling Products (Bar Chart)
+
+- **Customers Widget** — appears at the top of the Customers list page (`customer.list.before` zone):
+  - New vs. Returning Customers (Chart)
+  - Top Customer Groups by Sales (Chart)
+  - Average Sales per Customer (Chart)
+
+Each widget includes its own interval selector (This Month, Last Month, Last 3 Months, Custom Range) for quick filtering.
+
 ## Getting Started
 
 1. **Install the plugin** in your Medusa project:

@@ -19,6 +19,8 @@ yarn.lock
 .env
 .env.*
 medusa-config.js
+.prettierignore
+.prettierrc
 
 # Yarn
 .yarn/

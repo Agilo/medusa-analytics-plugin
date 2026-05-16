@@ -9,7 +9,7 @@ import {
   AdminShippingProfile,
   AdminStockLocation,
 } from '@medusajs/framework/types';
-import jwt from 'jsonwebtoken';
+import { generateJwtToken } from '@medusajs/framework/utils';
 import { createOrderSeeder } from '../fixtures/orders';
 import { createProductVariant } from '../fixtures/products';
 
@@ -42,14 +42,14 @@ medusaIntegrationTestRunner({
         const userModuleService = container.resolve('user');
 
         const user = await userModuleService.createUsers({
-          email: 'test@test.com',
+          email: `test-products-${Date.now()}@test.com`,
         });
 
         const authIdentity = await authModuleService.createAuthIdentities({
           provider_identities: [
             {
               provider: 'emailpass',
-              entity_id: 'test@test.com',
+              entity_id: user.email,
               provider_metadata: {
                 password: process.env.JWT_SECRET || 'test',
               },
@@ -60,14 +60,16 @@ medusaIntegrationTestRunner({
           },
         });
 
-        const token = jwt.sign(
+        const token = generateJwtToken(
           {
             actor_id: user.id,
             actor_type: 'user',
             auth_identity_id: authIdentity.id,
           },
-          process.env.JWT_SECRET || 'test',
-          { expiresIn: '1d' },
+          {
+            secret: process.env.JWT_SECRET || 'test',
+            expiresIn: '1d',
+          },
         );
 
         headers['Authorization'] = `Bearer ${token}`;
@@ -187,9 +189,11 @@ medusaIntegrationTestRunner({
         expect(res.status).toEqual(200);
         expect(Array.isArray(res.data.variantQuantitySold)).toBe(true);
 
-        const foundVariant = res.data.variantQuantitySold.find((v) => {
-          return v.title === variantTitle;
-        });
+        const foundVariant = res.data.variantQuantitySold.find(
+          (v: { title: string }) => {
+            return v.title === variantTitle;
+          },
+        );
 
         expect(foundVariant).toBeDefined();
         expect(foundVariant.quantity).toBeGreaterThanOrEqual(quantity);
@@ -232,7 +236,7 @@ medusaIntegrationTestRunner({
         const lowStockVariants = res.data.lowStockVariants;
 
         const foundVariant = lowStockVariants.find(
-          (v) => v.sku === variant.sku,
+          (v: { sku: string }) => v.sku === variant.sku,
         );
 
         expect(foundVariant).toBeDefined();

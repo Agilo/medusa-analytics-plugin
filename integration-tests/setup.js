@@ -1,4 +1,8 @@
 const { dropDatabase } = require('pg-god');
+const { MetadataStorage } = require('@medusajs/framework/mikro-orm/core');
+
+// Clear MikroORM metadata storage
+MetadataStorage.clear();
 
 const DB_HOST = process.env.DB_HOST;
 const DB_USERNAME = process.env.DB_USERNAME;

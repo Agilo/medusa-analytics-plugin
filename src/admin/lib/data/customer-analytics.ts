@@ -1,7 +1,7 @@
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { CustomerAnalyticsResponse } from '../../hooks/customer-analytics';
 import { sdk } from '../utils';
+import type { CustomerAnalyticsResponse } from '../../../api/admin/agilo-analytics/customers/route';
 
 export async function retrieveCustomersAnalytics(date: DateRange | undefined) {
   if (!date || !date.from || !date?.to) {

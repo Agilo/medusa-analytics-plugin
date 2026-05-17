@@ -4,6 +4,7 @@ import {
   useDataTable,
   DataTable,
 } from '@medusajs/ui';
+import { useTranslation } from 'react-i18next';
 
 import { Skeleton } from '../components/Skeleton';
 
@@ -58,6 +59,7 @@ const columns = [
 ];
 
 export const ProductsTableSkeleton = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = React.useState<string>('');
 
   const table = useDataTable({
@@ -74,7 +76,7 @@ export const ProductsTableSkeleton = () => {
   return (
     <DataTable instance={table}>
       <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder="Search..." />
+        <DataTable.Search placeholder={t('analytics.table.search')} />
       </DataTable.Toolbar>
       <DataTable.Table />
     </DataTable>

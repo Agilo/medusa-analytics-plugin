@@ -7,9 +7,11 @@ import { useCustomerAnalytics } from '../hooks/customer-analytics';
 import { ChartStateWrapper } from './StateWrappers';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
 import { useOrderAnalytics } from '../hooks/order-analytics';
+import { useTranslation } from 'react-i18next';
 
 // Products
 export const TopSellingProducts = () => {
+  const { t } = useTranslation();
   const { range } = useIntervalRange();
   const { data, isLoading, isError, error } = useProductAnalytics(range);
   const topThreeSellers = data?.variantQuantitySold
@@ -22,10 +24,10 @@ export const TopSellingProducts = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            Top-Selling Products
+            {t('analytics.products.topSelling')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted ">
-            Top products by quantity sold in the selected time period
+            {t('analytics.widgets.topSellingDesc')}
           </Text>
         </div>
 
@@ -36,7 +38,7 @@ export const TopSellingProducts = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -44,6 +46,7 @@ export const TopSellingProducts = () => {
         isLoading={isLoading}
         isError={isError}
         errorMessage={error?.message}
+        emptyText={t('analytics.noData')}
         isEmpty={!topThreeSellers || topThreeSellers.length === 0}
       >
         <div className="max-w-72 flex-1 text-xs aspect-video">
@@ -63,6 +66,7 @@ export const TopSellingProducts = () => {
 };
 
 export const LowStockVariants = () => {
+  const { t } = useTranslation();
   const { range } = useIntervalRange();
   const { data, isLoading, isError, error } = useProductAnalytics(range);
 
@@ -71,10 +75,10 @@ export const LowStockVariants = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            Low Stock Variants
+            {t('analytics.products.lowStock')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Products with inventory below threshold{' '}
+            {t('analytics.products.lowStockDesc')}{' '}
           </Text>
         </div>
 
@@ -85,7 +89,7 @@ export const LowStockVariants = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -93,6 +97,7 @@ export const LowStockVariants = () => {
         isLoading={isLoading}
         isError={isError}
         errorMessage={error?.message}
+        emptyText={t('analytics.noData')}
         isEmpty={!data?.lowStockVariants || data.lowStockVariants.length === 0}
       >
         <div className="max-w-72 flex-1 text-xs aspect-video">
@@ -112,6 +117,7 @@ export const LowStockVariants = () => {
 };
 
 export const BottomSellingProducts = () => {
+  const { t } = useTranslation();
   const { range } = useIntervalRange();
   const { data, isLoading, isError, error } = useProductAnalytics(range);
   const topThreeWorstSellingProducts = data?.variantQuantitySold
@@ -124,10 +130,10 @@ export const BottomSellingProducts = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            Bottom-Selling Products
+            {t('analytics.widgets.bottomSelling')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Worst products by quantity sold in the selected time period
+            {t('analytics.widgets.bottomSellingDesc')}
           </Text>
         </div>
 
@@ -138,7 +144,7 @@ export const BottomSellingProducts = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -146,6 +152,7 @@ export const BottomSellingProducts = () => {
         isLoading={isLoading}
         isError={isError}
         errorMessage={error?.message}
+        emptyText={t('analytics.noData')}
         isEmpty={
           !topThreeWorstSellingProducts ||
           topThreeWorstSellingProducts.length === 0
@@ -169,6 +176,7 @@ export const BottomSellingProducts = () => {
 
 // Customers
 export const NewVsReturningCustomers = () => {
+  const { t } = useTranslation();
   const { range } = useIntervalRange();
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
@@ -177,10 +185,10 @@ export const NewVsReturningCustomers = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            New vs Returning Customers
+            {t('analytics.customers.newVsReturning')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            New and returning customers over time in the selected period
+            {t('analytics.widgets.newVsReturningDesc')}
           </Text>
         </div>
 
@@ -191,7 +199,7 @@ export const NewVsReturningCustomers = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -199,6 +207,7 @@ export const NewVsReturningCustomers = () => {
         isLoading={isLoading}
         isError={isError}
         errorMessage={error?.message}
+        emptyText={t('analytics.noData')}
         isEmpty={!data?.customer_count || data.customer_count.length === 0}
       >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
@@ -218,6 +227,7 @@ export const NewVsReturningCustomers = () => {
 };
 
 export const TopCustomerGroupBySales = () => {
+  const { t } = useTranslation();
   const { range } = useIntervalRange();
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
@@ -226,10 +236,10 @@ export const TopCustomerGroupBySales = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            Top Customer Groups by Sales
+            {t('analytics.customers.topGroups')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Sales breakdown by customer group in the selected period
+            {t('analytics.customers.topGroupsDesc')}
           </Text>
         </div>
 
@@ -240,7 +250,7 @@ export const TopCustomerGroupBySales = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -248,6 +258,7 @@ export const TopCustomerGroupBySales = () => {
         isLoading={isLoading}
         isError={isError}
         errorMessage={error?.message}
+        emptyText={t('analytics.noData')}
         isEmpty={!data?.customer_group || data.customer_group.length === 0}
       >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
@@ -265,6 +276,7 @@ export const TopCustomerGroupBySales = () => {
 };
 
 export const AverageSalesPerCustomer = () => {
+  const { t } = useTranslation();
   const { interval, range } = useIntervalRange();
   const ordersQuery = useOrderAnalytics(interval, range);
   const customersQuery = useCustomerAnalytics(range);
@@ -298,10 +310,10 @@ export const AverageSalesPerCustomer = () => {
       <div className="flex justify-between">
         <div>
           <Text size="large" weight="plus">
-            Average Sales per Customer
+            {t('analytics.customers.avgSalesPerCustomer')}
           </Text>
           <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Average sales per customer over time in the selected period
+            {t('analytics.widgets.avgSalesPerCustomerDesc')}
           </Text>
         </div>
         <a
@@ -311,7 +323,7 @@ export const AverageSalesPerCustomer = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -321,6 +333,7 @@ export const AverageSalesPerCustomer = () => {
         errorMessage={
           ordersQuery.error?.message || customersQuery.error?.message
         }
+        emptyText={t('analytics.noData')}
         isEmpty={averageSalesPerCustomerTimeline.length === 0}
       >
         <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">

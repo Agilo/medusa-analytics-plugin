@@ -18,6 +18,7 @@ import {
   User,
 } from '@medusajs/icons';
 import { ChartNoAxesCombined } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
 import {
   Button,
@@ -110,6 +111,7 @@ function presetToDateRange(
 const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
 
 const AnalyticsPage = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const rangeParam = searchParams.get('range') || 'this-month';
 
@@ -227,7 +229,7 @@ const AnalyticsPage = () => {
   return (
     <Container className="divide-y p-0">
       <div className="flex flex-wrap gap-x-2 gap-y-4 items-center justify-between px-6 py-4">
-        <Heading level="h1">Analytics</Heading>
+        <Heading level="h1">{t('analytics.title')}</Heading>
 
         <div className="flex flex-wrap gap-2">
           <div className="w-[170px]">
@@ -247,10 +249,18 @@ const AnalyticsPage = () => {
                 <Select.Value />
               </Select.Trigger>
               <Select.Content>
-                <Select.Item value="this-month">This Month</Select.Item>
-                <Select.Item value="last-month">Last Month</Select.Item>
-                <Select.Item value="last-3-months">Last 3 Months</Select.Item>
-                <Select.Item value="custom">Custom</Select.Item>
+                <Select.Item value="this-month">
+                  {t('analytics.presets.thisMonth')}
+                </Select.Item>
+                <Select.Item value="last-month">
+                  {t('analytics.presets.lastMonth')}
+                </Select.Item>
+                <Select.Item value="last-3-months">
+                  {t('analytics.presets.last3Months')}
+                </Select.Item>
+                <Select.Item value="custom">
+                  {t('analytics.presets.custom')}
+                </Select.Item>
               </Select.Content>
             </Select>
           </div>
@@ -258,7 +268,7 @@ const AnalyticsPage = () => {
             value={dateRangeToRangeValue(date)}
             onChange={handleDateRangeChange}
             isDisabled={orderQuery.isLoading || productQuery.isLoading}
-            aria-label="Date range"
+            aria-label={t('analytics.dateRange')}
           >
             <Group className="inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive justify-start focus-visible:shadow-borders-interactive-with-active disabled:bg-ui-bg-disabled disabled:text-ui-fg-disabled bg-ui-bg-field text-ui-fg-base txt-compact-small h-8 text-left font-normal data-[state=open]:!shadow-borders-interactive-with-active shadow-buttons-neutral hover:bg-ui-bg-field-hover outline-none transition-fg disabled:cursor-not-allowed min-w-[260px] bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-ui-bg-field-component dark:border-ui-border-base dark:hover:bg-ui-bg-field-hover px-4 border cursor-pointer">
               <CalendarIcon className="h-4 w-4 text-ui-fg-muted group-disabled:text-ui-fg-disabled flex-shrink-0" />
@@ -347,19 +357,19 @@ const AnalyticsPage = () => {
               value="orders"
               disabled={orderQuery.isLoading || productQuery.isLoading}
             >
-              Orders
+              {t('analytics.tabs.orders')}
             </Tabs.Trigger>
             <Tabs.Trigger
               value="products"
               disabled={orderQuery.isLoading || productQuery.isLoading}
             >
-              Products
+              {t('analytics.tabs.products')}
             </Tabs.Trigger>
             <Tabs.Trigger
               value="customers"
               disabled={orderQuery.isLoading || productQuery.isLoading}
             >
-              Customers
+              {t('analytics.tabs.customers')}
             </Tabs.Trigger>
           </Tabs.List>
           <div className="mt-8">
@@ -368,7 +378,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <ShoppingCart className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Total Orders</Text>
+                    <Text size="small">
+                      {t('analytics.orders.totalOrders')}
+                    </Text>
                     {orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -379,8 +391,8 @@ const AnalyticsPage = () => {
                         <Text size="xsmall" className="text-ui-fg-muted">
                           {(orderQuery.data?.prev_orders_percent || 0) > 0 &&
                             '+'}
-                          {orderQuery.data?.prev_orders_percent || 0}% from
-                          previous period
+                          {orderQuery.data?.prev_orders_percent || 0}
+                          {t('analytics.fromPreviousPeriod')}
                         </Text>
                       </>
                     )}
@@ -388,15 +400,16 @@ const AnalyticsPage = () => {
 
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Orders Over Time
+                      {t('analytics.orders.ordersOverTime')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Total number of orders in the selected period
+                      {t('analytics.orders.ordersOverTimeDesc')}
                     </Text>
                     <ChartStateWrapper
                       isLoading={orderQuery.isLoading}
                       isError={orderQuery.isError}
                       errorMessage={orderQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !orderQuery.data?.order_count ||
                         orderQuery.data.order_count.length === 0 ||
@@ -417,7 +430,7 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-                    <Text size="small">Total Sales</Text>
+                    <Text size="small">{t('analytics.orders.totalSales')}</Text>
                     {orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -431,8 +444,8 @@ const AnalyticsPage = () => {
                         <Text size="xsmall" className="text-ui-fg-muted">
                           {(orderQuery.data?.prev_sales_percent || 0) > 0 &&
                             '+'}
-                          {orderQuery.data?.prev_sales_percent || 0}% from
-                          previous period
+                          {orderQuery.data?.prev_sales_percent || 0}
+                          {t('analytics.fromPreviousPeriod')}
                         </Text>
                       </>
                     )}
@@ -440,16 +453,18 @@ const AnalyticsPage = () => {
 
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Sales Over Time
+                      {t('analytics.orders.salesOverTime')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Total sales in the selected period (
-                      {orderQuery.data?.currency_code})
+                      {t('analytics.orders.salesOverTimeDesc', {
+                        currency: orderQuery.data?.currency_code,
+                      })}
                     </Text>
                     <ChartStateWrapper
                       isLoading={orderQuery.isLoading}
                       isError={orderQuery.isError}
                       errorMessage={orderQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !orderQuery.data?.order_sales ||
                         orderQuery.data.order_sales.length === 0 ||
@@ -484,15 +499,16 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Top Regions by Sales
+                      {t('analytics.orders.topRegions')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Sales breakdown by region in the selected period
+                      {t('analytics.orders.topRegionsDesc')}
                     </Text>
                     <ChartStateWrapper
                       isLoading={orderQuery.isLoading}
                       isError={orderQuery.isError}
                       errorMessage={orderQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !orderQuery.data?.regions ||
                         orderQuery.data.regions.length === 0
@@ -526,15 +542,16 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Order Status Breakdown
+                      {t('analytics.orders.statusBreakdown')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Distribution of orders by status in the selected period
+                      {t('analytics.orders.statusBreakdownDesc')}
                     </Text>
                     <ChartStateWrapper
                       isLoading={orderQuery.isLoading}
                       isError={orderQuery.isError}
                       errorMessage={orderQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !orderQuery.data?.statuses ||
                         orderQuery.data.statuses.length === 0
@@ -554,15 +571,16 @@ const AnalyticsPage = () => {
             <Tabs.Content value="products">
               <Container className="mb-4 min-h-[9.375rem]">
                 <Text size="xlarge" weight="plus">
-                  Top-Selling Products
+                  {t('analytics.products.topSelling')}
                 </Text>
                 <Text size="small" className="mb-8 text-ui-fg-muted">
-                  Products by quantity sold in selected period
+                  {t('analytics.products.topSellingDesc')}
                 </Text>
                 <ChartStateWrapper
                   isLoading={productQuery.isLoading}
                   isError={productQuery.isError}
                   errorMessage={productQuery.error?.message}
+                  emptyText={t('analytics.noData')}
                   isEmpty={
                     !productQuery.data?.variantQuantitySold ||
                     productQuery.data.variantQuantitySold.length === 0 ||
@@ -584,10 +602,10 @@ const AnalyticsPage = () => {
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Out-of-Stock Variants
+                    {t('analytics.products.outOfStock')}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Products with zero inventory
+                    {t('analytics.products.outOfStockDesc')}
                   </Text>
                   {productQuery.isLoading ? (
                     <ProductsTableSkeleton />
@@ -603,10 +621,10 @@ const AnalyticsPage = () => {
                 </Container>
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Low Stock Variants
+                    {t('analytics.products.lowStock')}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Products with inventory below threshold
+                    {t('analytics.products.lowStockDesc')}
                   </Text>
                   {productQuery.isLoading ? (
                     <ProductsTableSkeleton />
@@ -627,7 +645,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Total Customers</Text>
+                    <Text size="small">
+                      {t('analytics.customers.totalCustomers')}
+                    </Text>
                     {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -640,7 +660,9 @@ const AnalyticsPage = () => {
                   </Container>
                   <Container className="relative">
                     <User className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">New Customers</Text>
+                    <Text size="small">
+                      {t('analytics.customers.newCustomers')}
+                    </Text>
                     {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -656,7 +678,9 @@ const AnalyticsPage = () => {
                 <div className="space-y-4 flex-1">
                   <Container className="relative">
                     <User className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
-                    <Text size="small">Returning Customers</Text>
+                    <Text size="small">
+                      {t('analytics.customers.returningCustomers')}
+                    </Text>
                     {customerQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -669,7 +693,9 @@ const AnalyticsPage = () => {
                   </Container>
                   <Container className="relative">
                     <ChartNoAxesCombined className="absolute right-6 top-4 text-ui-fg-muted" />
-                    <Text size="small">Average Sales per Customer</Text>
+                    <Text size="small">
+                      {t('analytics.customers.avgSalesPerCustomer')}
+                    </Text>
                     {customerQuery.isLoading || orderQuery.isLoading ? (
                       <SmallCardSkeleton />
                     ) : (
@@ -696,16 +722,16 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      New vs. Returning Customers
+                      {t('analytics.customers.newVsReturning')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Distribution of new and returning customers in the
-                      selected period
+                      {t('analytics.customers.newVsReturningDesc')}
                     </Text>
                     <ChartStateWrapper
                       isLoading={customerQuery.isLoading}
                       isError={customerQuery.isError}
                       errorMessage={customerQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !customerQuery.data?.customer_count ||
                         customerQuery.data.customer_count.length === 0 ||
@@ -728,15 +754,16 @@ const AnalyticsPage = () => {
                 <div className="flex-1">
                   <Container className="min-h-[9.375rem]">
                     <Text size="xlarge" weight="plus">
-                      Top Customer Groups by Sales
+                      {t('analytics.customers.topGroups')}
                     </Text>
                     <Text size="small" className="mb-8 text-ui-fg-muted">
-                      Sales breakdown by customer group in the selected period
+                      {t('analytics.customers.topGroupsDesc')}
                     </Text>
                     <ChartStateWrapper
                       isLoading={customerQuery.isLoading}
                       isError={customerQuery.isError}
                       errorMessage={customerQuery.error?.message}
+                      emptyText={t('analytics.noData')}
                       isEmpty={
                         !customerQuery.data?.customer_group ||
                         customerQuery.data.customer_group.length === 0
@@ -772,10 +799,10 @@ const AnalyticsPage = () => {
               <div className="flex gap-4 max-xl:flex-col">
                 <Container>
                   <Text size="xlarge" weight="plus">
-                    Top Customers by Sales
+                    {t('analytics.customers.topCustomers')}
                   </Text>
                   <Text size="small" className="mb-8 text-ui-fg-muted">
-                    Customers by sales in the selected period
+                    {t('analytics.customers.topCustomersDesc')}
                   </Text>
                   {customerQuery.isLoading ? (
                     <CustomersTableSkeleton />
@@ -796,7 +823,7 @@ const AnalyticsPage = () => {
 };
 
 export const config = defineRouteConfig({
-  label: 'Analytics',
+  label: t('analytics.title'),
   icon: ChartBar,
 });
 

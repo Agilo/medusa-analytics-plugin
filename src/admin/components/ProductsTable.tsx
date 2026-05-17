@@ -6,6 +6,7 @@ import {
   DataTablePaginationState,
   DataTableSortingState,
 } from '@medusajs/ui';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -23,42 +24,11 @@ type ProductsTableProps = {
 const columnHelper =
   createDataTableColumnHelper<ProductsTableProps['products'][0]>();
 
-const columns = [
-  columnHelper.accessor('sku', {
-    header: 'SKU',
-    enableSorting: true,
-    sortLabel: 'SKU',
-    sortAscLabel: 'A-Z',
-    sortDescLabel: 'Z-A',
-  }),
-  columnHelper.accessor('variantName', {
-    header: 'Variant Name',
-    enableSorting: true,
-    sortLabel: 'Variant Name',
-    sortAscLabel: 'A-Z',
-    sortDescLabel: 'Z-A',
-  }),
-  columnHelper.accessor('inventoryQuantity', {
-    header: 'Inventory',
-    enableSorting: true,
-    sortLabel: 'Inventory',
-    sortAscLabel: 'Low to High',
-    sortDescLabel: 'High to Low',
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      return (
-        <p className={cn(value === 0 && 'text-ui-fg-error')}>
-          {value === 0 ? 'Out of Stock' : value}
-        </p>
-      );
-    },
-  }),
-];
-
 const PAGE_SIZE = 10;
 
 export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
+  const { t } = useTranslation();
+
   const [pagination, setPagination] = React.useState<DataTablePaginationState>({
     pageSize: PAGE_SIZE,
     pageIndex: 0,
@@ -71,6 +41,42 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
   );
 
   const navigate = useNavigate();
+
+  const columns = React.useMemo(
+    () => [
+      columnHelper.accessor('sku', {
+        header: t('analytics.table.products.sku'),
+        enableSorting: true,
+        sortLabel: t('analytics.table.products.sku'),
+        sortAscLabel: t('analytics.table.products.sortAZ'),
+        sortDescLabel: t('analytics.table.products.sortZA'),
+      }),
+      columnHelper.accessor('variantName', {
+        header: t('analytics.table.products.variantName'),
+        enableSorting: true,
+        sortLabel: t('analytics.table.products.variantName'),
+        sortAscLabel: t('analytics.table.products.sortAZ'),
+        sortDescLabel: t('analytics.table.products.sortZA'),
+      }),
+      columnHelper.accessor('inventoryQuantity', {
+        header: t('analytics.table.products.inventory'),
+        enableSorting: true,
+        sortLabel: t('analytics.table.products.inventory'),
+        sortAscLabel: t('analytics.table.products.sortLowHigh'),
+        sortDescLabel: t('analytics.table.products.sortHighLow'),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          return (
+            <p className={cn(value === 0 && 'text-ui-fg-error')}>
+              {value === 0 ? t('analytics.products.outOfStockLabel') : value}
+            </p>
+          );
+        },
+      }),
+    ],
+    [t],
+  );
 
   const shownProducts = React.useMemo(() => {
     let filtered = products.filter(
@@ -129,15 +135,15 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
   return (
     <DataTable instance={table}>
       <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder="Search..." />
+        <DataTable.Search placeholder={t('analytics.table.search')} />
       </DataTable.Toolbar>
       <DataTable.Table
         emptyState={{
           filtered: {
-            heading: 'No products found',
+            heading: t('analytics.table.products.noProductsFound'),
           },
           empty: {
-            heading: 'No products available',
+            heading: t('analytics.table.products.noProductsAvailable'),
           },
         }}
       />

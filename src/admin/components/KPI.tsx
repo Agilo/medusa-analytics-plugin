@@ -6,10 +6,12 @@ import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
 import { KPIStateWrapper } from './StateWrappers';
+import { useTranslation } from 'react-i18next';
 
 const KPITimelineLabel: React.FC<{
   percentage: number;
 }> = ({ percentage }) => {
+  const { t } = useTranslation();
   return (
     <Text size="small" className="text-ui-fg-muted">
       <span
@@ -34,13 +36,14 @@ const KPITimelineLabel: React.FC<{
           maximumFractionDigits: 2,
         }).format(Math.abs(percentage))}
       </span>{' '}
-      from the previous period
+      {t('analytics.kpi.fromPreviousPeriod')}
     </Text>
   );
 };
 
 // Orders
 export const AverageOrderValue = () => {
+  const { t } = useTranslation();
   const { interval, range } = useIntervalRange();
   const { data, isLoading, isError, error } = useOrderAnalytics(
     interval,
@@ -68,7 +71,7 @@ export const AverageOrderValue = () => {
   return (
     <Container className="flex flex-col">
       <div className="flex justify-between items-center">
-        <Text size="large">Average order value</Text>
+        <Text size="large">{t('analytics.kpi.averageOrderValue')}</Text>
         <a
           href={withOptionalAnalyticsRange(
             '/app/analytics?tab=orders#:~:text=Orders%20Over%20Time',
@@ -76,7 +79,7 @@ export const AverageOrderValue = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -131,6 +134,7 @@ export const AverageOrderValue = () => {
 };
 
 export const TotalSales = () => {
+  const { t } = useTranslation();
   const { interval, range } = useIntervalRange();
   const { data, isLoading, isError, error } = useOrderAnalytics(
     interval,
@@ -140,7 +144,7 @@ export const TotalSales = () => {
   return (
     <Container className="flex flex-col">
       <div className="flex justify-between items-center">
-        <Text size="large">Total Sales</Text>
+        <Text size="large">{t('analytics.orders.totalSales')}</Text>
         <a
           href={withOptionalAnalyticsRange(
             '/app/analytics#:~:text=Sales%20Over%20Time',
@@ -148,7 +152,7 @@ export const TotalSales = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>
@@ -201,6 +205,7 @@ export const TotalSales = () => {
 };
 
 export const TotalOrders = () => {
+  const { t } = useTranslation();
   const { interval, range } = useIntervalRange();
   const { data, isLoading, isError, error } = useOrderAnalytics(
     interval,
@@ -210,7 +215,7 @@ export const TotalOrders = () => {
   return (
     <Container className="flex flex-col">
       <div className="flex justify-between items-center">
-        <Text size="large">Total Orders</Text>
+        <Text size="large">{t('analytics.orders.totalOrders')}</Text>
         <a
           href={withOptionalAnalyticsRange(
             '/app/analytics#:~:text=Orders%20Over%20Time',
@@ -218,7 +223,7 @@ export const TotalOrders = () => {
           )}
         >
           <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
+            {t('analytics.viewMore')}
           </Button>
         </a>
       </div>

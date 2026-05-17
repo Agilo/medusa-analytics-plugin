@@ -9,7 +9,7 @@ import {
   AdminShippingProfile,
   AdminStockLocation,
 } from '@medusajs/framework/types';
-import jwt from 'jsonwebtoken';
+import { generateJwtToken } from '@medusajs/framework/utils';
 import { createOrderSeeder } from '../fixtures/orders';
 import {
   addCustomerToGroup,
@@ -46,14 +46,14 @@ medusaIntegrationTestRunner({
         const userModuleService = container.resolve('user');
 
         const user = await userModuleService.createUsers({
-          email: 'test@test.com',
+          email: `test-customers-${Date.now()}@test.com`,
         });
 
         const authIdentity = await authModuleService.createAuthIdentities({
           provider_identities: [
             {
               provider: 'emailpass',
-              entity_id: 'test@test.com',
+              entity_id: user.email,
               provider_metadata: {
                 password: process.env.JWT_SECRET || 'test',
               },
@@ -64,14 +64,16 @@ medusaIntegrationTestRunner({
           },
         });
 
-        const token = jwt.sign(
+        const token = generateJwtToken(
           {
             actor_id: user.id,
             actor_type: 'user',
             auth_identity_id: authIdentity.id,
           },
-          process.env.JWT_SECRET || 'test',
-          { expiresIn: '1d' },
+          {
+            secret: process.env.JWT_SECRET || 'test',
+            expiresIn: '1d',
+          },
         );
 
         headers['Authorization'] = `Bearer ${token}`;
@@ -413,7 +415,7 @@ medusaIntegrationTestRunner({
         expect(res.status).toEqual(200);
 
         const firstCustomer = res.data.customer_sales.find(
-          (c) => c.email === customer.email,
+          (c: { email: string }) => c.email === customer.email,
         );
 
         expect(firstCustomer).toBeDefined();
@@ -480,10 +482,10 @@ medusaIntegrationTestRunner({
 
         expect(res.status).toEqual(200);
         const groupData = res.data.customer_group.find(
-          (g) => g.name === group.name,
+          (g: { name: string }) => g.name === group.name,
         );
         const groupData2 = res.data.customer_group.find(
-          (g) => g.name === group2.name,
+          (g: { name: string }) => g.name === group2.name,
         );
         expect(groupData).toBeDefined();
         expect(groupData.total).toEqual(2400);

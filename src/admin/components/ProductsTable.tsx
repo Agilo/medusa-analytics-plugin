@@ -1,15 +1,15 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   createDataTableColumnHelper,
   useDataTable,
   DataTable,
   DataTablePaginationState,
   DataTableSortingState,
-} from "@medusajs/ui";
-import { useTranslation } from "react-i18next";
+} from '@medusajs/ui';
+import { useTranslation } from 'react-i18next';
 
-import { cn } from "../lib/utils";
-import { useNavigate } from "react-router-dom";
+import { cn } from '../lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 type ProductsTableProps = {
   products: {
@@ -22,7 +22,7 @@ type ProductsTableProps = {
 };
 
 const columnHelper =
-  createDataTableColumnHelper<ProductsTableProps["products"][0]>();
+  createDataTableColumnHelper<ProductsTableProps['products'][0]>();
 
 const PAGE_SIZE = 10;
 
@@ -34,7 +34,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
     pageIndex: 0,
   });
 
-  const [search, setSearch] = React.useState<string>("");
+  const [search, setSearch] = React.useState<string>('');
 
   const [sorting, setSorting] = React.useState<DataTableSortingState | null>(
     null,
@@ -44,32 +44,32 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
 
   const columns = React.useMemo(
     () => [
-      columnHelper.accessor("sku", {
-        header: t("analytics.table.products.sku"),
+      columnHelper.accessor('sku', {
+        header: t('analytics.table.products.sku'),
         enableSorting: true,
-        sortLabel: t("analytics.table.products.sku"),
-        sortAscLabel: t("analytics.table.products.sortAZ"),
-        sortDescLabel: t("analytics.table.products.sortZA"),
+        sortLabel: t('analytics.table.products.sku'),
+        sortAscLabel: t('analytics.table.products.sortAZ'),
+        sortDescLabel: t('analytics.table.products.sortZA'),
       }),
-      columnHelper.accessor("variantName", {
-        header: t("analytics.table.products.variantName"),
+      columnHelper.accessor('variantName', {
+        header: t('analytics.table.products.variantName'),
         enableSorting: true,
-        sortLabel: t("analytics.table.products.variantName"),
-        sortAscLabel: t("analytics.table.products.sortAZ"),
-        sortDescLabel: t("analytics.table.products.sortZA"),
+        sortLabel: t('analytics.table.products.variantName'),
+        sortAscLabel: t('analytics.table.products.sortAZ'),
+        sortDescLabel: t('analytics.table.products.sortZA'),
       }),
-      columnHelper.accessor("inventoryQuantity", {
-        header: t("analytics.table.products.inventory"),
+      columnHelper.accessor('inventoryQuantity', {
+        header: t('analytics.table.products.inventory'),
         enableSorting: true,
-        sortLabel: t("analytics.table.products.inventory"),
-        sortAscLabel: t("analytics.table.products.sortLowHigh"),
-        sortDescLabel: t("analytics.table.products.sortHighLow"),
+        sortLabel: t('analytics.table.products.inventory'),
+        sortAscLabel: t('analytics.table.products.sortLowHigh'),
+        sortDescLabel: t('analytics.table.products.sortHighLow'),
         cell: ({ getValue }) => {
           const value = getValue();
 
           return (
-            <p className={cn(value === 0 && "text-ui-fg-error")}>
-              {value === 0 ? t("analytics.products.outOfStockLabel") : value}
+            <p className={cn(value === 0 && 'text-ui-fg-error')}>
+              {value === 0 ? t('analytics.products.outOfStockLabel') : value}
             </p>
           );
         },
@@ -125,9 +125,9 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
       onSortingChange: setSorting,
     },
     onRowClick: (_, row) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       navigate(
-        `/products/${(row as any).original.productId}/variants/${(row as any).original.variantId}`,
+        // @ts-expect-error - original missing in the row type
+        `/products/${row.original.productId}/variants/${row.original.variantId}`,
       );
     },
   });
@@ -135,15 +135,15 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
   return (
     <DataTable instance={table}>
       <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder={t("analytics.table.search")} />
+        <DataTable.Search placeholder={t('analytics.table.search')} />
       </DataTable.Toolbar>
       <DataTable.Table
         emptyState={{
           filtered: {
-            heading: t("analytics.table.products.noProductsFound"),
+            heading: t('analytics.table.products.noProductsFound'),
           },
           empty: {
-            heading: t("analytics.table.products.noProductsAvailable"),
+            heading: t('analytics.table.products.noProductsAvailable'),
           },
         }}
       />

@@ -1,15 +1,15 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   createDataTableColumnHelper,
   useDataTable,
   DataTable,
   DataTablePaginationState,
   DataTableSortingState,
-} from "@medusajs/ui";
+} from '@medusajs/ui';
 
-import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { useTranslation } from "react-i18next";
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 type CustomersTableProps = {
   customers: {
@@ -18,14 +18,14 @@ type CustomersTableProps = {
     email: string;
     order_count: number;
     sales: number;
-    last_order: Date | null;
+    last_order: Date | string | null;
     groups: string[];
   }[];
   currencyCode: string;
 };
 
 const columnHelper =
-  createDataTableColumnHelper<CustomersTableProps["customers"][number]>();
+  createDataTableColumnHelper<CustomersTableProps['customers'][number]>();
 
 const PAGE_SIZE = 10;
 
@@ -39,7 +39,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
     pageIndex: 0,
   });
 
-  const [search, setSearch] = React.useState<string>("");
+  const [search, setSearch] = React.useState<string>('');
 
   const [sorting, setSorting] = React.useState<DataTableSortingState | null>(
     null,
@@ -78,71 +78,71 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const columns = React.useMemo(
     () => [
-      columnHelper.accessor("name", {
-        header: t("analytics.table.customers.name"),
+      columnHelper.accessor('name', {
+        header: t('analytics.table.customers.name'),
         enableSorting: true,
-        sortLabel: t("analytics.table.customers.name"),
-        sortAscLabel: t("analytics.table.customers.sortAZ"),
-        sortDescLabel: t("analytics.table.customers.sortZA"),
+        sortLabel: t('analytics.table.customers.name'),
+        sortAscLabel: t('analytics.table.customers.sortAZ'),
+        sortDescLabel: t('analytics.table.customers.sortZA'),
       }),
-      columnHelper.accessor("email", {
-        header: t("analytics.table.customers.email"),
+      columnHelper.accessor('email', {
+        header: t('analytics.table.customers.email'),
         enableSorting: true,
-        sortLabel: t("analytics.table.customers.email"),
-        sortAscLabel: t("analytics.table.customers.sortAZ"),
-        sortDescLabel: t("analytics.table.customers.sortZA"),
+        sortLabel: t('analytics.table.customers.email'),
+        sortAscLabel: t('analytics.table.customers.sortAZ'),
+        sortDescLabel: t('analytics.table.customers.sortZA'),
       }),
-      columnHelper.accessor("order_count", {
-        header: t("analytics.table.customers.orderCount"),
+      columnHelper.accessor('order_count', {
+        header: t('analytics.table.customers.orderCount'),
         enableSorting: true,
-        sortLabel: t("analytics.table.customers.orderCount"),
-        sortAscLabel: t("analytics.table.customers.sortLowHigh"),
-        sortDescLabel: t("analytics.table.customers.sortHighLow"),
+        sortLabel: t('analytics.table.customers.orderCount'),
+        sortAscLabel: t('analytics.table.customers.sortLowHigh'),
+        sortDescLabel: t('analytics.table.customers.sortHighLow'),
       }),
-      columnHelper.accessor("sales", {
-        header: t("analytics.table.customers.totalSales"),
+      columnHelper.accessor('sales', {
+        header: t('analytics.table.customers.totalSales'),
         enableSorting: true,
-        sortLabel: t("analytics.table.customers.totalSales"),
-        sortAscLabel: t("analytics.table.customers.sortLowHigh"),
-        sortDescLabel: t("analytics.table.customers.sortHighLow"),
+        sortLabel: t('analytics.table.customers.totalSales'),
+        sortAscLabel: t('analytics.table.customers.sortLowHigh'),
+        sortDescLabel: t('analytics.table.customers.sortHighLow'),
         cell: ({ getValue }) => {
           const sales = getValue();
           return (
             <p>
-              {new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: currencyCode || "EUR",
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currencyCode || 'EUR',
               }).format(sales || 0)}
             </p>
           );
         },
       }),
-      columnHelper.accessor("groups", {
-        header: t("analytics.table.customers.groups"),
+      columnHelper.accessor('groups', {
+        header: t('analytics.table.customers.groups'),
         cell: ({ getValue }) => {
           const groups = getValue();
           return (
             <p>
               {groups.length
-                ? groups.join(", ")
-                : t("analytics.table.customers.noGroup")}
+                ? groups.join(', ')
+                : t('analytics.table.customers.noGroup')}
             </p>
           );
         },
       }),
-      columnHelper.accessor("last_order", {
-        header: t("analytics.table.customers.lastOrder"),
+      columnHelper.accessor('last_order', {
+        header: t('analytics.table.customers.lastOrder'),
         enableSorting: true,
-        sortLabel: t("analytics.table.customers.lastOrder"),
-        sortAscLabel: t("analytics.table.customers.sortOldNew"),
-        sortDescLabel: t("analytics.table.customers.sortNewOld"),
+        sortLabel: t('analytics.table.customers.lastOrder'),
+        sortAscLabel: t('analytics.table.customers.sortOldNew'),
+        sortDescLabel: t('analytics.table.customers.sortNewOld'),
         cell: ({ getValue }) => {
           const date = getValue();
           return (
             <p>
               {date
-                ? format(new Date(date), "MMM dd, yyyy")
-                : t("analytics.table.customers.noOrders")}
+                ? format(new Date(date), 'MMM dd, yyyy')
+                : t('analytics.table.customers.noOrders')}
             </p>
           );
         },
@@ -176,16 +176,17 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   return (
     <DataTable instance={table}>
-      <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder={t("analytics.table.search")} />
-      </DataTable.Toolbar>
+      <div className="flex items-center justify-end gap-2 mb-4">
+        <DataTable.Search placeholder={t('analytics.table.search')} />
+        <DataTable.SortingMenu />
+      </div>
       <DataTable.Table
         emptyState={{
           filtered: {
-            heading: t("analytics.table.customers.noCustomersFound"),
+            heading: t('analytics.table.customers.noCustomersFound'),
           },
           empty: {
-            heading: t("analytics.table.customers.noCustomersAvailable"),
+            heading: t('analytics.table.customers.noCustomersAvailable'),
           },
         }}
       />

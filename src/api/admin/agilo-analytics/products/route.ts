@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import { OrderDTO } from '@medusajs/framework/types';
 import {
   ContainerRegistrationKeys,
   MedusaError,
@@ -18,7 +19,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', ')
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
   const validatedQuery = result.data;
@@ -30,7 +31,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const pluginConfig = config.plugins.find((p) =>
     typeof p === 'string'
       ? p === '@agilo/medusa-analytics-plugin'
-      : p.resolve === '@agilo/medusa-analytics-plugin'
+      : p.resolve === '@agilo/medusa-analytics-plugin',
   );
 
   const threshold =
@@ -38,7 +39,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       ? DEFAULT_THRESHOLD
       : (pluginConfig?.options?.stock_threshold as number) || DEFAULT_THRESHOLD;
 
-  const { data: orders } = await query.graph({
+  const { data: orders } = (await query.graph({
     entity: 'order',
     fields: [
       'id',
@@ -60,21 +61,21 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       },
       status: { $nin: ['draft'] },
     },
-  });
+  })) as { data: OrderDTO[] };
 
   let variantQuantitySold: Record<string, { title: string; quantity: number }> =
     {};
 
   orders.forEach((o) => {
     o.items?.forEach((i) => {
-      if (i?.variant?.id) {
-        if (!variantQuantitySold[i?.variant?.id]) {
-          variantQuantitySold[i?.variant.id] = {
-            title: i.product?.title + ' ' + i.variant.title,
+      if (i?.variant_id) {
+        if (!variantQuantitySold[i?.variant_id]) {
+          variantQuantitySold[i?.variant_id] = {
+            title: i.product_title + ' ' + i.variant_title,
             quantity: 0,
           };
         }
-        variantQuantitySold[i.variant.id].quantity += i.quantity;
+        variantQuantitySold[i.variant_id].quantity += i.quantity;
       }
     });
   });
@@ -87,13 +88,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     {
       stocked_quantity: { $lte: threshold },
     },
-    { select: ['id', 'inventory_item_id', 'stocked_quantity'] }
+    { select: ['id', 'inventory_item_id', 'stocked_quantity'] },
   );
   const inventoryItems = await inventoryService.listInventoryItems(
     {
       id: inventoryLevel.map((i) => i.inventory_item_id),
     },
-    { select: ['id', 'sku'] }
+    { select: ['id', 'sku'] },
   );
   const productVariants = await productService.listProductVariants(
     {
@@ -101,7 +102,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         .map((i) => i.sku)
         .filter((i) => i !== undefined && i !== null),
     },
-    { select: ['id', 'title', 'sku', 'product_id'] }
+    { select: ['id', 'title', 'sku', 'product_id'] },
   );
 
   const quantityByItemId: Record<string, number> = {};
@@ -139,5 +140,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   res.json({
     lowStockVariants,
     variantQuantitySold: sortedVariantQuantitySold.slice(0, 10),
-  });
+  } satisfies ProductAnalyticsResponse);
 }
+
+export type ProductAnalyticsResponse = {
+  lowStockVariants: {
+    sku: string;
+    inventoryQuantity: number;
+    variantName: string;
+    variantId: string;
+    productId: string;
+  }[];
+  variantQuantitySold: {
+    title: string;
+    quantity: number;
+  }[];
+};

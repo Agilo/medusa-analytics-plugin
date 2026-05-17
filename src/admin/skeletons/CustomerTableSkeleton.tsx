@@ -1,52 +1,52 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   createDataTableColumnHelper,
   useDataTable,
   DataTable,
-} from "@medusajs/ui";
-import { useTranslation } from "react-i18next";
+} from '@medusajs/ui';
+import { useTranslation } from 'react-i18next';
 
-import { Skeleton } from "../components/Skeleton";
+import { Skeleton } from '../components/Skeleton';
 
 const dummyData = [
   {
-    a: "a1",
-    b: "b",
+    a: 'a1',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: "a2",
-    b: "b",
+    a: 'a2',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: "a3",
-    b: "b",
+    a: 'a3',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: "a4",
-    b: "b",
+    a: 'a4',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: "a5",
-    b: "b",
+    a: 'a5',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
   },
   {
-    a: "a6",
-    b: "b",
+    a: 'a6',
+    b: 'b',
     c: 0,
     d: 0,
     e: new Date(),
@@ -56,23 +56,23 @@ const dummyData = [
 const columnHelper = createDataTableColumnHelper<(typeof dummyData)[0]>();
 
 const columns = [
-  columnHelper.accessor("a", {
+  columnHelper.accessor('a', {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,
   }),
-  columnHelper.accessor("b", {
+  columnHelper.accessor('b', {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,
   }),
-  columnHelper.accessor("c", {
+  columnHelper.accessor('c', {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,
   }),
-  columnHelper.accessor("d", {
+  columnHelper.accessor('d', {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,
   }),
-  columnHelper.accessor("e", {
+  columnHelper.accessor('e', {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,
   }),
@@ -80,7 +80,7 @@ const columns = [
 
 export const CustomersTableSkeleton = () => {
   const { t } = useTranslation();
-  const [search, setSearch] = React.useState<string>("");
+  const [search, setSearch] = React.useState<string>('');
 
   const table = useDataTable({
     columns,
@@ -96,7 +96,7 @@ export const CustomersTableSkeleton = () => {
   return (
     <DataTable instance={table}>
       <DataTable.Toolbar className="px-0 pt-0">
-        <DataTable.Search placeholder={t("analytics.table.search")} />
+        <DataTable.Search placeholder={t('analytics.table.search')} />
       </DataTable.Toolbar>
       <DataTable.Table />
     </DataTable>

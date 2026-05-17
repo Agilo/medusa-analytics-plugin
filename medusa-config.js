@@ -1,4 +1,4 @@
-const { defineConfig, Modules } = require('@medusajs/utils');
+const { defineConfig } = require('@medusajs/utils');
 
 module.exports = defineConfig({
   admin: {

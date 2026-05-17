@@ -42,7 +42,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', ')
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
   const validatedQuery = result.data;
@@ -80,7 +80,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const stores = await storeModuleService.listStores(
     {},
-    { relations: ['supported_currencies'] }
+    { relations: ['supported_currencies'] },
   );
 
   const store = stores?.[0];
@@ -96,7 +96,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   if (!exchangeRates) {
     const response = await fetch(
-      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`
+      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
     );
     exchangeRates = await response.json();
 
@@ -116,7 +116,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!calculateDateRange) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      'Invalid preset value'
+      'Invalid preset value',
     );
   }
 
@@ -164,7 +164,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       new Date(order.created_at),
       groupBy,
       currentFrom,
-      currentTo
+      currentTo,
     );
 
     if (!groupedByKey[key]) {
@@ -223,7 +223,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     count,
   }));
 
-  const orderData = {
+  res.json({
     total_orders: orders.length,
     prev_orders_percent: percentOrders,
     regions: regionsArray,
@@ -233,7 +233,17 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     order_sales: salesArray,
     order_count: orderCountArray,
     currency_code: currencyCode,
-  };
-
-  res.json(orderData);
+  } satisfies OrderAnalyticsResponse);
 }
+
+export type OrderAnalyticsResponse = {
+  total_orders: number;
+  regions: { name: string; sales: number }[];
+  total_sales: number;
+  statuses: { name: string; count: number }[];
+  order_sales: { name: string; sales: number }[];
+  prev_sales_percent: number;
+  order_count: { name: string; count: number }[];
+  prev_orders_percent: number;
+  currency_code: string;
+};

@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { Select } from '@medusajs/ui';
 import { IntervalOption, useIntervalRange } from '../hooks/use-interval-range';
+import { useTranslation } from 'react-i18next';
 
 export const SelectInterval: React.FC = () => {
+  const { t } = useTranslation();
   const { interval, onIntervalChange } = useIntervalRange();
 
   return (
@@ -15,9 +17,15 @@ export const SelectInterval: React.FC = () => {
         <Select.Value />
       </Select.Trigger>
       <Select.Content>
-        <Select.Item value="30-days-ago">Last 30 Days</Select.Item>
-        <Select.Item value="60-days-ago">Last 60 Days</Select.Item>
-        <Select.Item value="90-days-ago">Last 90 Days</Select.Item>
+        <Select.Item value="30-days-ago">
+          {t('analytics.interval.last30Days')}
+        </Select.Item>
+        <Select.Item value="60-days-ago">
+          {t('analytics.interval.last60Days')}
+        </Select.Item>
+        <Select.Item value="90-days-ago">
+          {t('analytics.interval.last90Days')}
+        </Select.Item>
       </Select.Content>
     </Select>
   );

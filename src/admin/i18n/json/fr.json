@@ -82,6 +82,23 @@
         "sortOldNew": "Du plus ancien au plus récent",
         "sortNewOld": "Du plus récent au plus ancien"
       }
+    },
+    "viewMore": "Voir plus",
+    "kpi": {
+      "fromPreviousPeriod": "par rapport à la période précédente",
+      "averageOrderValue": "Valeur moyenne des commandes"
+    },
+    "interval": {
+      "last30Days": "30 derniers jours",
+      "last60Days": "60 derniers jours",
+      "last90Days": "90 derniers jours"
+    },
+    "widgets": {
+      "topSellingDesc": "Meilleurs produits par quantité vendue sur la période sélectionnée",
+      "bottomSelling": "Produits les moins vendus",
+      "bottomSellingDesc": "Pires produits par quantité vendue sur la période sélectionnée",
+      "newVsReturningDesc": "Nouveaux clients et clients fidèles dans le temps sur la période sélectionnée",
+      "avgSalesPerCustomerDesc": "Ventes moyennes par client dans le temps sur la période sélectionnée"
     }
   }
 }

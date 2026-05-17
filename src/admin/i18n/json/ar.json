@@ -80,6 +80,23 @@
         "sortLowHigh": "من الأقل إلى الأعلى",
         "sortHighLow": "من الأعلى إلى الأقل"
       }
+    },
+    "viewMore": "عرض المزيد",
+    "kpi": {
+      "fromPreviousPeriod": "من الفترة السابقة",
+      "averageOrderValue": "متوسط قيمة الطلب"
+    },
+    "interval": {
+      "last30Days": "آخر 30 يوماً",
+      "last60Days": "آخر 60 يوماً",
+      "last90Days": "آخر 90 يوماً"
+    },
+    "widgets": {
+      "topSellingDesc": "أفضل المنتجات حسب الكمية المباعة في الفترة الزمنية المحددة",
+      "bottomSelling": "المنتجات الأقل مبيعاً",
+      "bottomSellingDesc": "أسوأ المنتجات حسب الكمية المباعة في الفترة الزمنية المحددة",
+      "newVsReturningDesc": "العملاء الجدد والعائدون عبر الزمن في الفترة المحددة",
+      "avgSalesPerCustomerDesc": "متوسط المبيعات لكل عميل عبر الزمن في الفترة المحددة"
     }
   }
 }

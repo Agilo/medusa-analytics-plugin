@@ -80,6 +80,23 @@
         "sortLowHigh": "Low to High",
         "sortHighLow": "High to Low"
       }
+    },
+    "viewMore": "View more",
+    "kpi": {
+      "fromPreviousPeriod": "from the previous period",
+      "averageOrderValue": "Average order value"
+    },
+    "interval": {
+      "last30Days": "Last 30 Days",
+      "last60Days": "Last 60 Days",
+      "last90Days": "Last 90 Days"
+    },
+    "widgets": {
+      "topSellingDesc": "Top products by quantity sold in the selected time period",
+      "bottomSelling": "Bottom-Selling Products",
+      "bottomSellingDesc": "Worst products by quantity sold in the selected time period",
+      "newVsReturningDesc": "New and returning customers over time in the selected period",
+      "avgSalesPerCustomerDesc": "Average sales per customer over time in the selected period"
     }
   }
 }

@@ -12,53 +12,51 @@ import {
   Skeleton,
   Text,
 } from '@medusajs/ui';
+import type { AvailableModel } from '../../../../api/admin/agilo-analytics/analytics-ai/models/route';
+import { useRetrieveModels } from '../../../hooks/ai-dashboard';
 
-const getAvailableModels = () => [
-  {
-    id: 'gpt-4.1',
-    label: 'GPT-4.1',
-    provider: 'OpenAI',
-    context: '128k',
-    recommended: true,
-    description: 'General-purpose analytics & reasoning',
-  },
-  {
-    id: 'gpt-4o-mini',
-    label: 'GPT-4o mini',
-    provider: 'OpenAI',
-    context: '128k',
-    description: 'Fast, cost-effective summaries',
-  },
-  {
-    id: 'claude-3.5-sonnet',
-    label: 'Claude 3.5 Sonnet',
-    provider: 'Anthropic',
-    context: '200k',
-    recommended: true,
-    description: 'Strong writing and analysis',
-  },
-  {
-    id: 'gemini-1.5-pro',
-    label: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    context: '1M',
-    description: 'Large-context exploration',
-  },
-  {
-    id: 'mistral-large',
-    label: 'Mistral Large',
-    provider: 'Mistral',
-    context: '128k',
-    description: 'Balanced quality and speed',
-  },
-];
+const providerLabels: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Anthropic',
+  google: 'Google',
+  mistral: 'Mistral',
+  local: 'Local',
+};
+
+const normalizeGatewayModels = (models: AvailableModel[]) =>
+  models
+    .map((model, index) => {
+      const providerKey = model.specification.provider.toLowerCase();
+
+      return {
+        id: model.id,
+        label: model.name,
+        provider: providerLabels[providerKey] ?? model.specification.provider,
+        context: model.specification.modelId,
+        description: model.description ?? undefined,
+        recommended: index < 2,
+      };
+    })
+    .sort((left, right) => {
+      const leftIndex = Object.values(providerLabels).indexOf(left.provider);
+      const rightIndex = Object.values(providerLabels).indexOf(right.provider);
+
+      return leftIndex - rightIndex || left.label.localeCompare(right.label);
+    });
 
 export default function AnalyticsAIPage() {
-  const models = React.useMemo(() => getAvailableModels(), []);
+  const [hasGatewayKey, setHasGatewayKey] = React.useState(false); // Make this complete and then remove it
 
-  const [hasGatewayKey, setHasGatewayKey] = React.useState(false);
+  const { data, isPending } = useRetrieveModels();
 
-  const [modelId, setModelId] = React.useState<string>(() => {
+  const models = React.useMemo(
+    () => (data?.length ? normalizeGatewayModels(data) : []),
+    [data],
+  );
+
+  const isLoadingModels = isPending && !data;
+
+  const [modelId, setModelId] = React.useState(() => {
     const defaultModel = models.find((m) => m.recommended) ?? models[0];
     return defaultModel?.id ?? 'gpt-4.1';
   });
@@ -67,6 +65,23 @@ export default function AnalyticsAIPage() {
     () => models.find((m) => m.id === modelId),
     [models, modelId],
   );
+
+  React.useEffect(() => {
+    if (models.length === 0) {
+      return;
+    }
+
+    const hasSelectedModel = models.some((model) => model.id === modelId);
+
+    if (!hasSelectedModel) {
+      const defaultModel =
+        models.find((model) => model.recommended) ?? models[0];
+
+      if (defaultModel) {
+        setModelId(defaultModel.id);
+      }
+    }
+  }, [modelId, models]);
 
   return (
     <>
@@ -120,7 +135,9 @@ export default function AnalyticsAIPage() {
                 <Select value={modelId} onValueChange={setModelId} size="small">
                   <Select.Trigger className="min-w-40 px-2">
                     <Select.Value>
-                      {selectedModel?.label ?? 'Select a model'}
+                      {isLoadingModels
+                        ? 'Loading models...'
+                        : (selectedModel?.label ?? 'Select a model')}
                     </Select.Value>
                   </Select.Trigger>
                   <Select.Content className="max-h-90">

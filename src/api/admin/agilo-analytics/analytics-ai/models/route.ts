@@ -1,25 +1,26 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
 import { gateway } from 'ai';
 
-const allowedProviders = new Set(['openai', 'anthropic', 'google']);
+const allowedProviders = new Set(['openai', 'anthropic', 'vertex']); // vertex = google
+
+const EXCLUDED_MODEL_SEGMENTS = /\b(opus|codex|pro|thinking|deep|o\d)\b/i;
 
 const preferredModelPatterns: Record<string, RegExp> = {
-  openai: /\bgpt-(?:[5-9]|[1-9]\d+)(?:[.\-]\S*)?\b/i,
-  anthropic: /\bclaude-(?:[4-9]|[1-9]\d+)(?:[.\-]\S*)?\b/i,
-  google: /\bgemini-(?:[3-9]|[1-9]\d+)(?:[.\-]\S*)?\b/i,
+  openai: /\/gpt-(?:[5-9]|[1-9]\d+)(?:[.\-]\S*)?\b/i,
+  anthropic: /\/claude-(?:(?!opus)\w+)-(?:[4-9]|[1-9]\d+)(?:[.\-]\d+)?\b/i,
+  vertex: /\/gemini-(?:[3-9]|[1-9]\d+)(?:[.\-]\d+)?(?:-\w+)*\b/i,
 };
+
 function isPreferredModel(model: AvailableModel) {
   const provider = model.specification.provider.toLowerCase();
 
-  if (!allowedProviders.has(provider)) {
-    return false;
-  }
+  if (!allowedProviders.has(provider)) return false;
 
-  const searchableText = [model.id, model.name, model.specification.modelId]
-    .join(' ')
-    .toLowerCase();
+  const modelId = model.specification.modelId.toLowerCase();
 
-  return preferredModelPatterns[provider]?.test(searchableText) ?? false;
+  if (EXCLUDED_MODEL_SEGMENTS.test(modelId)) return false;
+
+  return preferredModelPatterns[provider]?.test(modelId) ?? false;
 }
 
 function filterPopularModels(models: AvailableModel[]) {

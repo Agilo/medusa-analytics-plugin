@@ -49,6 +49,7 @@ export default function AnalyticsAIPage() {
 
   const { data, isPending } = useRetrieveModels();
 
+  console.log('Retrieved models:', data);
   const models = React.useMemo(
     () => (data?.length ? normalizeGatewayModels(data) : []),
     [data],
@@ -95,6 +96,7 @@ export default function AnalyticsAIPage() {
                 <Text size="small" className="text-ui-fg-muted mt-1">
                   Add your Vercel AI Gateway API key once, then you can select
                   any model from the picker.
+                  {import.meta.env.VITE_LOL}
                 </Text>
               </div>
             </div>

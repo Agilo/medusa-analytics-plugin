@@ -10,10 +10,7 @@ export const useRetrieveModels = (
 ) => {
   return useQuery({
     queryKey: ['available-models'],
-    queryFn: async () => {
-      const models = await retrieveAllAvailableModels();
-      return models;
-    },
+    queryFn: retrieveAllAvailableModels,
     ...options,
   });
 };

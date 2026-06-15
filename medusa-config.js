@@ -1,4 +1,6 @@
-const { defineConfig } = require('@medusajs/utils');
+const { defineConfig, loadEnv } = require('@medusajs/utils');
+
+loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 module.exports = defineConfig({
   admin: {

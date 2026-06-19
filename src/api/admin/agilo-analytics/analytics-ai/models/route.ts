@@ -39,7 +39,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
 
   const { models } = await gateway.getAvailableModels();
-  return res.json(filterPopularModels(models));
+  return res.json(
+    filterPopularModels(models) satisfies AvailableModelsResponse['models'],
+  );
 }
 
 export type AvailableModelsResponse = Awaited<

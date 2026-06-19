@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   AdminSetGatewayKeyInputArgs,
   adminSetGatewayKeySchema,
-} from '../../api/admin/agilo-analytics/analytics-ai/route';
+} from '../../api/admin/agilo-analytics/analytics-ai/validators';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSetGatewayKey } from '../hooks/ai-dashboard';
 

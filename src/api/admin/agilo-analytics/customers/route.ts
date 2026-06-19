@@ -7,19 +7,13 @@ import {
   BigNumber,
 } from '@medusajs/framework/utils';
 import { format } from 'date-fns';
-import { z } from 'zod';
-
 import {
   calculateDateRangeMethod,
   getAllDateGroupingKeys,
   getDateGroupingKey,
 } from '../../../../utils/orders';
 import { DateTime } from 'luxon';
-
-export const adminCustomerAnalyticsQuerySchema = z.object({
-  date_from: z.string(),
-  date_to: z.string(),
-});
+import { adminCustomerAnalyticsQuerySchema } from './validators';
 
 const DEFAULT_CURRENCY = 'EUR';
 

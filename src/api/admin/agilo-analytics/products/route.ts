@@ -5,14 +5,9 @@ import {
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
-import { z } from 'zod';
+import { adminProductAnalyticsQuerySchema } from './validators';
 
 const DEFAULT_THRESHOLD = 5;
-
-export const adminProductAnalyticsQuerySchema = z.object({
-  date_from: z.string(),
-  date_to: z.string(),
-});
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const result = adminProductAnalyticsQuerySchema.safeParse(req.query);

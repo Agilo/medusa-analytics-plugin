@@ -3,19 +3,10 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { randomBytes, scryptSync } from 'crypto';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
+import { adminSetGatewayKeySchema } from './validators';
 
 // TODO:support multiple keys/types in the future if needed, only one key rn
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
-
-import { z } from 'zod';
-
-export const adminSetGatewayKeySchema = z.object({
-  api_key: z.string().min(1),
-});
-
-export type AdminSetGatewayKeyInputArgs = z.infer<
-  typeof adminSetGatewayKeySchema
->;
 
 function hashToStoredString(value: string) {
   const salt = randomBytes(16);

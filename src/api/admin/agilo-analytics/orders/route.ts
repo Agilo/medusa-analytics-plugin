@@ -5,7 +5,6 @@ import {
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import {
   calculateDateRangeMethod,
@@ -13,23 +12,8 @@ import {
   getDateGroupingKey,
 } from '../../../../utils/orders';
 import { DateTime } from 'luxon';
+import { adminOrdersListQuerySchema } from './validators';
 
-export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
-  z.object({
-    preset: z.literal('custom'),
-    date_from: z.string(),
-    date_to: z.string(),
-  }),
-  z.object({
-    preset: z.literal('this-month'),
-  }),
-  z.object({
-    preset: z.literal('last-month'),
-  }),
-  z.object({
-    preset: z.literal('last-3-months'),
-  }),
-]);
 const DEFAULT_CURRENCY = 'EUR';
 
 function getPercentChange(current: number, previous: number) {

@@ -1,17 +1,21 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { MedusaError } from '@medusajs/framework/utils';
-import { z } from 'zod';
 import { randomBytes, scryptSync } from 'crypto';
-
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
-import AiGatewayModuleService from '../../../../modules/ai-gateway/service';
+import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 
 // TODO:support multiple keys/types in the future if needed, only one key rn
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
 
+import { z } from 'zod';
+
 export const adminSetGatewayKeySchema = z.object({
   api_key: z.string().min(1),
 });
+
+export type AdminSetGatewayKeyInputArgs = z.infer<
+  typeof adminSetGatewayKeySchema
+>;
 
 function hashToStoredString(value: string) {
   const salt = randomBytes(16);
@@ -69,3 +73,29 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     key_last_four: keyLastFour,
   });
 }
+
+export async function GET(req: MedusaRequest, res: MedusaResponse) {
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+
+  const [existing] = await aiGatewayModuleService.listAiGatewayKeys({
+    type: VERCEL_AI_GATEWAY_KEY_TYPE,
+  });
+
+  res.status(200).json({
+    key: existing
+      ? {
+          type: existing.type,
+          key_last_four: existing.key_last_four,
+        }
+      : null,
+  } satisfies GetGatewayConfigResponse);
+}
+
+export type GetGatewayConfigResponse = {
+  key: {
+    type: string;
+    key_last_four: string | null;
+  } | null;
+};

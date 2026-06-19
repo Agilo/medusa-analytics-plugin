@@ -7,55 +7,29 @@ import {
   Container,
   Heading,
   Input,
-  Label,
   Select,
   Skeleton,
   Text,
 } from '@medusajs/ui';
-import type { AvailableModel } from '../../../../api/admin/agilo-analytics/analytics-ai/models/route';
-import { useRetrieveModels } from '../../../hooks/ai-dashboard';
-
-const providerLabels: Record<string, string> = {
-  openai: 'OpenAI',
-  anthropic: 'Anthropic',
-  google: 'Google',
-  mistral: 'Mistral',
-  local: 'Local',
-};
-
-const normalizeGatewayModels = (models: AvailableModel[]) =>
-  models
-    .map((model, index) => {
-      const providerKey = model.specification.provider.toLowerCase();
-
-      return {
-        id: model.id,
-        label: model.name,
-        provider: providerLabels[providerKey] ?? model.specification.provider,
-        context: model.specification.modelId,
-        description: model.description ?? undefined,
-        recommended: index < 2,
-      };
-    })
-    .sort((left, right) => {
-      const leftIndex = Object.values(providerLabels).indexOf(left.provider);
-      const rightIndex = Object.values(providerLabels).indexOf(right.provider);
-
-      return leftIndex - rightIndex || left.label.localeCompare(right.label);
-    });
+import {
+  useRetrieveModels,
+  useGatewayConfig,
+} from '../../../hooks/ai-dashboard';
+import { GatewayForm } from '../../../components/GatewayForm';
+import { normalizeGatewayModels } from '../../../lib/normalize-models';
 
 export default function AnalyticsAIPage() {
-  const [hasGatewayKey, setHasGatewayKey] = React.useState(false); // Make this complete and then remove it
+  const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
+  const hasGatewayKey = !!config?.key;
 
-  const { data, isPending } = useRetrieveModels();
+  const { data, isPending } = useRetrieveModels({
+    enabled: hasGatewayKey,
+  });
 
-  console.log('Retrieved models:', data);
   const models = React.useMemo(
     () => (data?.length ? normalizeGatewayModels(data) : []),
     [data],
   );
-
-  const isLoadingModels = isPending && !data;
 
   const [modelId, setModelId] = React.useState(() => {
     const defaultModel = models.find((m) => m.recommended) ?? models[0];
@@ -84,37 +58,18 @@ export default function AnalyticsAIPage() {
     }
   }, [modelId, models]);
 
+  if (isLoadingConfig) {
+    return (
+      <div className="flex h-[calc(100vh-60px)] items-center justify-center">
+        <Skeleton className="h-6 w-56" />
+      </div>
+    );
+  }
+
   return (
     <>
       {!hasGatewayKey ? (
-        <div className="flex items-center justify-center relative p-6 h-[calc(100vh-60px)]">
-          <div className="w-full max-w-lg rounded-lg border border-ui-border-base bg-ui-bg-base p-6 shadow-lg">
-            <div className="flex items-start gap-3">
-              <AiAssistent className="text-ui-fg-subtle mt-0.5" />
-              <div className="flex-1">
-                <Heading level="h2">Add Vercel AI Gateway API key</Heading>
-                <Text size="small" className="text-ui-fg-muted mt-1">
-                  Add your Vercel AI Gateway API key once, then you can select
-                  any model from the picker.
-                  {import.meta.env.VITE_LOL}
-                </Text>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col gap-y-2">
-              <Label htmlFor="vercel_gateway_key" className="text-ui-fg-subtle">
-                Vercel AI Gateway API key
-              </Label>
-              <Input type="password" placeholder="Paste your key…" />
-            </div>
-
-            <div className="mt-6 flex items-center justify-end">
-              <Button variant="primary" onClick={() => setHasGatewayKey(true)}>
-                Continue
-              </Button>
-            </div>
-          </div>
-        </div>
+        <GatewayForm />
       ) : (
         <Container className="relative divide-y p-0">
           <div className="px-6 py-4">
@@ -137,7 +92,7 @@ export default function AnalyticsAIPage() {
                 <Select value={modelId} onValueChange={setModelId} size="small">
                   <Select.Trigger className="min-w-40 px-2">
                     <Select.Value>
-                      {isLoadingModels
+                      {isPending && !data
                         ? 'Loading models...'
                         : (selectedModel?.label ?? 'Select a model')}
                     </Select.Value>

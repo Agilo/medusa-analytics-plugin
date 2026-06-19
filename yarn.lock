@@ -9,6 +9,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@agilo/medusa-analytics-plugin@workspace:."
   dependencies:
+    "@hookform/resolvers": "npm:^5.4.0"
     "@medusajs/admin-sdk": "npm:2.13.3"
     "@medusajs/cli": "npm:2.13.3"
     "@medusajs/framework": "npm:2.13.3"
@@ -40,6 +41,7 @@ __metadata:
     react-aria-components: "npm:^1.10.1"
     react-day-picker: "npm:^9.13.2"
     react-dom: "npm:^18.0.0"
+    react-hook-form: "npm:^7.79.0"
     recharts: "npm:^3.7.0"
     tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^4.1.8"
@@ -2289,6 +2291,17 @@ __metadata:
   peerDependencies:
     react-hook-form: ^7.0.0
   checksum: 10c0/cb8a3e0cc1c9aeaf2adad585f29badf342a96da9cfdf4efa1168aadb7ef52f440cac5cc6fedf0fda6a52effd27a5c859692c89bb99ed5c76d03064aea1f0d684
+  languageName: node
+  linkType: hard
+
+"@hookform/resolvers@npm:^5.4.0":
+  version: 5.4.0
+  resolution: "@hookform/resolvers@npm:5.4.0"
+  dependencies:
+    "@standard-schema/utils": "npm:^0.3.0"
+  peerDependencies:
+    react-hook-form: ^7.55.0
+  checksum: 10c0/ea312948a8ee4dd711287295c95ddd4cefc69d3e01ecf196477aaf5179fbb28b10801486cb3e909abaea169ee7199ce9e725fcded8a98a539ba07aa278753a42
   languageName: node
   linkType: hard
 
@@ -16440,6 +16453,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17 || ^18
   checksum: 10c0/9496155273220a432f897fbe1c393f11b273cd1c9c2ede70e301df95190e2cac6479bdaed7479612c027954b0da35b01c4eec7a428c0dfafcd04b915a170fc8c
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.79.0":
+  version: 7.79.0
+  resolution: "react-hook-form@npm:7.79.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10c0/d34edf52766b911dd8c7f583ab7345bca60a352ae96cd8cb82e808e7875c36de21b2d4ee0afc40f693e1d98f0b3d6b47929cb873ca39d3b7b54a56cef6a5cb6d
   languageName: node
   linkType: hard
 

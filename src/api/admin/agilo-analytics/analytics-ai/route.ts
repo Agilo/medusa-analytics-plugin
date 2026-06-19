@@ -65,6 +65,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   });
 }
 
+export async function PATCH(req: MedusaRequest, res: MedusaResponse) {}
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const aiGatewayModuleService = req.scope.resolve(
     AI_GATEWAY_MODULE,

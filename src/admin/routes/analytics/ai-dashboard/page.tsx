@@ -17,6 +17,7 @@ import {
 } from '../../../hooks/ai-dashboard';
 import { GatewayForm } from '../../../components/GatewayForm';
 import { normalizeGatewayModels } from '../../../lib/normalize-models';
+import { EditApiKeyForm } from '../../../components/EditApiKeyForm';
 
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
@@ -75,7 +76,7 @@ export default function AnalyticsAIPage() {
       ) : (
         <Container className="relative divide-y p-0">
           <div className="px-6 py-4">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start  gap-4">
               <div className="min-w-65">
                 <div className="flex items-center gap-2">
                   <AiAssistent className="text-ui-fg-subtle" />
@@ -87,7 +88,7 @@ export default function AnalyticsAIPage() {
                 </Text>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 <Text as="span" size="small" className="text-ui-fg-muted">
                   Model:
                 </Text>
@@ -166,6 +167,9 @@ export default function AnalyticsAIPage() {
                       ))}
                   </Select.Content>
                 </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <EditApiKeyForm />
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { defineRouteConfig } from '@medusajs/admin-sdk';
-import { AiAssistent } from '@medusajs/icons';
+import { AiAssistent, Spinner } from '@medusajs/icons';
 import {
   Badge,
   Button,
@@ -21,6 +21,8 @@ import { normalizeGatewayModels } from '../../../lib/normalize-models';
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
   const hasGatewayKey = !!config?.key;
+
+  console.log('Overall data', config);
 
   const { data, isPending } = useRetrieveModels({
     enabled: hasGatewayKey,
@@ -61,7 +63,7 @@ export default function AnalyticsAIPage() {
   if (isLoadingConfig) {
     return (
       <div className="flex h-[calc(100vh-60px)] items-center justify-center">
-        <Skeleton className="h-6 w-56" />
+        <Spinner className="size-12 animate-spin" />
       </div>
     );
   }
@@ -178,6 +180,7 @@ export default function AnalyticsAIPage() {
             </div>
           </div>
 
+          {/* TODO: Implement AI dashboard content, then handle this text */}
           <div className="px-6 py-6">
             <div className="min-h-90">
               {true && (

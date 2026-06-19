@@ -1,14 +1,53 @@
+import { Button, FocusModal, Heading, Label, Text, toast } from '@medusajs/ui';
+import { Input } from './Input';
 import { PencilSquare } from '@medusajs/icons';
-import { Button, FocusModal, Heading, Input, Label, Text } from '@medusajs/ui';
-import { useGatewayConfig } from '../hooks/ai-dashboard';
+import { useGatewayConfig, useUpdateGatewayKey } from '../hooks/ai-dashboard';
+import * as React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  AdminSetGatewayKeyInputArgs,
+  adminSetGatewayKeySchema,
+} from '../../api/admin/agilo-analytics/analytics-ai/validators';
 
 export const EditApiKeyForm = () => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   const { data } = useGatewayConfig();
+  const { mutate, isPending } = useUpdateGatewayKey();
+
+  const {
+    reset,
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = useForm({
+    resolver: zodResolver(adminSetGatewayKeySchema),
+    defaultValues: {
+      api_key: '',
+    },
+    mode: 'onChange',
+  });
+  const onSubmit = (data: AdminSetGatewayKeyInputArgs) => {
+    mutate(
+      { api_key: data.api_key },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          toast.success('API key updated successfully');
+          reset();
+        },
+        onError: () => {
+          toast.error('Failed to update API key');
+        },
+      },
+    );
+  };
 
   return (
-    <FocusModal>
+    <FocusModal open={isOpen} onOpenChange={setIsOpen}>
       <FocusModal.Trigger asChild>
-        <Button>
+        <Button variant="secondary">
           <PencilSquare className="size-fit" />
         </Button>
       </FocusModal.Trigger>
@@ -17,7 +56,10 @@ export const EditApiKeyForm = () => {
           <FocusModal.Title>Replace API Key</FocusModal.Title>
         </FocusModal.Header>
         <FocusModal.Body className="flex flex-col items-center py-16">
-          <div className="flex w-full max-w-lg flex-col gap-y-8">
+          <form
+            className="flex w-full max-w-lg flex-col gap-y-8"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-y-1">
               <Heading>Replace your API key</Heading>
               <Text className="text-ui-fg-subtle">
@@ -27,18 +69,29 @@ export const EditApiKeyForm = () => {
               </Text>
             </div>
             <div className="flex flex-col gap-y-2">
-              <Label htmlFor="key_name" className="text-ui-fg-subtle">
-                Key name
+              <Label htmlFor="api_key" className="text-ui-fg-subtle">
+                API Key
               </Label>
-              <Input
-                id="key_name"
-                placeholder={`Your last key: ******${data?.key?.key_last_four ?? ''}`}
+              <Controller
+                name="api_key"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Input
+                    {...field}
+                    id="api_key"
+                    type="password"
+                    placeholder={`Your last key: ******${data?.key?.key_last_four ?? ''}`}
+                    error={fieldState.error?.message}
+                  />
+                )}
               />
             </div>
-          </div>
+          </form>
         </FocusModal.Body>
         <FocusModal.Footer>
-          <Button>Save</Button>
+          <Button isLoading={isPending} disabled={isPending || !isValid}>
+            Save
+          </Button>
         </FocusModal.Footer>
       </FocusModal.Content>
     </FocusModal>

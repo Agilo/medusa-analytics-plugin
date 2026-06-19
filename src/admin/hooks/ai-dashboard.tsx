@@ -6,8 +6,12 @@ import {
 } from '@tanstack/react-query';
 import type { AvailableModel } from '../../api/admin/agilo-analytics/analytics-ai/models/route';
 import { retrieveAllAvailableModels } from '../lib/data/models';
-import { getGatewayConfig, setGatewayKey } from '../lib/data/ai-gateway';
-import { AdminSetGatewayKeyInputArgs } from '../../api/admin/agilo-analytics/analytics-ai/route';
+import {
+  getGatewayConfig,
+  setGatewayKey,
+  updateGatewayKey,
+} from '../lib/data/ai-gateway';
+import { AdminSetGatewayKeyInputArgs } from '../../api/admin/agilo-analytics/analytics-ai/validators';
 
 export const useRetrieveModels = (
   options?: Omit<
@@ -26,6 +30,18 @@ export const useGatewayConfig = () => {
   return useQuery({
     queryKey: ['ai-gateway-config'],
     queryFn: getGatewayConfig,
+  });
+};
+
+export const useUpdateGatewayKey = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: AdminSetGatewayKeyInputArgs) =>
+      updateGatewayKey(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-gateway-config'] });
+    },
   });
 };
 

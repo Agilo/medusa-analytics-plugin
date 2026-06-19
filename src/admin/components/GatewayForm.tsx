@@ -1,6 +1,7 @@
 import { AiAssistent } from '@medusajs/icons';
-import { Button, Heading, Input, Label, Text, toast } from '@medusajs/ui';
+import { Button, Heading, Label, Text, toast } from '@medusajs/ui';
 import { Controller, useForm } from 'react-hook-form';
+import { Input } from './Input';
 import {
   AdminSetGatewayKeyInputArgs,
   adminSetGatewayKeySchema,
@@ -9,11 +10,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSetGatewayKey } from '../hooks/ai-dashboard';
 
 export const GatewayForm: React.FC = () => {
-  const { control, handleSubmit } = useForm<AdminSetGatewayKeyInputArgs>({
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+  } = useForm<AdminSetGatewayKeyInputArgs>({
     resolver: zodResolver(adminSetGatewayKeySchema),
     defaultValues: {
       api_key: '',
     },
+    mode: 'onChange',
   });
 
   const { mutate, isPending } = useSetGatewayKey();
@@ -53,19 +59,25 @@ export const GatewayForm: React.FC = () => {
           <Controller
             control={control}
             name="api_key"
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <Input
                 {...field}
                 id="api_key"
                 type="password"
                 placeholder="Paste your key…"
+                error={fieldState.error?.message}
               />
             )}
           />
         </div>
 
         <div className="mt-6 flex items-center justify-end">
-          <Button variant="primary" type="submit" isLoading={isPending}>
+          <Button
+            variant="primary"
+            type="submit"
+            isLoading={isPending}
+            disabled={isPending || !isValid}
+          >
             Continue
           </Button>
         </div>

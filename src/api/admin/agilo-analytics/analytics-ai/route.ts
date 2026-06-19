@@ -5,7 +5,7 @@ import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
 
-// TODO:support multiple keys/types in the future if needed, only one key rn
+// TODO:support multiple keys/types in the future if needed, only one key rn (vercel ai gateway)
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
 
 function hashToStoredString(value: string) {
@@ -41,23 +41,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     AI_GATEWAY_MODULE,
   ) as AiGatewayModuleService;
 
-  const existing = await aiGatewayModuleService.listAiGatewayKeys();
-
-  if (existing.length) {
-    await aiGatewayModuleService.updateAiGatewayKeys({
-      selector: { type: VERCEL_AI_GATEWAY_KEY_TYPE },
-      data: {
-        key_hash,
-        key_last_four: keyLastFour,
-      },
-    });
-  } else {
-    await aiGatewayModuleService.createAiGatewayKeys({
-      type: VERCEL_AI_GATEWAY_KEY_TYPE,
-      key_hash,
-      key_last_four: keyLastFour,
-    });
-  }
+  await aiGatewayModuleService.createAiGatewayKeys({
+    type: VERCEL_AI_GATEWAY_KEY_TYPE,
+    key_hash,
+    key_last_four: keyLastFour,
+  });
 
   res.status(201).json({
     type: VERCEL_AI_GATEWAY_KEY_TYPE,
@@ -65,7 +53,43 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   });
 }
 
-export async function PATCH(req: MedusaRequest, res: MedusaResponse) {}
+export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
+  const parsed = adminSetGatewayKeySchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      parsed.error.errors.map((err) => err.message).join(', '),
+    );
+  }
+
+  const apiKey = parsed.data.api_key.trim();
+  if (!apiKey) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      'api_key is required',
+    );
+  }
+
+  const key_hash = hashToStoredString(apiKey);
+  const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
+
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+
+  await aiGatewayModuleService.updateAiGatewayKeys({
+    selector: { type: VERCEL_AI_GATEWAY_KEY_TYPE },
+    data: {
+      key_hash,
+      key_last_four: keyLastFour,
+    },
+  });
+
+  res.status(200).json({
+    type: VERCEL_AI_GATEWAY_KEY_TYPE,
+    key_last_four: keyLastFour,
+  });
+}
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const aiGatewayModuleService = req.scope.resolve(

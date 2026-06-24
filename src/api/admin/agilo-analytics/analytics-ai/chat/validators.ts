@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const analyticsInputSchema = z.object({
+export const analyticsAISchema = z.object({
   date_from: z.string().describe('ISO date (YYYY-MM-DD)').optional(),
   date_to: z.string().describe('ISO date (YYYY-MM-DD)').optional(),
   preset: z
@@ -9,4 +9,8 @@ export const analyticsInputSchema = z.object({
     .default('this-month'),
 });
 
-export type AnalyticsInputArgs = z.infer<typeof analyticsInputSchema>;
+export type AnalyticsAIArgs = z.infer<typeof analyticsAISchema>;
+
+export const analyticsInputSchema = z.object({});
+
+type AnalyticsInputArgs = z.infer<typeof analyticsInputSchema>;

@@ -57,6 +57,7 @@ export const EditApiKeyForm = () => {
         </FocusModal.Header>
         <FocusModal.Body className="flex flex-col items-center py-16">
           <form
+            id="edit-api-key-form"
             className="flex w-full max-w-lg flex-col gap-y-8"
             onSubmit={handleSubmit(onSubmit)}
           >
@@ -89,7 +90,12 @@ export const EditApiKeyForm = () => {
           </form>
         </FocusModal.Body>
         <FocusModal.Footer>
-          <Button isLoading={isPending} disabled={isPending || !isValid}>
+          <Button
+            type="submit"
+            form="edit-api-key-form"
+            isLoading={isPending}
+            disabled={isPending || !isValid}
+          >
             Save
           </Button>
         </FocusModal.Footer>

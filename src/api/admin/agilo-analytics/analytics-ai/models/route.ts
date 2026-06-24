@@ -1,4 +1,5 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
+import { createConfiguredGateway } from '../gateway-key';
 import { gateway } from 'ai';
 
 const allowedProviders = new Set(['openai', 'anthropic', 'vertex']); // vertex = google
@@ -34,10 +35,7 @@ function filterPopularModels(models: AvailableModel[]) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  if (!process.env.AI_GATEWAY_API_KEY) {
-    throw new Error('Missing AI_GATEWAY_API_KEY environment variable');
-  }
-
+  const gateway = await createConfiguredGateway(req.scope);
   const { models } = await gateway.getAvailableModels();
   return res.json(
     filterPopularModels(models) satisfies AvailableModelsResponse['models'],

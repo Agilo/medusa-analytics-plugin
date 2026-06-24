@@ -12,7 +12,6 @@ import {
   Button,
   Container,
   Heading,
-  Input,
   Select,
   Skeleton,
   Text,
@@ -25,18 +24,17 @@ import { GatewayForm } from '../../../components/GatewayForm';
 import { normalizeGatewayModels } from '../../../lib/normalize-models';
 import { EditApiKeyForm } from '../../../components/EditApiKeyForm';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport, type UIMessagePart, type UITools } from 'ai';
+import { DefaultChatTransport } from 'ai';
 import { LineChart } from '../../../components/LineChart';
 import { BarChart } from '../../../components/BarChart';
 import { format } from 'date-fns';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
-const promptSchema = z.object({
-  prompt: z.string().min(1),
-});
-type PromptFormValues = z.infer<typeof promptSchema>;
+import { Input } from '../../../components/Input';
+import {
+  PromptFormValues,
+  promptSchema,
+} from '../../../../api/admin/agilo-analytics/analytics-ai/chat/validators';
 
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
@@ -61,37 +59,36 @@ export default function AnalyticsAIPage() {
     [models, modelId],
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, setMessages, status } = useChat({
     transport: new DefaultChatTransport({
       api: '/admin/agilo-analytics/analytics-ai/chat',
-      body: {
-        modelId,
-      },
+      // Send a single flat { prompt, modelId } body that matches the request
+      // schema — no message history, no parts.
+      prepareSendMessagesRequest: ({ messages }) => ({
+        body: {
+          prompt:
+            messages[messages.length - 1]?.parts.find((p) => p.type === 'text')
+              ?.text ?? '',
+          modelId,
+        },
+      }),
     }),
   });
   const isLoading = status === 'submitted' || status === 'streaming';
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<PromptFormValues>({
+  // We only ever show the latest answer — never a conversation history.
+  const answer = messages.find((m) => m.role === 'assistant');
+
+  const { control, handleSubmit, reset } = useForm<PromptFormValues>({
     resolver: zodResolver(promptSchema),
   });
 
   const onSubmit = (data: PromptFormValues) => {
+    // Drop any previous exchange so each question is answered on its own. (don't care about history of conversation)
+    setMessages([]);
     sendMessage({ role: 'user', parts: [{ type: 'text', text: data.prompt }] });
     reset();
   };
-
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   React.useEffect(() => {
     if (models.length === 0) {
@@ -181,7 +178,7 @@ export default function AnalyticsAIPage() {
 
                 <Select.Separator />
 
-                {['OpenAI', 'Anthropic', 'Google', 'Mistral']
+                {['OpenAI', 'Anthropic', 'Google']
                   .filter((provider) =>
                     models.some(
                       (m) => m.provider === provider && !m.recommended,
@@ -226,25 +223,28 @@ export default function AnalyticsAIPage() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex mt-4 gap-2 items-center w-full"
         >
-          <div className="flex-1 min-w-70">
-            <Input
-              {...register('prompt')}
-              placeholder="Ask a question about your store… (e.g., 'Show me abandoned carts')"
-              className="flex-1 min-w-70"
-              disabled={isLoading}
-            />
-          </div>
+          <Controller
+            control={control}
+            name="prompt"
+            render={({ field, fieldState }) => (
+              <div className="flex-1 min-w-70">
+                <Input
+                  {...field}
+                  placeholder="Ask a question about your store… (e.g., 'Show me abandoned carts')"
+                  className="flex-1 min-w-70"
+                  error={fieldState.error?.message}
+                />
+              </div>
+            )}
+          />
           <Button type="submit" variant="primary" disabled={isLoading}>
             {isLoading ? <Spinner className="animate-spin" /> : 'Generate'}
           </Button>
         </form>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="px-6 py-6 overflow-y-auto max-h-[calc(100vh-280px)]"
-      >
-        {messages.length === 0 ? (
+      <div className="px-6 py-6 overflow-y-auto max-h-[calc(100vh-280px)]">
+        {!answer && !isLoading ? (
           <div className="h-90 flex flex-col items-center justify-center text-center gap-2">
             <AiAssistent className="text-ui-fg-subtle" />
             <Text size="small" weight="plus">
@@ -257,15 +257,8 @@ export default function AnalyticsAIPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex flex-col gap-2 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                <MessageBubble message={message} />
-              </div>
-            ))}
-            {isLoading && (
+            {answer && <AssistantAnswer message={answer} />}
+            {isLoading && !answer && (
               <div className="flex flex-col gap-3 max-w-205">
                 <Skeleton className="h-6 w-56" />
                 <Skeleton className="h-4 w-full" />
@@ -281,7 +274,7 @@ export default function AnalyticsAIPage() {
   );
 }
 
-const isToolPart = (part: UIMessagePart<any, UITools>) =>
+const isToolPart = (part: any) =>
   part.type.startsWith('tool-') || part.type === 'dynamic-tool';
 
 const getToolName = (part: any) =>
@@ -289,26 +282,17 @@ const getToolName = (part: any) =>
     ? part.toolName
     : String(part.type).replace(/^tool-/, '');
 
-const MessageBubble = ({ message }: { message: any }) => {
+const AssistantAnswer = ({ message }: { message: any }) => {
   const text = message.parts
-    ?.filter((part: UIMessagePart<any, UITools>) => part.type === 'text')
+    ?.filter((part: any) => part.type === 'text')
     .map((part: any) => part.text)
     .join('');
-  const toolParts =
-    message.parts?.filter((part: UIMessagePart<any, UITools>) =>
-      isToolPart(part),
-    ) ?? [];
+  const toolParts = message.parts?.filter(isToolPart) ?? [];
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {text ? (
-        <div
-          className={`max-w-[80%] rounded-lg p-4 ${
-            message.role === 'user'
-              ? 'bg-ui-bg-interactive text-ui-fg-on-color'
-              : 'bg-ui-bg-subtle border border-ui-border-base'
-          }`}
-        >
+        <div className="max-w-[80%] rounded-lg p-4 bg-ui-bg-subtle border border-ui-border-base">
           <Text size="small" className="whitespace-pre-wrap">
             {text}
           </Text>
@@ -320,7 +304,7 @@ const MessageBubble = ({ message }: { message: any }) => {
           <AIGeneratedWidget toolPart={part} />
         </div>
       ))}
-    </>
+    </div>
   );
 };
 

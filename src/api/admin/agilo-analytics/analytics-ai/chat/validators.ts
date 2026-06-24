@@ -8,9 +8,13 @@ export const analyticsAISchema = z.object({
     .optional()
     .default('this-month'),
 });
-
 export type AnalyticsAIArgs = z.infer<typeof analyticsAISchema>;
 
-export const analyticsInputSchema = z.object({});
+export const analyticsChatSchema = z.object({
+  prompt: z.string().min(1, 'Please enter a question'),
+  modelId: z.string().min(1, 'Please select a model'),
+});
+export type AnalyticsChatInput = z.infer<typeof analyticsChatSchema>;
 
-type AnalyticsInputArgs = z.infer<typeof analyticsInputSchema>;
+export const promptSchema = analyticsChatSchema.pick({ prompt: true });
+export type PromptFormValues = z.infer<typeof promptSchema>;

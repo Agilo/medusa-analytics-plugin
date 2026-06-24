@@ -8,15 +8,15 @@ import { adminSetGatewayKeySchema } from './validators';
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const parsed = adminSetGatewayKeySchema.safeParse(req.body);
-  if (!parsed.success) {
+  const result = adminSetGatewayKeySchema.safeParse(req.body);
+  if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      parsed.error.errors.map((err) => err.message).join(', '),
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
 
-  const apiKey = parsed.data.api_key.trim();
+  const apiKey = result.data.api_key.trim();
   if (!apiKey) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
@@ -43,15 +43,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 }
 
 export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
-  const parsed = adminSetGatewayKeySchema.safeParse(req.body);
-  if (!parsed.success) {
+  const result = adminSetGatewayKeySchema.safeParse(req.body);
+  if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      parsed.error.errors.map((err) => err.message).join(', '),
+      result.error.errors.map((err) => err.message).join(', '),
     );
   }
 
-  const apiKey = parsed.data.api_key.trim();
+  const apiKey = result.data.api_key.trim();
   if (!apiKey) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,

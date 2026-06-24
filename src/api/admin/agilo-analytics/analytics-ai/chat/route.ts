@@ -1,16 +1,25 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
-  convertToModelMessages,
   stepCountIs,
   streamText,
   tool,
   pipeUIMessageStreamToResponse,
-  type UIMessage,
 } from 'ai';
-import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from '@medusajs/framework/utils';
 import { calculateDateRangeMethod } from '../../../../../utils/orders';
 import { createConfiguredGateway } from '../gateway-key';
 import { AnalyticsAIArgs, analyticsAISchema } from './validators';
+import { analyticsChatSchema } from './validators';
+
+type OrderItem = {
+  quantity: number;
+  product_title?: string;
+  product?: { title: string };
+  variant?: { title: string; product?: { title: string } };
+};
 
 function resolveDateRange(params: AnalyticsAIArgs) {
   if (params.date_from && params.date_to) {
@@ -35,23 +44,24 @@ function resolveDateRange(params: AnalyticsAIArgs) {
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const { messages, modelId } = req.body as {
-    messages: UIMessage[];
-    modelId: string;
-  };
+  const result = analyticsChatSchema.safeParse(req.body);
+  if (!result.success) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      result.error.errors.map((err) => err.message).join(', '),
+    );
+  }
 
-  // console.log(
-  //   "Let's go let's go",
-  //   process.env.AI_GATEWAY_API_KEY,
-  //   modelId,
-  //   messages,
-  // );
+  const { prompt, modelId } = result.data;
+
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const gateway = await createConfiguredGateway(req.scope);
 
-  const result = streamText({
+  // Each request carries exactly one user prompt — we intentionally do not
+  // preserve conversation context between questions.
+  const data = streamText({
     model: gateway(modelId),
-    messages: await convertToModelMessages(messages),
+    prompt,
     stopWhen: stepCountIs(5),
     system: `You are an AI analytics assistant for a Medusa store.
     Your goal is to help users understand their store data.
@@ -85,7 +95,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           });
 
           const orderCounts = orders.reduce(
-            (acc: Record<string, number>, order: any) => {
+            (acc: Record<string, number>, order) => {
               const date = new Date(order.created_at)
                 .toISOString()
                 .split('T')[0];
@@ -100,7 +110,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           return {
             total_orders: orders.length,
             total_sales: orders.reduce(
-              (acc: number, o: any) => acc + (o.total || 0),
+              (acc: number, o) => acc + (Number(o.total) || 0),
               0,
             ),
             currency: orders[0]?.currency_code || 'USD',
@@ -137,7 +147,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           return {
             new_customers: customers.length,
             customers: customers
-              .map((c: any) => ({ id: c.id, created_at: c.created_at }))
+              .map((c) => ({ id: c.id, created_at: c.created_at }))
               .slice(0, 10),
             date_range: {
               from: current.start.toISOString(),
@@ -172,7 +182,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
           const productSales: Record<string, number> = {};
           orders.forEach((o) => {
-            o.items?.forEach((i: any) => {
+            (o.items as OrderItem[] | undefined)?.forEach((i) => {
               const title =
                 i.product_title ||
                 i.product?.title ||
@@ -203,6 +213,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   pipeUIMessageStreamToResponse({
     response: res,
-    stream: result.toUIMessageStream(),
+    stream: data.toUIMessageStream(),
   });
 }

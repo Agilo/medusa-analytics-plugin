@@ -45,14 +45,11 @@ export default function AnalyticsAIPage() {
   });
 
   const models = React.useMemo(
-    () => (data?.length ? normalizeGatewayModels(data) : []),
+    () => (Array.isArray(data) ? normalizeGatewayModels(data) : []),
     [data],
   );
 
-  const [modelId, setModelId] = React.useState(() => {
-    const defaultModel = models.find((m) => m.recommended) ?? models[0];
-    return defaultModel?.id ?? 'openai/gpt-4.1';
-  });
+  const [modelId, setModelId] = React.useState('');
 
   const selectedModel = React.useMemo(
     () => models.find((m) => m.id === modelId),
@@ -98,12 +95,7 @@ export default function AnalyticsAIPage() {
     const hasSelectedModel = models.some((model) => model.id === modelId);
 
     if (!hasSelectedModel) {
-      const defaultModel =
-        models.find((model) => model.recommended) ?? models[0];
-
-      if (defaultModel) {
-        setModelId(defaultModel.id);
-      }
+      setModelId(models[0].id);
     }
   }, [modelId, models]);
 
@@ -134,7 +126,7 @@ export default function AnalyticsAIPage() {
             </Text>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 ml-auto relative">
             <Text as="span" size="small" className="text-ui-fg-muted">
               Model:
             </Text>
@@ -146,66 +138,25 @@ export default function AnalyticsAIPage() {
                     : (selectedModel?.label ?? 'Select a model')}
                 </Select.Value>
               </Select.Trigger>
-              <Select.Content className="max-h-90">
-                <Select.Group>
-                  <Select.Label>Recommended</Select.Label>
-                  {models
-                    .filter((m) => m.recommended)
-                    .map((m) => (
-                      <Select.Item key={m.id} value={m.id}>
-                        <div className="flex items-center justify-between gap-3 w-full">
-                          <div className="flex items-center gap-2">
-                            <Text as="span" size="small" weight="plus">
-                              {m.label}
-                            </Text>
-                            <Badge size="xsmall" color="grey">
-                              {m.provider}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center">
-                            <Text
-                              as="span"
-                              size="xsmall"
-                              className="text-ui-fg-muted"
-                            >
-                              {m.context}
-                            </Text>
-                          </div>
-                        </div>
-                      </Select.Item>
-                    ))}
-                </Select.Group>
-
-                <Select.Separator />
-
+              <Select.Content
+                className="max-h-64 w-(--radix-select-trigger-width) overflow-y-scroll scrollbar-thin scrollbar-thumb-ui-bg-subtle scrollbar-track-ui-bg-base"
+                position="popper"
+              >
                 {['OpenAI', 'Anthropic', 'Google']
                   .filter((provider) =>
-                    models.some(
-                      (m) => m.provider === provider && !m.recommended,
-                    ),
+                    models.some((m) => m.provider === provider),
                   )
                   .map((provider) => (
                     <Select.Group key={provider}>
                       <Select.Label>{provider}</Select.Label>
                       {models
-                        .filter(
-                          (m) => m.provider === provider && !m.recommended,
-                        )
+                        .filter((m) => m.provider === provider)
                         .map((m) => (
                           <Select.Item key={m.id} value={m.id}>
                             <div className="flex items-center justify-between gap-3 w-full">
                               <Text as="span" size="small" weight="plus">
                                 {m.label}
                               </Text>
-                              <div className="flex items-center">
-                                <Text
-                                  as="span"
-                                  size="xsmall"
-                                  className="text-ui-fg-muted"
-                                >
-                                  {m.context}
-                                </Text>
-                              </div>
                             </div>
                           </Select.Item>
                         ))}

@@ -3,22 +3,19 @@ import { AvailableModel } from '../../api/admin/agilo-analytics/analytics-ai/mod
 export const providerLabels: Record<string, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
-  google: 'Google',
-  mistral: 'Mistral',
+  vertex: 'Google',
 };
 
 export const normalizeGatewayModels = (models: AvailableModel[]) =>
   models
-    .map((model, index) => {
+    .map((model) => {
       const providerKey = model.specification.provider.toLowerCase();
-
       return {
         id: model.id,
         label: model.name,
-        provider: providerLabels[providerKey] ?? model.specification.provider,
+        provider: providerLabels[providerKey],
         context: model.specification.modelId,
         description: model.description ?? undefined,
-        recommended: index < 2, // TODO: Change this to some other parameter (leave this now for testing purposes)
       };
     })
     .sort((left, right) => {

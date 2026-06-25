@@ -21,7 +21,10 @@ import {
   useGatewayConfig,
 } from '../../../hooks/ai-dashboard';
 import { GatewayForm } from '../../../components/GatewayForm';
-import { normalizeGatewayModels } from '../../../lib/normalize-models';
+import {
+  idLabels,
+  normalizeGatewayModels,
+} from '../../../lib/normalize-models';
 import { EditApiKeyForm } from '../../../components/EditApiKeyForm';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -135,27 +138,27 @@ export default function AnalyticsAIPage() {
                 <Select.Value>
                   {isPending && !data
                     ? 'Loading models...'
-                    : (selectedModel?.label ?? 'Select a model')}
+                    : (selectedModel?.name ?? 'Select a model')}
                 </Select.Value>
               </Select.Trigger>
               <Select.Content
                 className="max-h-64 w-(--radix-select-trigger-width) overflow-y-scroll scrollbar-thin scrollbar-thumb-ui-bg-subtle scrollbar-track-ui-bg-base"
                 position="popper"
               >
-                {['OpenAI', 'Anthropic', 'Google']
+                {Object.values(idLabels)
                   .filter((provider) =>
-                    models.some((m) => m.provider === provider),
+                    models.some((m) => m.prettyName === provider),
                   )
                   .map((provider) => (
                     <Select.Group key={provider}>
                       <Select.Label>{provider}</Select.Label>
                       {models
-                        .filter((m) => m.provider === provider)
+                        .filter((m) => m.prettyName === provider)
                         .map((m) => (
                           <Select.Item key={m.id} value={m.id}>
                             <div className="flex items-center justify-between gap-3 w-full">
                               <Text as="span" size="small" weight="plus">
-                                {m.label}
+                                {m.name}
                               </Text>
                             </div>
                           </Select.Item>

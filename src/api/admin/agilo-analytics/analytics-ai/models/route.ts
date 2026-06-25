@@ -2,16 +2,48 @@ import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
 import { createConfiguredGateway } from '../gateway-key';
 import { gateway } from 'ai';
 
-const ALLOWED_PROVIDERS = new Set(['openai', 'anthropic', 'vertex']);
+// Filtering: open, antrhopic, google, xai,
+const ALLOWED_PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'vertex'];
 
-const MAX_AVG_PRICE_PER_INPUT_TOKEN = 0.000001;
-const MAX_AVG_PRICE_PER_OUTPUT_TOKEN = 0.000005;
+// Price of sonnet (no need for high thinking models)
+const MAX_AVG_PRICE_PER_INPUT_TOKEN = 0.000003;
+const MAX_AVG_PRICE_PER_OUTPUT_TOKEN = 0.000015;
+
+const EXCLUDED_KEYWORDS = [
+  /(?<!non-)reasoning/i,
+  /\bo\d+/i,
+  /nano/i,
+  /codex/i,
+  /multi-agent/i,
+  /thinking/i,
+  /preview/i,
+  /banana/i,
+];
+
+const VERSION_REQUIREMENTS = [
+  { pattern: /gpt-(\d+)/i, min: 5 },
+  { pattern: /claude-\D*?(\d+)/i, min: 4 },
+  { pattern: /gemini-(\d+)/i, min: 3 },
+];
 
 function isAffordableModel(model: AvailableModel) {
   if (model.modelType !== 'language') return false;
 
-  if (!ALLOWED_PROVIDERS.has(model.specification.provider.toLowerCase()))
+  const idLower = model.id.toLowerCase();
+  if (!ALLOWED_PROVIDERS.some((provider) => idLower.includes(provider)))
     return false;
+
+  if (!ALLOWED_PROVIDERS.includes(model.specification.provider.toLowerCase()))
+    return false;
+
+  const text = `${model.id} ${model.name}`;
+
+  if (EXCLUDED_KEYWORDS.some((pattern) => pattern.test(text))) return false;
+
+  for (const { pattern, min } of VERSION_REQUIREMENTS) {
+    const match = text.match(pattern);
+    if (match && parseInt(match[1]) < min) return false;
+  }
 
   if (!model.pricing?.input || !model.pricing?.output) return false;
 
@@ -24,7 +56,11 @@ function isAffordableModel(model: AvailableModel) {
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const gateway = await createConfiguredGateway(req.scope);
   const { models } = await gateway.getAvailableModels();
-  return res.json(models.filter(isAffordableModel));
+  return res.json(
+    models.filter(
+      isAffordableModel,
+    ) satisfies AvailableModelsResponse['models'],
+  );
 }
 
 export type AvailableModelsResponse = Awaited<

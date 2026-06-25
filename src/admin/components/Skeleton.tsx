@@ -1,4 +1,4 @@
-import { twMerge } from 'tailwind-merge';
+import { cn } from '../lib/utils';
 
 export const Skeleton: React.FC<React.ComponentProps<'div'>> = ({
   className,
@@ -6,7 +6,7 @@ export const Skeleton: React.FC<React.ComponentProps<'div'>> = ({
 }) => (
   <div
     {...props}
-    className={twMerge(
+    className={cn(
       'animate-pulse rounded-md bg-[#F4F4F4] dark:bg-[#3F3F46]',
       className,
     )}

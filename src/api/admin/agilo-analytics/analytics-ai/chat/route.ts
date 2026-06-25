@@ -67,8 +67,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  // Each request carries exactly one user prompt — we intentionally do not
-  // preserve conversation context between questions.
+  // Each request carries exactly one user prompt => there are no previous messages in the conversations
   const data = streamText({
     model: gateway(modelId),
     prompt,

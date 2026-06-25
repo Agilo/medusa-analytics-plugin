@@ -1,12 +1,11 @@
-import { Button, Container, Text } from '@medusajs/ui';
 import { BarChart } from '../components/BarChart';
 import { LineChart } from './LineChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
-import { ChartStateWrapper } from './StateWrappers';
 import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
 import { useOrderAnalytics } from '../hooks/order-analytics';
+import { ChartCard } from './AnalyticsTemplateCards';
 
 // Products
 export const TopSellingProducts = () => {
@@ -18,47 +17,27 @@ export const TopSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            Top-Selling Products
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted ">
-            Top products by quantity sold in the selected time period
-          </Text>
-        </div>
-
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=products',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="Top-Selling Products"
+      description="Top products by quantity sold in the selected time period"
+      href={withOptionalAnalyticsRange('/app/analytics?tab=products', range)}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      isEmpty={!topThreeSellers || topThreeSellers.length === 0}
+    >
+      <div className="max-w-72 flex-1 text-xs aspect-video">
+        <BarChart
+          isHorizontal
+          data={topThreeSellers}
+          yAxisDataKey="quantity"
+          xAxisDataKey="title"
+          lineColor="#a1a1aa"
+          colorKeyField="title"
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        isEmpty={!topThreeSellers || topThreeSellers.length === 0}
-      >
-        <div className="max-w-72 flex-1 text-xs aspect-video">
-          <BarChart
-            isHorizontal
-            data={topThreeSellers}
-            yAxisDataKey="quantity"
-            xAxisDataKey="title"
-            lineColor="#a1a1aa"
-            colorKeyField="title"
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };
 
@@ -67,47 +46,30 @@ export const LowStockVariants = () => {
   const { data, isLoading, isError, error } = useProductAnalytics(range);
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            Low Stock Variants
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Products with inventory below threshold{' '}
-          </Text>
-        </div>
-
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=products#:~:text=Low%20Stock%20Variants',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="Low Stock Variants"
+      description="Products with inventory below threshold "
+      href={withOptionalAnalyticsRange(
+        '/app/analytics?tab=products#:~:text=Low%20Stock%20Variants',
+        range,
+      )}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      isEmpty={!data?.lowStockVariants || data.lowStockVariants.length === 0}
+    >
+      <div className="max-w-72 flex-1 text-xs aspect-video">
+        <BarChart
+          isHorizontal
+          data={data?.lowStockVariants}
+          xAxisDataKey="variantName"
+          yAxisDataKey="inventoryQuantity"
+          lineColor="#a1a1aa"
+          colorKeyField="variantName"
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        isEmpty={!data?.lowStockVariants || data.lowStockVariants.length === 0}
-      >
-        <div className="max-w-72 flex-1 text-xs aspect-video">
-          <BarChart
-            isHorizontal
-            data={data?.lowStockVariants}
-            xAxisDataKey="variantName"
-            yAxisDataKey="inventoryQuantity"
-            lineColor="#a1a1aa"
-            colorKeyField="variantName"
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };
 
@@ -120,50 +82,30 @@ export const BottomSellingProducts = () => {
     .slice(0, 3);
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            Bottom-Selling Products
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Worst products by quantity sold in the selected time period
-          </Text>
-        </div>
-
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=products',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="Bottom-Selling Products"
+      description="Worst products by quantity sold in the selected time period"
+      href={withOptionalAnalyticsRange('/app/analytics?tab=products', range)}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      isEmpty={
+        !topThreeWorstSellingProducts ||
+        topThreeWorstSellingProducts.length === 0
+      }
+    >
+      <div className="max-w-72 flex-1 text-xs aspect-video">
+        <BarChart
+          isHorizontal
+          data={topThreeWorstSellingProducts}
+          yAxisDataKey="quantity"
+          xAxisDataKey="title"
+          lineColor="#a1a1aa"
+          colorKeyField="title"
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        isEmpty={
-          !topThreeWorstSellingProducts ||
-          topThreeWorstSellingProducts.length === 0
-        }
-      >
-        <div className="max-w-72 flex-1 text-xs aspect-video">
-          <BarChart
-            isHorizontal
-            data={topThreeWorstSellingProducts}
-            yAxisDataKey="quantity"
-            xAxisDataKey="title"
-            lineColor="#a1a1aa"
-            colorKeyField="title"
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };
 
@@ -173,47 +115,27 @@ export const NewVsReturningCustomers = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            New vs Returning Customers
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            New and returning customers over time in the selected period
-          </Text>
-        </div>
-
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=customers',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="New vs Returning Customers"
+      description="New and returning customers over time in the selected period"
+      href={withOptionalAnalyticsRange('/app/analytics?tab=customers', range)}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      isEmpty={!data?.customer_count || data.customer_count.length === 0}
+    >
+      <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+        <LineChart
+          data={data?.customer_count}
+          xAxisDataKey="name"
+          series={[
+            { dataKey: 'new_customers', color: '#82ca9d' },
+            { dataKey: 'returning_customers', color: '#a1a1aa' },
+          ]}
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        isEmpty={!data?.customer_count || data.customer_count.length === 0}
-      >
-        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          <LineChart
-            data={data?.customer_count}
-            xAxisDataKey="name"
-            series={[
-              { dataKey: 'new_customers', color: '#82ca9d' },
-              { dataKey: 'returning_customers', color: '#a1a1aa' },
-            ]}
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };
 
@@ -222,45 +144,28 @@ export const TopCustomerGroupBySales = () => {
   const { data, isLoading, isError, error } = useCustomerAnalytics(range);
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            Top Customer Groups by Sales
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Sales breakdown by customer group in the selected period
-          </Text>
-        </div>
-
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs ">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="Top Customer Groups by Sales"
+      description="Sales breakdown by customer group in the selected period"
+      href={withOptionalAnalyticsRange(
+        '/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales',
+        range,
+      )}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      isEmpty={!data?.customer_group || data.customer_group.length === 0}
+    >
+      <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+        <BarChart
+          data={data?.customer_group ?? []}
+          xAxisDataKey="name"
+          yAxisDataKey="total"
+          lineColor="#a1a1aa"
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        isEmpty={!data?.customer_group || data.customer_group.length === 0}
-      >
-        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          <BarChart
-            data={data?.customer_group ?? []}
-            xAxisDataKey="name"
-            yAxisDataKey="total"
-            lineColor="#a1a1aa"
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };
 
@@ -294,58 +199,40 @@ export const AverageSalesPerCustomer = () => {
   });
 
   return (
-    <Container className="flex flex-col">
-      <div className="flex justify-between">
-        <div>
-          <Text size="large" weight="plus">
-            Average Sales per Customer
-          </Text>
-          <Text size="xsmall" className="mb-4 text-ui-fg-muted">
-            Average sales per customer over time in the selected period
-          </Text>
-        </div>
-        <a
-          href={withOptionalAnalyticsRange(
-            '/app/analytics#:~:text=Sales%20Over%20Time',
-            range,
-          )}
-        >
-          <Button variant="transparent" className="text-ui-fg-muted text-xs">
-            View more
-          </Button>
-        </a>
+    <ChartCard
+      title="Average Sales per Customer"
+      description="Average sales per customer over time in the selected period"
+      href={withOptionalAnalyticsRange(
+        '/app/analytics#:~:text=Sales%20Over%20Time',
+        range,
+      )}
+      isLoading={ordersQuery.isLoading || customersQuery.isLoading}
+      isError={ordersQuery.isError || customersQuery.isError}
+      errorMessage={ordersQuery.error?.message || customersQuery.error?.message}
+      isEmpty={averageSalesPerCustomerTimeline.length === 0}
+    >
+      <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
+        <LineChart
+          data={averageSalesPerCustomerTimeline}
+          xAxisDataKey="name"
+          yAxisDataKey="value"
+          lineColor="#a1a1aa"
+          yAxisTickFormatter={(value) =>
+            new Intl.NumberFormat(undefined, {
+              style: 'currency',
+              currency: ordersQuery.data?.currency_code || 'EUR',
+              maximumFractionDigits: 0,
+            }).format(
+              typeof value === 'number'
+                ? value
+                : typeof value === 'string'
+                  ? Number(value)
+                  : 0,
+            )
+          }
+          hideTooltip
+        />
       </div>
-      <ChartStateWrapper
-        isLoading={ordersQuery.isLoading || customersQuery.isLoading}
-        isError={ordersQuery.isError || customersQuery.isError}
-        errorMessage={
-          ordersQuery.error?.message || customersQuery.error?.message
-        }
-        isEmpty={averageSalesPerCustomerTimeline.length === 0}
-      >
-        <div className="w-full max-w-72 mx-auto flex-1 aspect-video min-w-60">
-          <LineChart
-            data={averageSalesPerCustomerTimeline}
-            xAxisDataKey="name"
-            yAxisDataKey="value"
-            lineColor="#a1a1aa"
-            yAxisTickFormatter={(value) =>
-              new Intl.NumberFormat(undefined, {
-                style: 'currency',
-                currency: ordersQuery.data?.currency_code || 'EUR',
-                maximumFractionDigits: 0,
-              }).format(
-                typeof value === 'number'
-                  ? value
-                  : typeof value === 'string'
-                    ? Number(value)
-                    : 0,
-              )
-            }
-            hideTooltip
-          />
-        </div>
-      </ChartStateWrapper>
-    </Container>
+    </ChartCard>
   );
 };

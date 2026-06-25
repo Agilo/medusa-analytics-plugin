@@ -136,7 +136,7 @@ export default function AnalyticsAIPage() {
         </form>
 
         <div className="mt-3">
-          <Suggestions onSelect={handleSuggestionSelect} disabled={isLoading} />
+          <Suggestions onSelect={handleSuggestionSelect} />
         </div>
       </div>
 

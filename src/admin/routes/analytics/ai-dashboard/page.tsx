@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../../components/Input';
+import { Suggestions } from '../../../components/Suggestions';
 import {
   AnalyticsChatInput,
   analyticsChatSchema,
@@ -28,10 +29,11 @@ export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
   const hasGatewayKey = !!config?.key;
 
-  const { control, handleSubmit, reset } = useForm<AnalyticsChatInput>({
-    resolver: zodResolver(analyticsChatSchema),
-    defaultValues: { prompt: '', modelId: '' },
-  });
+  const { control, handleSubmit, reset, setValue, setFocus } =
+    useForm<AnalyticsChatInput>({
+      resolver: zodResolver(analyticsChatSchema),
+      defaultValues: { prompt: '', modelId: '' },
+    });
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport: new DefaultChatTransport({
@@ -63,6 +65,13 @@ export default function AnalyticsAIPage() {
     );
     // Clear the prompt but keep the selected model for the next question.
     reset({ prompt: '', modelId: data.modelId });
+  };
+
+  // Prefill the input when a suggested question is clicked, then focus it so
+  // the user can edit or submit right away.
+  const handleSuggestionSelect = (question: string) => {
+    setValue('prompt', question, { shouldValidate: true });
+    setFocus('prompt');
   };
 
   if (isLoadingConfig) {
@@ -125,6 +134,10 @@ export default function AnalyticsAIPage() {
             {isLoading ? <Spinner className="animate-spin" /> : 'Generate'}
           </Button>
         </form>
+
+        <div className="mt-3">
+          <Suggestions onSelect={handleSuggestionSelect} disabled={isLoading} />
+        </div>
       </div>
 
       <div className="px-6 py-6 overflow-y-auto max-h-[calc(100vh-280px)]">
@@ -136,7 +149,8 @@ export default function AnalyticsAIPage() {
               place
             </Text>
             <Text size="small" className="text-ui-fg-muted max-w-130">
-              Enter a question above to get started
+              Enter a question above to get started. Chat is cleared on the
+              refresh
             </Text>
           </div>
         ) : (

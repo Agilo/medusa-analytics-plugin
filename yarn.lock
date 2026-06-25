@@ -45,10 +45,9 @@ __metadata:
     react-hook-form: "npm:^7.79.0"
     recharts: "npm:^3.7.0"
     tailwind-merge: "npm:^3.4.0"
-    tailwindcss: "npm:^4.1.8"
+    tailwindcss: "npm:3"
     ts-jest: "npm:^29.4.0"
     ts-node: "npm:^10.9.2"
-    tw-animate-css: "npm:^1.3.4"
     typescript: "npm:^5.8.3"
     vite: "npm:^5.4.19"
     yalc: "npm:^1.0.0-pre.53"
@@ -17682,7 +17681,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:^3.4.3":
+"tailwindcss@npm:3, tailwindcss@npm:^3.4.3":
   version: 3.4.19
   resolution: "tailwindcss@npm:3.4.19"
   dependencies:
@@ -17712,13 +17711,6 @@ __metadata:
     tailwind: lib/cli.js
     tailwindcss: lib/cli.js
   checksum: 10c0/e1063daccb9e5a508b357ec73b0011354204b2366b56496d6f0cc822733a55a0551502cb85856a2257ef9b676d0026616daaaa176d391f3216df57fbd693c581
-  languageName: node
-  linkType: hard
-
-"tailwindcss@npm:^4.1.8":
-  version: 4.1.18
-  resolution: "tailwindcss@npm:4.1.18"
-  checksum: 10c0/c79263cea0b2c577859b02f28284caa4eb3844e4d0f563686726ca97817c045c5c395a55bc776daaa351ba9e4aefa9a75bfbb43c22d86f3c573eecc2b87d6bf1
   languageName: node
   linkType: hard
 
@@ -17990,13 +17982,6 @@ __metadata:
   version: 2.6.3
   resolution: "tslib@npm:2.6.3"
   checksum: 10c0/2598aef53d9dbe711af75522464b2104724d6467b26a60f2bdac8297d2b5f1f6b86a71f61717384aa8fd897240467aaa7bcc36a0700a0faf751293d1331db39a
-  languageName: node
-  linkType: hard
-
-"tw-animate-css@npm:^1.3.4":
-  version: 1.4.0
-  resolution: "tw-animate-css@npm:1.4.0"
-  checksum: 10c0/6cfbc19ccc73883ec80ef1f9147f43e736cb01ee99c8172968b37eb81b720523d30e38b1a96aef92db3c586d864204db5510b51744ddacbbf0ad8e3c7fb56ec7
   languageName: node
   linkType: hard
 

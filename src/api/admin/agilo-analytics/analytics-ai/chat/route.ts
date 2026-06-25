@@ -58,6 +58,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const gateway = await createConfiguredGateway(req.scope);
 
+  // TODO: See if there is a direct way to get a certain model by ID form the gateway, and only then check if it is available
+  const { models: availableModels } = await gateway.getAvailableModels();
+  if (!availableModels.some((model) => model.id === modelId)) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      `Model "${modelId}" is not available.`,
+    );
+  }
+
   // Each request carries exactly one user prompt — we intentionally do not
   // preserve conversation context between questions.
   const data = streamText({

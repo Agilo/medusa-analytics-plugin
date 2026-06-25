@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import {
   AiAssistent,
@@ -7,24 +6,10 @@ import {
   ShoppingCart,
   FlyingBox,
 } from '@medusajs/icons';
-import {
-  Badge,
-  Button,
-  Container,
-  Heading,
-  Select,
-  Skeleton,
-  Text,
-} from '@medusajs/ui';
-import {
-  useRetrieveModels,
-  useGatewayConfig,
-} from '../../../hooks/ai-dashboard';
+import { Button, Container, Heading, Skeleton, Text } from '@medusajs/ui';
+import { useGatewayConfig } from '../../../hooks/ai-dashboard';
 import { GatewayForm } from '../../../components/GatewayForm';
-import {
-  idLabels,
-  normalizeGatewayModels,
-} from '../../../lib/normalize-models';
+import { SelectModels } from '../../../components/SelectModels';
 import { EditApiKeyForm } from '../../../components/EditApiKeyForm';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -35,41 +20,31 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../../../components/Input';
 import {
-  PromptFormValues,
-  promptSchema,
+  AnalyticsChatInput,
+  analyticsChatSchema,
 } from '../../../../api/admin/agilo-analytics/analytics-ai/chat/validators';
 
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
   const hasGatewayKey = !!config?.key;
 
-  const { data, isPending } = useRetrieveModels({
-    enabled: hasGatewayKey,
+  const { control, handleSubmit, reset } = useForm<AnalyticsChatInput>({
+    resolver: zodResolver(analyticsChatSchema),
+    defaultValues: { prompt: '', modelId: '' },
   });
-
-  const models = React.useMemo(
-    () => (Array.isArray(data) ? normalizeGatewayModels(data) : []),
-    [data],
-  );
-
-  const [modelId, setModelId] = React.useState('');
-
-  const selectedModel = React.useMemo(
-    () => models.find((m) => m.id === modelId),
-    [models, modelId],
-  );
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport: new DefaultChatTransport({
       api: '/admin/agilo-analytics/analytics-ai/chat',
       // Send a single flat { prompt, modelId } body that matches the request
-      // schema — no message history, no parts.
-      prepareSendMessagesRequest: ({ messages }) => ({
+      // schema — no message history, no parts. modelId comes from the per-call
+      // body (set in onSubmit), so it's always the value selected at send time.
+      prepareSendMessagesRequest: ({ messages, body }) => ({
         body: {
           prompt:
             messages[messages.length - 1]?.parts.find((p) => p.type === 'text')
               ?.text ?? '',
-          modelId,
+          modelId: body?.modelId,
         },
       }),
     }),
@@ -79,28 +54,16 @@ export default function AnalyticsAIPage() {
   // We only ever show the latest answer — never a conversation history.
   const answer = messages.find((m) => m.role === 'assistant');
 
-  const { control, handleSubmit, reset } = useForm<PromptFormValues>({
-    resolver: zodResolver(promptSchema),
-  });
-
-  const onSubmit = (data: PromptFormValues) => {
+  const onSubmit = (data: AnalyticsChatInput) => {
     // Drop any previous exchange so each question is answered on its own. (don't care about history of conversation)
     setMessages([]);
-    sendMessage({ role: 'user', parts: [{ type: 'text', text: data.prompt }] });
-    reset();
+    sendMessage(
+      { role: 'user', parts: [{ type: 'text', text: data.prompt }] },
+      { body: { modelId: data.modelId } },
+    );
+    // Clear the prompt but keep the selected model for the next question.
+    reset({ prompt: '', modelId: data.modelId });
   };
-
-  React.useEffect(() => {
-    if (models.length === 0) {
-      return;
-    }
-
-    const hasSelectedModel = models.some((model) => model.id === modelId);
-
-    if (!hasSelectedModel) {
-      setModelId(models[0].id);
-    }
-  }, [modelId, models]);
 
   if (isLoadingConfig) {
     return (
@@ -133,40 +96,7 @@ export default function AnalyticsAIPage() {
             <Text as="span" size="small" className="text-ui-fg-muted">
               Model:
             </Text>
-            <Select value={modelId} onValueChange={setModelId} size="small">
-              <Select.Trigger className="min-w-40 px-2">
-                <Select.Value>
-                  {isPending && !data
-                    ? 'Loading models...'
-                    : (selectedModel?.name ?? 'Select a model')}
-                </Select.Value>
-              </Select.Trigger>
-              <Select.Content
-                className="max-h-64 w-(--radix-select-trigger-width) overflow-y-scroll scrollbar-thin scrollbar-thumb-ui-bg-subtle scrollbar-track-ui-bg-base"
-                position="popper"
-              >
-                {Object.values(idLabels)
-                  .filter((provider) =>
-                    models.some((m) => m.prettyName === provider),
-                  )
-                  .map((provider) => (
-                    <Select.Group key={provider}>
-                      <Select.Label>{provider}</Select.Label>
-                      {models
-                        .filter((m) => m.prettyName === provider)
-                        .map((m) => (
-                          <Select.Item key={m.id} value={m.id}>
-                            <div className="flex items-center justify-between gap-3 w-full">
-                              <Text as="span" size="small" weight="plus">
-                                {m.name}
-                              </Text>
-                            </div>
-                          </Select.Item>
-                        ))}
-                    </Select.Group>
-                  ))}
-              </Select.Content>
-            </Select>
+            <SelectModels control={control} />
           </div>
           <div className="flex items-center gap-2">
             <EditApiKeyForm />
@@ -228,20 +158,15 @@ export default function AnalyticsAIPage() {
   );
 }
 
-const isToolPart = (part: any) =>
-  part.type.startsWith('tool-') || part.type === 'dynamic-tool';
-
-const getToolName = (part: any) =>
-  part.type === 'dynamic-tool'
-    ? part.toolName
-    : String(part.type).replace(/^tool-/, '');
-
 const AssistantAnswer = ({ message }: { message: any }) => {
   const text = message.parts
     ?.filter((part: any) => part.type === 'text')
     .map((part: any) => part.text)
     .join('');
-  const toolParts = message.parts?.filter(isToolPart) ?? [];
+  const toolParts = message.parts?.filter(
+    (part: any) =>
+      part.type.startsWith('tool-') || part.type === 'dynamic-tool',
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -263,7 +188,10 @@ const AssistantAnswer = ({ message }: { message: any }) => {
 };
 
 const AIGeneratedWidget = ({ toolPart }: { toolPart: any }) => {
-  const toolName = getToolName(toolPart);
+  const toolName =
+    toolPart.type === 'dynamic-tool'
+      ? toolPart.toolName
+      : String(toolPart.type).replace(/^tool-/, '');
 
   if (toolPart.state === 'output-error') {
     return (

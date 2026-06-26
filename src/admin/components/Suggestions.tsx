@@ -1,5 +1,5 @@
 import { Button } from '@medusajs/ui';
-import { Marquee } from './Marquee';
+// import { Marquee } from './Marquee';
 
 const SUGGESTED_QUESTIONS = [
   'Show me abandoned carts',
@@ -18,21 +18,22 @@ export const Suggestions = ({
   onSelect: (question: string) => void;
 }) => {
   return (
-    <Marquee
-      items={[...SUGGESTED_QUESTIONS, ...SUGGESTED_QUESTIONS].map(
-        (question, idx) => (
-          <Button
-            key={idx}
-            type="button"
-            size="small"
-            variant="secondary"
-            onClick={() => onSelect(question)}
-            className="shrink-0"
-          >
-            {question}
-          </Button>
-        ),
-      )}
-    />
+    <>
+    <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
+    <div className="flex gap-4 overflow-x-scroll no-scrollbar" style={{scrollbarWidth:'none',msOverflowStyle:'none'}}>
+      {SUGGESTED_QUESTIONS.map((question, idx) => (
+        <Button
+          key={idx}
+          type="button"
+          size="small"
+          variant="secondary"
+          onClick={() => onSelect(question)}
+          className="shrink-0"
+        >
+          {question}
+        </Button>
+      ))}
+    </div>
+    </>
   );
 };

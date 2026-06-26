@@ -1,11 +1,14 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
+import { Modules } from '@medusajs/framework/utils';
+import type { ICacheService } from '@medusajs/framework/types';
 import { createConfiguredGateway } from '../gateway-key';
 import { gateway } from 'ai';
 
-// Filtering: open, antrhopic, google, xai,
+export const MODELS_CACHE_KEY = 'agilo-analytics:ai-models';
+const MODELS_CACHE_TTL_SECONDS = 60 * 60 * 24; // 24h
+
 const ALLOWED_PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'vertex'];
 
-// Price of sonnet (no need for high thinking models)
 const MAX_AVG_PRICE_PER_INPUT_TOKEN = 0.000003;
 const MAX_AVG_PRICE_PER_OUTPUT_TOKEN = 0.000015;
 
@@ -54,13 +57,23 @@ function isAffordableModel(model: AvailableModel) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
+  const cache = req.scope.resolve<ICacheService>(Modules.CACHE);
+
+  const cached =
+    await cache.get<AvailableModelsResponse['models']>(MODELS_CACHE_KEY);
+  if (cached) {
+    return res.json(cached);
+  }
+
   const gateway = await createConfiguredGateway(req.scope);
   const { models } = await gateway.getAvailableModels();
-  return res.json(
-    models.filter(
-      isAffordableModel,
-    ) satisfies AvailableModelsResponse['models'],
-  );
+  const affordableModels = models.filter(
+    isAffordableModel,
+  ) satisfies AvailableModelsResponse['models'];
+
+  await cache.set(MODELS_CACHE_KEY, affordableModels, MODELS_CACHE_TTL_SECONDS);
+
+  return res.json(affordableModels);
 }
 
 export type AvailableModelsResponse = Awaited<

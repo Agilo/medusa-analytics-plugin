@@ -1,9 +1,11 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { MedusaError } from '@medusajs/framework/utils';
+import { MedusaError, Modules } from '@medusajs/framework/utils';
+import type { ICacheService } from '@medusajs/framework/types';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
 import { assertValidGatewayKey } from './gateway-key';
+import { MODELS_CACHE_KEY } from './models/route';
 
 // TODO: support multiple keys/types in the future if needed, only one key rn (vercel ai gateway)
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
@@ -13,7 +15,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      result.error.issues.map((err) => err.message).join(', '),
     );
   }
 
@@ -40,6 +42,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     key_last_four: keyLastFour,
   });
 
+  // The model list is per-key, so drop any cached list from a previous key.
+  await req.scope
+    .resolve<ICacheService>(Modules.CACHE)
+    .invalidate(MODELS_CACHE_KEY);
+
   res.status(201).json({
     type: VERCEL_AI_GATEWAY_KEY_TYPE,
     key_last_four: keyLastFour,
@@ -51,7 +58,7 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      result.error.issues.map((err) => err.message).join(', '),
     );
   }
 
@@ -79,6 +86,11 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
       key_last_four: keyLastFour,
     },
   });
+
+  // The model list is per-key, so drop the cached list from the replaced key.
+  await req.scope
+    .resolve<ICacheService>(Modules.CACHE)
+    .invalidate(MODELS_CACHE_KEY);
 
   res.status(200).json({
     type: VERCEL_AI_GATEWAY_KEY_TYPE,

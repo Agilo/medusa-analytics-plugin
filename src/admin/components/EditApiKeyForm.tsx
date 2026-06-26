@@ -37,8 +37,8 @@ export const EditApiKeyForm = () => {
           toast.success('API key updated successfully');
           reset();
         },
-        onError: () => {
-          toast.error('Failed to update API key');
+        onError: (error: Error) => {
+          toast.error(error?.message ?? 'Failed to update API key');
         },
       },
     );

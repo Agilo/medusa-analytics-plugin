@@ -3,6 +3,7 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
+import { assertValidGatewayKey } from './gateway-key';
 
 // TODO: support multiple keys/types in the future if needed, only one key rn (vercel ai gateway)
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
@@ -23,6 +24,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       'api_key is required',
     );
   }
+
+  // Reject bogus keys before persisting so an invalid key never unlocks the dashboard.
+  await assertValidGatewayKey(apiKey);
 
   const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
 
@@ -58,6 +62,9 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
       'api_key is required',
     );
   }
+
+  // Validate the replacement key before overwriting — a bad key must not clobber the working one.
+  await assertValidGatewayKey(apiKey);
 
   const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
 

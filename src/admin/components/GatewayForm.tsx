@@ -29,8 +29,8 @@ export const GatewayForm: React.FC = () => {
       onSuccess: () => {
         toast.success('Successfully set AI Gateway key');
       },
-      onError: () => {
-        toast.error('Failed to set AI Gateway key');
+      onError: (error: Error) => {
+        toast.error(error?.message ?? 'Failed to set AI Gateway key');
       },
     });
   };

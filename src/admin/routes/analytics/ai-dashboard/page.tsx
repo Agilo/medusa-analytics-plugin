@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import {
   AiAssistent,
@@ -7,19 +8,19 @@ import {
   FlyingBox,
 } from '@medusajs/icons';
 import { Button, Container, Heading, Skeleton, Text } from '@medusajs/ui';
-import { useGatewayConfig } from '../../../hooks/ai-dashboard';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import { GatewayForm } from '../../../components/GatewayForm';
 import { SelectModels } from '../../../components/SelectModels';
 import { EditApiKeyForm } from '../../../components/EditApiKeyForm';
-import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { Input } from '../../../components/Input';
+import { Suggestions } from '../../../components/Suggestions';
 import { LineChart } from '../../../components/LineChart';
 import { BarChart } from '../../../components/BarChart';
 import { format } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input } from '../../../components/Input';
-import { Suggestions } from '../../../components/Suggestions';
+import { useGatewayConfig } from '../../../hooks/ai-dashboard';
 import {
   AnalyticsChatInput,
   analyticsChatSchema,
@@ -56,6 +57,8 @@ export default function AnalyticsAIPage() {
   // We only ever show the latest answer — never a conversation history.
   const answer = messages.find((m) => m.role === 'assistant');
 
+  const [lastPrompt, setLastPrompt] = React.useState('');
+
   const onSubmit = (data: AnalyticsChatInput) => {
     // Drop any previous exchange so each question is answered on its own. (don't care about history of conversation)
     setMessages([]);
@@ -65,6 +68,7 @@ export default function AnalyticsAIPage() {
     );
     // Clear the prompt but keep the selected model for the next question.
     reset({ prompt: '', modelId: data.modelId });
+    setLastPrompt(data.prompt);
   };
 
   // Prefill the input when a suggested question is clicked, then focus it so
@@ -155,7 +159,17 @@ export default function AnalyticsAIPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {answer && <AssistantAnswer message={answer} />}
+            {answer && (
+              <>
+                <div className="px-4 py-3 shadow-elevation-card-rest flex items-center gap-2 border border-rounded-md items-baseline">
+                  <Text size="small" className="text-ui-fg-muted ">
+                    Your last question:
+                  </Text>
+                  <Text size="base">{lastPrompt}</Text>
+                </div>
+                <AssistantAnswer message={answer} />
+              </>
+            )}
             {isLoading && !answer && (
               <div className="flex flex-col gap-3 max-w-205">
                 <Skeleton className="h-6 w-56" />

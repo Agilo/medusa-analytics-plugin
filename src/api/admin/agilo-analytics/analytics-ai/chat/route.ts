@@ -14,7 +14,7 @@ import { createConfiguredGateway } from '../gateway-key';
 import { AnalyticsAIArgs, analyticsAISchema } from './validators';
 import { analyticsChatSchema } from './validators';
 
-// Add more fields, so that we can spit out to the user more data
+// TODO: Add more fields, so that we can spit out to the user more data
 type OrderItem = {
   quantity: number;
   product_title?: string;

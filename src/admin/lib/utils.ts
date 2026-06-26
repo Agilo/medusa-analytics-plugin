@@ -1,10 +1,27 @@
 import Medusa from '@medusajs/js-sdk';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const toChartNumber = (value: ValueType | undefined): number =>
+  typeof value === 'number'
+    ? value
+    : typeof value === 'string'
+      ? Number(value)
+      : 0;
+
+export const formatAxisCurrency = (
+  value: ValueType | undefined,
+  currency: string,
+): string =>
+  new Intl.NumberFormat(undefined, {
+    currency,
+    maximumFractionDigits: 0,
+  }).format(toChartNumber(value));
 
 /**
  * Generates a stable, deterministic color based on a string input

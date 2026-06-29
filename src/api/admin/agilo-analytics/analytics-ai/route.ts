@@ -57,17 +57,17 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  const apiKey = result.data.api_key.trim();
-  if (!apiKey) {
+  const api_key = result.data.api_key.trim();
+  if (!api_key) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
       'api_key is required',
     );
   }
 
-  await assertValidGatewayKey(apiKey);
+  await assertValidGatewayKey(api_key);
 
-  const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
+  const keyLastFour = api_key.length >= 4 ? api_key.slice(-4) : null;
 
   const aiGatewayModuleService = req.scope.resolve(
     AI_GATEWAY_MODULE,
@@ -76,7 +76,7 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
   await aiGatewayModuleService.updateAiGatewayKeys({
     selector: { type: VERCEL_AI_GATEWAY_KEY_TYPE },
     data: {
-      key_hash: apiKey,
+      key_hash: api_key,
       key_last_four: keyLastFour,
     },
   });

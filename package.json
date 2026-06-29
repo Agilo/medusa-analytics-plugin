@@ -87,6 +87,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^3.0.133",
     "@ai-sdk/react": "^3.0.210",
     "@hookform/resolvers": "^5.4.0",
     "@json-render/core": "^0.19.0",

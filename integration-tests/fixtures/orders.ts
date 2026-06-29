@@ -231,9 +231,7 @@ export async function createOrderSeeder({
       adminHeaders,
     );
   }
-  /**
-   * Create shipping options for each shipping profile provided
-   */
+
   const shippingOptions = await Promise.all(
     (shippingProfileOverrideArray || [shippingProfile]).map(async (sp) => {
       return (

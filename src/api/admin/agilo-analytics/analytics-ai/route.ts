@@ -1,6 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { MedusaError, Modules } from '@medusajs/framework/utils';
-import type { ICacheService } from '@medusajs/framework/types';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
@@ -27,7 +26,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  // Reject bogus keys before persisting so an invalid key never unlocks the dashboard.
   await assertValidGatewayKey(apiKey);
 
   const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
@@ -42,10 +40,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     key_last_four: keyLastFour,
   });
 
-  // The model list is per-key, so drop any cached list from a previous key.
-  await req.scope
-    .resolve<ICacheService>(Modules.CACHE)
-    .invalidate(MODELS_CACHE_KEY);
+  await req.scope.resolve(Modules.CACHE).invalidate(MODELS_CACHE_KEY);
 
   res.status(201).json({
     type: VERCEL_AI_GATEWAY_KEY_TYPE,
@@ -70,7 +65,6 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  // Validate the replacement key before overwriting — a bad key must not clobber the working one.
   await assertValidGatewayKey(apiKey);
 
   const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
@@ -87,10 +81,7 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
     },
   });
 
-  // The model list is per-key, so drop the cached list from the replaced key.
-  await req.scope
-    .resolve<ICacheService>(Modules.CACHE)
-    .invalidate(MODELS_CACHE_KEY);
+  await req.scope.resolve(Modules.CACHE).invalidate(MODELS_CACHE_KEY);
 
   res.status(200).json({
     type: VERCEL_AI_GATEWAY_KEY_TYPE,

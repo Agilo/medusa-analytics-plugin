@@ -50,7 +50,7 @@ export function generateStableColor(
  * Generates an array of stable colors for a dataset
  * Each item's color is based on a key field (like name or id)
  */
-export function generateColorsForData<T extends Record<string, any>>(
+export function generateColorsForData<T extends Record<string, unknown>>(
   data: T[],
   keyField: keyof T,
   saturation = 70,

@@ -75,7 +75,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const cacheKey = `exchange_rates_${currencyCode}`;
 
-  let exchangeRates: { rates: Record<string, any> } | null =
+  let exchangeRates: { rates: Record<string, number> } | null =
     await cacheModuleService.get(cacheKey);
 
   if (!exchangeRates) {
@@ -140,7 +140,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of orders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        ? (exchangeRates?.rates[order.currency_code.toUpperCase()] ?? 1)
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
 
@@ -174,7 +174,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of prevRangeOrders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        ? (exchangeRates?.rates[order.currency_code.toUpperCase()] ?? 1)
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     prevTotalSales += orderTotal;

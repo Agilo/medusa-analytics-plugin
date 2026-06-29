@@ -19,6 +19,13 @@ const DEFAULT_CURRENCY = 'EUR';
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const result = adminCustomerAnalyticsQuerySchema.safeParse(req.query);
+  if (!result.success) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      result.error.issues.map((err) => err.message).join(', '),
+    );
+  }
+
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
   const cacheModuleService = req.scope.resolve(Modules.CACHE);
@@ -35,7 +42,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const cacheKey = `exchange_rates_${currencyCode}`;
 
-  let exchangeRates: { rates: Record<string, any> } | null =
+  let exchangeRates: { rates: Record<string, number> } | null =
     await cacheModuleService.get(cacheKey);
 
   if (!exchangeRates) {
@@ -55,12 +62,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     await cacheModuleService.set(cacheKey, exchangeRates, ttl);
   }
 
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.issues.map((err) => err.message).join(', '),
-    );
-  }
   const { data: orders } = (await query.graph({
     entity: 'order',
     fields: [
@@ -152,7 +153,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of orders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        ? (exchangeRates?.rates[order.currency_code.toUpperCase()] ?? 1)
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     const key = getDateGroupingKey(

@@ -75,7 +75,7 @@ All under `/admin/agilo-analytics/` (admin-protected):
 
 ## Key Conventions
 
-- **No unnecessary comments** — code should be self-documenting; only add a comment when the WHY is non-obvious
+- **No unnecessary comments** — code should be self-documenting; only add a comment when the WHY is non-obvious in VERY RARE AND COMPLEX cases.
 - **TypeScript strict mode** — do not disable strict checks or use `any` without a good reason
 - **One responsibility per function** — keep functions small and focused
 - **Don't repeat yourself** — avoid duplicating logic; extract shared code into a helper function or module. Also if some one-two line logic is only going to be used once, don't extract it into a function or some variable, just leave it in place. Don't over-engineer.

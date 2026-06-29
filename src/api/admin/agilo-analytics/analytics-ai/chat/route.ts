@@ -7,19 +7,10 @@ import {
 import { z } from 'zod';
 import { createConfiguredGateway } from '../gateway-key';
 import { catalog } from '../../../../../admin/lib/ai/catalog';
-
-// useUIStream POSTs { prompt, context, currentSpec }. The selected model id
-// is carried in `context` (set on the client via send(prompt, { modelId })).
-const requestSchema = z.object({
-  prompt: z.string().min(1, 'Please enter a question'),
-  context: z.object({
-    modelId: z.string().min(1, 'Please select a model'),
-  }),
-  currentSpec: z.unknown().optional(),
-});
+import { analyticsChatRequestSchema } from './validators';
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const parsed = requestSchema.safeParse(req.body);
+  const parsed = analyticsChatRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,

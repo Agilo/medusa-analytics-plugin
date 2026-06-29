@@ -16,5 +16,13 @@ export const analyticsChatSchema = z.object({
 });
 export type AnalyticsChatInput = z.infer<typeof analyticsChatSchema>;
 
+export const analyticsChatRequestSchema = z.object({
+  prompt: analyticsChatSchema.shape.prompt,
+  context: z.object({
+    modelId: analyticsChatSchema.shape.modelId,
+  }),
+  currentSpec: z.unknown().optional(),
+});
+
 export const promptSchema = analyticsChatSchema.pick({ prompt: true });
 export type PromptFormValues = z.infer<typeof promptSchema>;

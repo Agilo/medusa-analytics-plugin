@@ -27,19 +27,26 @@ export default function AnalyticsAIPage() {
       defaultValues: { prompt: '', modelId: '' },
     });
 
-  // The AI streams a json-render UI spec; <Renderer> turns it into our cards/charts.
   const { spec, isStreaming, error, send } = useUIStream({
     api: '/admin/agilo-analytics/analytics-ai/chat',
   });
 
   const [lastPrompt, setLastPrompt] = React.useState('');
+  const pendingPromptRef = React.useRef('');
 
-  const onSubmit = async (data: AnalyticsChatInput) => {
-    // The selected model travels in the stream's `context` body field.
-    await send(data.prompt, { modelId: data.modelId });
+  const onSubmit = (data: AnalyticsChatInput) => {
+    pendingPromptRef.current = data.prompt;
+    setLastPrompt('');
+    send(data.prompt, { modelId: data.modelId });
     reset({ prompt: '', modelId: data.modelId });
-    setLastPrompt(data.prompt);
   };
+
+  React.useEffect(() => {
+    if (!isStreaming && pendingPromptRef.current) {
+      setLastPrompt(pendingPromptRef.current);
+      pendingPromptRef.current = '';
+    }
+  }, [isStreaming]);
 
   const handleSuggestionSelect = (question: string) => {
     setValue('prompt', question, { shouldValidate: true });

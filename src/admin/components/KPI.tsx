@@ -1,8 +1,8 @@
 import { LineChart } from './LineChart';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useOrderAnalytics } from '../hooks/order-analytics';
-import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links.ts';
 import { KPICard } from './AnalyticsTemplateCards.tsx';
+import { withOptionalAnalyticsRange } from '../lib/utils/analytics-links.ts';
 
 // Orders
 export const AverageOrderValue = () => {

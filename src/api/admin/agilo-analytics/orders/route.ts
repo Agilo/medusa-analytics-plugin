@@ -23,10 +23,11 @@ function getPercentChange(current: number, previous: number) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const { preset } = isDataValid({
+  const validatedQuery = isDataValid({
     data: req.query,
     schema: adminOrdersListQuerySchema,
   });
+  const { preset } = validatedQuery;
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
@@ -101,9 +102,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  const { current, previous, days } = calculateDateRange({
-    preset,
-  });
+  const { current, previous, days } = calculateDateRange(validatedQuery);
 
   const currentFrom = format(current.start, 'yyyy-MM-dd');
   const currentTo = format(current.end, 'yyyy-MM-dd');

@@ -51,6 +51,7 @@ Guidelines:
           'High-level snapshot of the store: order count and total sales, customer count, product count, and the default currency. Call this first for context.',
         inputSchema: z.object({}),
         execute: async () => {
+          // Optimization for AI, important data + fetches in parallel so the AI can get the snapshot more quickly
           const [ordersRes, customersRes, productsRes] = await Promise.all([
             query.graph({
               entity: 'order',
@@ -131,6 +132,5 @@ Guidelines:
     },
   });
 
-  // Stream the raw JSONL spec (text deltas) — useUIStream parses it line by line.
   result.pipeTextStreamToResponse(res);
 }

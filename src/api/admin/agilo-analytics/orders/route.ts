@@ -13,6 +13,7 @@ import {
 } from '../../../../utils/orders';
 import { DateTime } from 'luxon';
 import { adminOrdersListQuerySchema } from './validators';
+import { isDataValid } from '../../../../utils/data-validation';
 
 const DEFAULT_CURRENCY = 'EUR';
 
@@ -22,14 +23,10 @@ function getPercentChange(current: number, previous: number) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminOrdersListQuerySchema.safeParse(req.query);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.issues.map((err) => err.message).join(', '),
-    );
-  }
-  const validatedQuery = result.data;
+  const { preset } = isDataValid({
+    data: req.query,
+    schema: adminOrdersListQuerySchema,
+  });
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
@@ -95,7 +92,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     await cacheModuleService.set(cacheKey, exchangeRates, ttl);
   }
 
-  const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
+  const calculateDateRange = calculateDateRangeMethod[preset];
 
   if (!calculateDateRange) {
     throw new MedusaError(
@@ -104,7 +101,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  const { current, previous, days } = calculateDateRange(validatedQuery);
+  const { current, previous, days } = calculateDateRange({
+    preset,
+  });
 
   const currentFrom = format(current.start, 'yyyy-MM-dd');
   const currentTo = format(current.end, 'yyyy-MM-dd');

@@ -14,17 +14,15 @@ import {
 } from '../../../../utils/orders';
 import { DateTime } from 'luxon';
 import { adminCustomerAnalyticsQuerySchema } from './validators';
+import { isDataValid } from '../../../../utils/data-validation';
 
 const DEFAULT_CURRENCY = 'EUR';
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminCustomerAnalyticsQuerySchema.safeParse(req.query);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.issues.map((err) => err.message).join(', '),
-    );
-  }
+  const { date_from, date_to } = isDataValid({
+    data: req.query,
+    schema: adminCustomerAnalyticsQuerySchema,
+  });
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
@@ -75,8 +73,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     ],
     filters: {
       created_at: {
-        $gte: result.data.date_from + 'T00:00:00Z',
-        $lte: result.data.date_to + 'T23:59:59.999Z',
+        $gte: date_from + 'T00:00:00Z',
+        $lte: date_to + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft', 'canceled'] },
     },
@@ -102,8 +100,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       Array.isArray(customer.orders) &&
       customer?.orders?.every(
         (order) =>
-          new Date(order.created_at) >=
-          new Date(result.data.date_from + 'T00:00:00Z'),
+          new Date(order.created_at) >= new Date(date_from + 'T00:00:00Z'),
       ),
   );
 
@@ -116,7 +113,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
 
   const { days, current } = calculateDateRange({
-    ...result.data,
+    date_from,
+    date_to,
     preset: 'custom',
   });
 

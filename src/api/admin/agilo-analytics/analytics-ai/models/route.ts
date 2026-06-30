@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
 import { Modules } from '@medusajs/framework/utils';
 import type { ICacheService } from '@medusajs/framework/types';
-import { createConfiguredGateway } from '../gateway-key';
+import { createConfiguredGateway } from '../../../../../utils/gateway-key';
 import { gateway } from 'ai';
 
 export const MODELS_CACHE_KEY = 'agilo-analytics:ai-models';

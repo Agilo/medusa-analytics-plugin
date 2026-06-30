@@ -3,22 +3,21 @@ import { MedusaError, Modules } from '@medusajs/framework/utils';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
-import { assertValidGatewayKey } from './gateway-key';
+import { assertValidGatewayKey } from '../../../../utils/gateway-key';
 import { MODELS_CACHE_KEY } from './models/route';
+import { isDataValid } from '../../../../utils/data-validation';
 
 // TODO: support multiple keys/types in the future if needed, only one key rn (vercel ai gateway)
 const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminSetGatewayKeySchema.safeParse(req.body);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.issues.map((err) => err.message).join(', '),
-    );
-  }
+  const validatedData = isDataValid({
+    data: req.body,
+    schema: adminSetGatewayKeySchema,
+  });
 
-  const apiKey = result.data.api_key.trim();
+  const apiKey = validatedData.api_key.trim();
+
   if (!apiKey) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,

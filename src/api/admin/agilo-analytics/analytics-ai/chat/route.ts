@@ -1,25 +1,20 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { streamText, tool, stepCountIs } from 'ai';
-import {
-  ContainerRegistrationKeys,
-  MedusaError,
-} from '@medusajs/framework/utils';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { z } from 'zod';
-import { createConfiguredGateway } from '../gateway-key';
+import { createConfiguredGateway } from '../../../../../utils/gateway-key';
 import { catalog } from '../../../../../admin/lib/ai/catalog';
 import { analyticsChatRequestSchema } from './validators';
+import { isDataValid } from '../../../../../utils/data-validation';
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
-  const parsed = analyticsChatRequestSchema.safeParse(req.body);
-  if (!parsed.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      parsed.error.issues.map((err) => err.message).join(', '),
-    );
-  }
-
-  const { prompt } = parsed.data;
-  const { modelId } = parsed.data.context;
+  const {
+    prompt,
+    context: { modelId },
+  } = isDataValid({
+    data: req.body,
+    schema: analyticsChatRequestSchema,
+  });
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const gateway = await createConfiguredGateway(req.scope);

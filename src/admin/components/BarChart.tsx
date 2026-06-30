@@ -10,7 +10,7 @@ import {
   Cell,
 } from 'recharts';
 import { useDarkMode } from '../hooks/use-dark-mode';
-import { generateColorsForData } from '../lib/utils';
+import { generateColorsForData } from '../lib/utils/chart';
 import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 type BarChartProps<T extends Record<string, unknown>> = {

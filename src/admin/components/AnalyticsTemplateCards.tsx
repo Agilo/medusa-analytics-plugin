@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button, Container, Text } from '@medusajs/ui';
 import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
 import { ChartStateWrapper, KPIStateWrapper } from './StateWrappers';
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils/general-utils';
 
 // Chart card
 const CardHeader: React.FC<

@@ -3,7 +3,7 @@ import { LineChart } from './LineChart';
 import { useProductAnalytics } from '../hooks/product-analytics';
 import { useIntervalRange } from '../hooks/use-interval-range';
 import { useCustomerAnalytics } from '../hooks/customer-analytics';
-import { withOptionalAnalyticsRange } from '../lib/analytics-widgets-links';
+import { withOptionalAnalyticsRange } from '../lib/utils/analytics-links';
 import { useOrderAnalytics } from '../hooks/order-analytics';
 import { ChartCard } from './AnalyticsTemplateCards';
 

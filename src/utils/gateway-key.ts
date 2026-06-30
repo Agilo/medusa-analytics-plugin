@@ -36,7 +36,8 @@ export async function createConfiguredGateway(scope: {
   });
 
   if (!existing?.key_hash) {
-    throw new Error(
+    throw new MedusaError(
+      MedusaError.Types.NOT_ALLOWED,
       'Missing AI Gateway key. Save a Vercel AI Gateway key in the admin dashboard.',
     );
   }

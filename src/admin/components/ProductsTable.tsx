@@ -7,7 +7,7 @@ import {
   DataTableSortingState,
 } from '@medusajs/ui';
 
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils/general-utils';
 import { useNavigate } from 'react-router-dom';
 
 type ProductsTableProps = {

@@ -1,4 +1,4 @@
-import { sdk } from '../utils';
+import { sdk } from '../utils/general-utils';
 import type { AdminSetGatewayKeyInputArgs } from '../../../api/admin/agilo-analytics/analytics-ai/validators';
 
 export async function setGatewayKey(payload: AdminSetGatewayKeyInputArgs) {

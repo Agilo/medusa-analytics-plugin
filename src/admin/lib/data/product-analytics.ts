@@ -1,6 +1,6 @@
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
-import { sdk } from '../utils';
+import { sdk } from '../utils/general-utils';
 import type { ProductAnalyticsResponse } from '../../../api/admin/agilo-analytics/products/route';
 
 export async function retrieveProductAnalytics(date: DateRange | undefined) {

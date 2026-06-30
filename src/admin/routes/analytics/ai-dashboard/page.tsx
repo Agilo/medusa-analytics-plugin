@@ -16,7 +16,7 @@ import {
   AnalyticsChatInput,
   analyticsChatSchema,
 } from '../../../../api/admin/agilo-analytics/analytics-ai/chat/validators';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../../lib/utils/general-utils';
 
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();

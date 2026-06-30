@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Container, Text } from '@medusajs/ui';
 import { ChartStateWrapper } from './StateWrappers';
 import { SmallCardSkeleton } from '../skeletons/SmallCardSkeleton';
-import { cn } from '../lib/utils';
+import { cn } from '../lib/utils/general-utils';
 
 const PanelHeader: React.FC<{
   title: React.ReactNode;

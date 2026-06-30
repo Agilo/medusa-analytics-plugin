@@ -9,7 +9,7 @@ import { CustomersTab } from '../../components/analytics/CustomersTab';
 import { useDateRangeParams } from '../../hooks/use-date-range-params';
 import { useProductAnalytics } from '../../hooks/product-analytics';
 import { useOrderAnalytics } from '../../hooks/order-analytics';
-import { isDatePreset } from '../../lib/date-range';
+import { isDatePreset } from '../../lib/utils/date-range';
 import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 
 const AnalyticsPage = () => {

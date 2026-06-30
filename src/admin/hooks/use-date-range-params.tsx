@@ -6,7 +6,7 @@ import {
   isDatePreset,
   parseRangeParam,
   presetToDateRange,
-} from '../lib/date-range';
+} from '../lib/utils/date-range';
 
 export const useDateRangeParams = () => {
   const [searchParams, setSearchParams] = useSearchParams(); // Retrieving data from context no need to use useSearchParams

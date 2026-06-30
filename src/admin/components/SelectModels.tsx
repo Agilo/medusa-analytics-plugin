@@ -5,7 +5,7 @@ import { Select, Text } from '@medusajs/ui';
 
 // Internal
 import { useRetrieveModels } from '../hooks/ai-dashboard';
-import { idLabels, normalizeGatewayModels } from '../lib/normalize-models';
+import { idLabels, normalizeGatewayModels } from '../lib/utils/models';
 import { AnalyticsChatInput } from '../../api/admin/agilo-analytics/analytics-ai/chat/validators';
 
 export const SelectModels = ({

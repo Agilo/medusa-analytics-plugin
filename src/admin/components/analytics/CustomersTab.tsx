@@ -7,9 +7,9 @@ import { CustomersTable } from '../CustomersTable';
 import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
 import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 import { useOrderAnalytics } from '../../hooks/order-analytics';
-import { formatAxisCurrency } from '../../lib/utils';
+import { formatAxisCurrency } from '../../lib/utils/chart';
 import { useDateRangeParams } from '../../hooks/use-date-range-params';
-import { isDatePreset } from '../../lib/date-range';
+import { isDatePreset } from '../../lib/utils/date-range';
 
 export const CustomersTab = () => {
   const { date, rangeParam } = useDateRangeParams();

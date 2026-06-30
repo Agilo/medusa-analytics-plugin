@@ -1,4 +1,4 @@
-import { sdk } from '../utils';
+import { sdk } from '../utils/general-utils';
 import type { AvailableModelsResponse } from '../../../api/admin/agilo-analytics/analytics-ai/models/route';
 
 export async function retrieveAllAvailableModels() {

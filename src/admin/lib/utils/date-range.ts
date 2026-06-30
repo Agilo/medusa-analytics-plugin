@@ -1,23 +1,15 @@
 import { DateRange } from 'react-day-picker';
 import { CalendarDate } from '@internationalized/date';
-import type { DateValue } from 'react-aria-components';
-import type { RangeValue } from '@react-types/shared';
 import { subMonths, startOfMonth, endOfMonth, format, parse } from 'date-fns';
+import { DateValue, RangeValue } from 'react-aria-components';
 
-export const DATE_PRESETS = [
-  'this-month',
-  'last-month',
-  'last-3-months',
-] as const;
-
-export type DatePreset = (typeof DATE_PRESETS)[number];
+const DATE_PRESETS = ['this-month', 'last-month', 'last-3-months'] as const;
+type DatePreset = (typeof DATE_PRESETS)[number];
+const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
 
 export const isDatePreset = (value: string): value is DatePreset =>
   (DATE_PRESETS as readonly string[]).includes(value);
 
-const DATE_RANGE_REGEX = /^(\d{4}-\d{2}-\d{2})-(\d{4}-\d{2}-\d{2})$/;
-
-/** Serializes a range into the `yyyy-MM-dd-yyyy-MM-dd` url param format. */
 export const formatDateRangeParam = (range: DateRange): string =>
   `${format(range.from ?? new Date(), 'yyyy-MM-dd')}-${format(
     range.to ?? range.from ?? new Date(),
@@ -39,7 +31,6 @@ export function presetToDateRange(preset: DatePreset): DateRange {
   };
 }
 
-/** Resolves a `range` url param (preset id or explicit range) to a DateRange. */
 export function parseRangeParam(rangeParam: string): DateRange | undefined {
   if (isDatePreset(rangeParam)) {
     return presetToDateRange(rangeParam);
@@ -56,8 +47,7 @@ export function parseRangeParam(rangeParam: string): DateRange | undefined {
   return undefined;
 }
 
-// Conversions between `react-day-picker` dates and `react-aria` calendar values.
-export function dateToCalendarDate(date: Date): CalendarDate {
+function dateToCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
     date.getFullYear(),
     date.getMonth() + 1,

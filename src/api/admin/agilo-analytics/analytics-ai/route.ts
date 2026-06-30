@@ -48,15 +48,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 }
 
 export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminSetGatewayKeySchema.safeParse(req.body);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.issues.map((err) => err.message).join(', '),
-    );
-  }
-
-  const api_key = result.data.api_key.trim();
+  const { api_key: rawKey } = isDataValid({ data: req.body, schema: adminSetGatewayKeySchema });
+  const api_key = rawKey.trim();
   if (!api_key) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,

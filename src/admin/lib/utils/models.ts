@@ -1,4 +1,4 @@
-import { AvailableModel } from '../../api/admin/agilo-analytics/analytics-ai/models/route';
+import { AvailableModel } from '../../../api/admin/agilo-analytics/analytics-ai/models/route';
 
 export const idLabels: Record<string, string> = {
   openai: 'OpenAI',

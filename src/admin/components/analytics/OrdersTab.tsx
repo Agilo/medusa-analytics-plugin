@@ -4,9 +4,9 @@ import { LineChart } from '../LineChart';
 import { BarChart } from '../BarChart';
 import { PieChart } from '../PieChart';
 import { ChartPanelCard, StatCard } from '../AnalyticsPanelCards';
-import { formatAxisCurrency } from '../../lib/utils';
+import { formatAxisCurrency } from '../../lib/utils/chart';
 import { useOrderAnalytics } from '../../hooks/order-analytics';
-import { isDatePreset } from '../../lib/date-range';
+import { isDatePreset } from '../../lib/utils/date-range';
 import { useDateRangeParams } from '../../hooks/use-date-range-params';
 
 export const OrdersTab = () => {

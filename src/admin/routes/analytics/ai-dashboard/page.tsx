@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { AiAssistent, Spinner } from '@medusajs/icons';
-import { Button, Container, Heading, Skeleton, Text } from '@medusajs/ui';
+import { Button, Container, Heading, Text } from '@medusajs/ui';
 import { useUIStream, JSONUIProvider, Renderer } from '@json-render/react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +18,12 @@ import {
 } from '../../../../api/admin/agilo-analytics/analytics-ai/chat/validators';
 import { cn } from '../../../lib/utils/general-utils';
 
+const randomGenerationWord = [
+  'Thinking...',
+  'Processing...',
+  'Generating...',
+  'Cooking...',
+][Math.floor(Math.random() * 4)];
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
 
@@ -32,21 +38,13 @@ export default function AnalyticsAIPage() {
   });
 
   const [lastPrompt, setLastPrompt] = React.useState('');
-  const pendingPromptRef = React.useRef('');
 
-  const onSubmit = (data: AnalyticsChatInput) => {
-    pendingPromptRef.current = data.prompt;
+  const onSubmit = async (data: AnalyticsChatInput) => {
     setLastPrompt('');
-    send(data.prompt, { modelId: data.modelId });
+    await send(data.prompt, { modelId: data.modelId });
     reset({ prompt: '', modelId: data.modelId });
+    setLastPrompt(data.prompt);
   };
-
-  React.useEffect(() => {
-    if (!isStreaming && pendingPromptRef.current) {
-      setLastPrompt(pendingPromptRef.current);
-      pendingPromptRef.current = '';
-    }
-  }, [isStreaming]);
 
   const handleSuggestionSelect = (question: string) => {
     setValue('prompt', question, { shouldValidate: true });
@@ -67,10 +65,7 @@ export default function AnalyticsAIPage() {
 
   return (
     <Container
-      className={cn(
-        'relative divide-y p-0',
-        lastPrompt && 'h-[calc(100vh-80px)]',
-      )}
+      className={cn('relative divide-y p-0', !!spec && 'h-[calc(100vh-80px)]')}
     >
       <div className="px-6 py-4">
         <div className="flex flex-wrap items-start gap-4">
@@ -156,17 +151,17 @@ export default function AnalyticsAIPage() {
               </Container>
             )}
 
-            {isStreaming && !spec && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-64 w-full md:col-span-2" />
-              </div>
-            )}
-
             <JSONUIProvider registry={registry}>
               <Renderer spec={spec} registry={registry} loading={isStreaming} />
             </JSONUIProvider>
+            {isStreaming && (
+              <div className="flex w-full items-center justify-end w-full gap-2">
+                <Text size="small" className="text-ui-fg-muted">
+                  {randomGenerationWord}
+                </Text>
+                <Spinner className="size-4 animate-spin text-ui-fg-muted" />
+              </div>
+            )}
           </div>
         )}
       </div>

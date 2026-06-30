@@ -28,11 +28,30 @@ const STAT_ICONS: Record<string, React.ReactNode> = {
   products: <FlyingBox />,
 };
 
-/**
- * Maps the catalog's component names to the plugin's existing, reusable
- * analytics components. The AI generates a json-render spec referencing these
- * names; <Renderer> walks the spec and renders these.
- */
+type ChartRow = Record<string, string | number>;
+
+const toChartNumber = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value.replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+};
+
+// More consistent formatting for chart since the issues with rendering the slope
+const numericRows = (
+  rows: ChartRow[] | undefined,
+  keys: string[],
+): ChartRow[] =>
+  (rows ?? []).map((row) => {
+    const next: ChartRow = { ...row };
+    for (const key of keys) {
+      next[key] = toChartNumber(row[key]);
+    }
+    return next;
+  });
+
 export const { registry } = defineRegistry(catalog, {
   components: {
     Dashboard: ({ children }) => (
@@ -77,7 +96,7 @@ export const { registry } = defineRegistry(catalog, {
 
     LineChart: ({ props }) => (
       <LineChart
-        data={props.data}
+        data={numericRows(props.data, [props.yKey])}
         xAxisDataKey={props.xKey}
         yAxisDataKey={props.yKey}
         lineColor={props.color ?? undefined}
@@ -86,7 +105,7 @@ export const { registry } = defineRegistry(catalog, {
 
     BarChart: ({ props }) => (
       <BarChart
-        data={props.data}
+        data={numericRows(props.data, [props.yKey])}
         xAxisDataKey={props.xKey}
         yAxisDataKey={props.yKey}
         isHorizontal={props.horizontal}
@@ -98,14 +117,14 @@ export const { registry } = defineRegistry(catalog, {
     PieChart: ({ props }) => {
       const data = (props.data ?? []).map((row) => ({
         name: String(row[props.nameKey]),
-        value: Number(row[props.valueKey]),
+        value: toChartNumber(row[props.valueKey]),
       }));
       return <PieChart data={data} dataKey="value" />;
     },
 
     StackedBarChart: ({ props }) => (
       <StackedBarChart
-        data={props.data}
+        data={numericRows(props.data, props.seriesKeys)}
         xAxisDataKey={props.xKey}
         dataKeys={props.seriesKeys}
         useStableColors

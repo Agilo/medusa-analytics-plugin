@@ -59,7 +59,7 @@ export default function AnalyticsAIPage() {
     );
   }
 
-  if (!config?.key) {
+  if (!config?.configured) {
     return <GatewayForm />;
   }
 

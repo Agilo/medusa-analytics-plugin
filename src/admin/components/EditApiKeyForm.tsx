@@ -81,7 +81,7 @@ export const EditApiKeyForm = () => {
                     {...field}
                     id="api_key"
                     type="password"
-                    placeholder={`Your last key: ******${data?.key?.key_last_four ?? ''}`}
+                    placeholder={`Your last key: ******${data?.key_last_four ?? ''}`}
                     error={fieldState.error?.message}
                   />
                 )}

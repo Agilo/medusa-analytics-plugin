@@ -1,8 +1,9 @@
 import { sdk } from '../utils/general-utils';
 import type { AdminSetGatewayKeyInputArgs } from '../../../api/admin/agilo-analytics/analytics-ai/validators';
+import type { GetGatewayConfigResponse } from '../../../api/admin/agilo-analytics/analytics-ai/route';
 
 export async function setGatewayKey(payload: AdminSetGatewayKeyInputArgs) {
-  return await sdk.client.fetch<AdminSetGatewayKeyInputArgs>(
+  return await sdk.client.fetch<GetGatewayConfigResponse>(
     `/admin/agilo-analytics/analytics-ai`,
     {
       method: 'POST',
@@ -12,7 +13,7 @@ export async function setGatewayKey(payload: AdminSetGatewayKeyInputArgs) {
 }
 
 export async function updateGatewayKey(payload: AdminSetGatewayKeyInputArgs) {
-  return await sdk.client.fetch<AdminSetGatewayKeyInputArgs>(
+  return await sdk.client.fetch<GetGatewayConfigResponse>(
     `/admin/agilo-analytics/analytics-ai`,
     {
       method: 'PATCH',
@@ -22,10 +23,7 @@ export async function updateGatewayKey(payload: AdminSetGatewayKeyInputArgs) {
 }
 
 export async function getGatewayConfig() {
-  return await sdk.client.fetch<{
-    key: {
-      type: string;
-      key_last_four: string | null;
-    } | null;
-  }>(`/admin/agilo-analytics/analytics-ai`);
+  return await sdk.client.fetch<GetGatewayConfigResponse>(
+    `/admin/agilo-analytics/analytics-ai`,
+  );
 }

@@ -34,7 +34,7 @@ export const AverageOrderValue = () => {
     <KPICard
       title="Average order value"
       href={withOptionalAnalyticsRange(
-        '/app/analytics?tab=orders#:~:text=Orders%20Over%20Time',
+        '/analytics?tab=orders#:~:text=Orders%20Over%20Time',
         range,
       )}
       isLoading={isLoading}
@@ -85,7 +85,7 @@ export const TotalSales = () => {
     <KPICard
       title="Total Sales"
       href={withOptionalAnalyticsRange(
-        '/app/analytics#:~:text=Sales%20Over%20Time',
+        '/analytics#:~:text=Sales%20Over%20Time',
         range,
       )}
       isLoading={isLoading}
@@ -132,7 +132,7 @@ export const TotalOrders = () => {
     <KPICard
       title="Total Orders"
       href={withOptionalAnalyticsRange(
-        '/app/analytics#:~:text=Orders%20Over%20Time',
+        '/analytics#:~:text=Orders%20Over%20Time',
         range,
       )}
       isLoading={isLoading}

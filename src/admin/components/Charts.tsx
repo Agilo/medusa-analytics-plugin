@@ -20,7 +20,7 @@ export const TopSellingProducts = () => {
     <ChartCard
       title="Top-Selling Products"
       description="Top products by quantity sold in the selected time period"
-      href={withOptionalAnalyticsRange('/app/analytics?tab=products', range)}
+      href={withOptionalAnalyticsRange('/analytics?tab=products', range)}
       isLoading={isLoading}
       isError={isError}
       errorMessage={error?.message}
@@ -50,7 +50,7 @@ export const LowStockVariants = () => {
       title="Low Stock Variants"
       description="Products with inventory below threshold "
       href={withOptionalAnalyticsRange(
-        '/app/analytics?tab=products#:~:text=Low%20Stock%20Variants',
+        '/analytics?tab=products#:~:text=Low%20Stock%20Variants',
         range,
       )}
       isLoading={isLoading}
@@ -85,7 +85,7 @@ export const BottomSellingProducts = () => {
     <ChartCard
       title="Bottom-Selling Products"
       description="Worst products by quantity sold in the selected time period"
-      href={withOptionalAnalyticsRange('/app/analytics?tab=products', range)}
+      href={withOptionalAnalyticsRange('/analytics?tab=products', range)}
       isLoading={isLoading}
       isError={isError}
       errorMessage={error?.message}
@@ -118,7 +118,7 @@ export const NewVsReturningCustomers = () => {
     <ChartCard
       title="New vs Returning Customers"
       description="New and returning customers over time in the selected period"
-      href={withOptionalAnalyticsRange('/app/analytics?tab=customers', range)}
+      href={withOptionalAnalyticsRange('/analytics?tab=customers', range)}
       isLoading={isLoading}
       isError={isError}
       errorMessage={error?.message}
@@ -148,7 +148,7 @@ export const TopCustomerGroupBySales = () => {
       title="Top Customer Groups by Sales"
       description="Sales breakdown by customer group in the selected period"
       href={withOptionalAnalyticsRange(
-        '/app/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales',
+        '/analytics?tab=customers#:~:text=Top%20Customer%20Groups%20by%20Sales',
         range,
       )}
       isLoading={isLoading}
@@ -203,7 +203,7 @@ export const AverageSalesPerCustomer = () => {
       title="Average Sales per Customer"
       description="Average sales per customer over time in the selected period"
       href={withOptionalAnalyticsRange(
-        '/app/analytics#:~:text=Sales%20Over%20Time',
+        '/analytics#:~:text=Sales%20Over%20Time',
         range,
       )}
       isLoading={ordersQuery.isLoading || customersQuery.isLoading}

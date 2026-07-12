@@ -3,6 +3,7 @@ import { Button, Container, Text } from '@medusajs/ui';
 import { ArrowDownMini, ArrowUpMini, Equals } from '@medusajs/icons';
 import { ChartStateWrapper, KPIStateWrapper } from './StateWrappers';
 import { cn } from '../lib/utils/general-utils';
+import { Link } from 'react-router-dom';
 
 // Chart card
 const CardHeader: React.FC<
@@ -24,11 +25,11 @@ const CardHeader: React.FC<
       )}
     </div>
 
-    <a href={href}>
+    <Link to={href}>
       <Button variant="transparent" className="text-ui-fg-muted text-xs">
         View more
       </Button>
-    </a>
+    </Link>
   </div>
 );
 

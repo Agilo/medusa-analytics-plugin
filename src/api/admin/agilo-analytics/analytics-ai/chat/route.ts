@@ -1,4 +1,7 @@
-import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
+import {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
 import { streamText, tool, stepCountIs } from 'ai';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { z } from 'zod';
@@ -7,7 +10,10 @@ import { catalog } from '../../../../../admin/lib/ai/catalog';
 import { analyticsChatRequestSchema } from './validators';
 import { isDataValid } from '../../../../../utils/data-validation';
 
-export async function POST(req: MedusaRequest, res: MedusaResponse) {
+export async function POST(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
   const {
     prompt,
     context: { modelId },
@@ -17,7 +23,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   });
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const gateway = await createConfiguredGateway(req.scope);
+  const gateway = await createConfiguredGateway(
+    req.scope,
+    req.auth_context.actor_id,
+  );
 
   const today = new Date().toISOString().split('T')[0];
 

@@ -1,4 +1,7 @@
-import { MedusaRequest, MedusaResponse } from '@medusajs/framework';
+import {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework';
 import { Modules } from '@medusajs/framework/utils';
 import type { ICacheService } from '@medusajs/framework/types';
 import { createConfiguredGateway } from '../../../../../utils/gateway-key';
@@ -56,7 +59,10 @@ function isAffordableModel(model: AvailableModel) {
   );
 }
 
-export async function GET(req: MedusaRequest, res: MedusaResponse) {
+export async function GET(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
   const cache = req.scope.resolve<ICacheService>(Modules.CACHE);
 
   const cached =
@@ -65,7 +71,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return res.json(cached);
   }
 
-  const gateway = await createConfiguredGateway(req.scope);
+  const gateway = await createConfiguredGateway(
+    req.scope,
+    req.auth_context.actor_id,
+  );
   const { models } = await gateway.getAvailableModels();
   const affordableModels = models.filter(
     isAffordableModel,

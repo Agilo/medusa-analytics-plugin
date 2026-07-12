@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -15,8 +13,8 @@
           "nullable": false,
           "mappedType": "text"
         },
-        "type": {
-          "name": "type",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -24,8 +22,8 @@
           "nullable": false,
           "mappedType": "text"
         },
-        "key_hash": {
-          "name": "key_hash",
+        "key_encrypted": {
+          "name": "key_encrypted",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -79,13 +77,13 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_ai_gateway_key_type_unique",
+          "keyName": "IDX_ai_gateway_key_user_id_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_ai_gateway_key_type_unique\" ON \"ai_gateway_key\" (\"type\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_ai_gateway_key_user_id_unique\" ON \"ai_gateway_key\" (\"user_id\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "IDX_ai_gateway_key_deleted_at",
@@ -98,9 +96,7 @@
         },
         {
           "keyName": "ai_gateway_key_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,

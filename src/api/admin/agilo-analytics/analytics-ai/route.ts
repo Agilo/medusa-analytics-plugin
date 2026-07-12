@@ -1,16 +1,18 @@
-import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { MedusaError, Modules } from '@medusajs/framework/utils';
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
+import { MedusaError } from '@medusajs/framework/utils';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
 import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
 import { assertValidGatewayKey } from '../../../../utils/gateway-key';
-import { MODELS_CACHE_KEY } from './models/route';
 import { isDataValid } from '../../../../utils/data-validation';
 
-// TODO: support multiple keys/types in the future if needed, only one key rn (vercel ai gateway)
-const VERCEL_AI_GATEWAY_KEY_TYPE = 'vercel_ai_gateway';
-
-export async function POST(req: MedusaRequest, res: MedusaResponse) {
+export async function POST(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
   const validatedData = isDataValid({
     data: req.body,
     schema: adminSetGatewayKeySchema,
@@ -25,30 +27,42 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
-  await assertValidGatewayKey(apiKey);
-
-  const keyLastFour = apiKey.length >= 4 ? apiKey.slice(-4) : null;
-
   const aiGatewayModuleService = req.scope.resolve(
     AI_GATEWAY_MODULE,
   ) as AiGatewayModuleService;
+  const userId = req.auth_context.actor_id;
 
-  await aiGatewayModuleService.createAiGatewayKeys({
-    type: VERCEL_AI_GATEWAY_KEY_TYPE,
-    key_hash: apiKey,
-    key_last_four: keyLastFour,
+  const { configured } =
+    await aiGatewayModuleService.getKeyStatusForUser(userId);
+
+  if (configured) {
+    throw new MedusaError(
+      MedusaError.Types.DUPLICATE_ERROR,
+      'An AI Gateway key is already configured for your user. Replace it instead.',
+    );
+  }
+
+  await assertValidGatewayKey(apiKey);
+
+  const { key_last_four } = await aiGatewayModuleService.createKeyForUser({
+    user_id: userId,
+    api_key: apiKey,
   });
-
-  await req.scope.resolve(Modules.CACHE).invalidate(MODELS_CACHE_KEY);
 
   res.status(201).json({
-    type: VERCEL_AI_GATEWAY_KEY_TYPE,
-    key_last_four: keyLastFour,
-  });
+    configured: true,
+    key_last_four,
+  } satisfies GetGatewayConfigResponse);
 }
 
-export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
-  const { api_key: rawKey } = isDataValid({ data: req.body, schema: adminSetGatewayKeySchema });
+export async function PATCH(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
+  const { api_key: rawKey } = isDataValid({
+    data: req.body,
+    schema: adminSetGatewayKeySchema,
+  });
   const api_key = rawKey.trim();
   if (!api_key) {
     throw new MedusaError(
@@ -57,52 +71,52 @@ export async function PATCH(req: MedusaRequest, res: MedusaResponse) {
     );
   }
 
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+  const userId = req.auth_context.actor_id;
+
+  const { configured } =
+    await aiGatewayModuleService.getKeyStatusForUser(userId);
+
+  if (!configured) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      'No AI Gateway key is configured for your user. Save one first.',
+    );
+  }
+
   await assertValidGatewayKey(api_key);
 
-  const keyLastFour = api_key.length >= 4 ? api_key.slice(-4) : null;
-
-  const aiGatewayModuleService = req.scope.resolve(
-    AI_GATEWAY_MODULE,
-  ) as AiGatewayModuleService;
-
-  await aiGatewayModuleService.updateAiGatewayKeys({
-    selector: { type: VERCEL_AI_GATEWAY_KEY_TYPE },
-    data: {
-      key_hash: api_key,
-      key_last_four: keyLastFour,
-    },
-  });
-
-  await req.scope.resolve(Modules.CACHE).invalidate(MODELS_CACHE_KEY);
-
-  res.status(200).json({
-    type: VERCEL_AI_GATEWAY_KEY_TYPE,
-    key_last_four: keyLastFour,
-  });
-}
-
-export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const aiGatewayModuleService = req.scope.resolve(
-    AI_GATEWAY_MODULE,
-  ) as AiGatewayModuleService;
-
-  const [existing] = await aiGatewayModuleService.listAiGatewayKeys({
-    type: VERCEL_AI_GATEWAY_KEY_TYPE,
+  const { key_last_four } = await aiGatewayModuleService.updateKeyForUser({
+    user_id: userId,
+    api_key,
   });
 
   res.status(200).json({
-    key: existing
-      ? {
-          type: existing.type,
-          key_last_four: existing.key_last_four,
-        }
-      : null,
+    configured: true,
+    key_last_four,
   } satisfies GetGatewayConfigResponse);
 }
 
+export async function GET(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+
+  res
+    .status(200)
+    .json(
+      (await aiGatewayModuleService.getKeyStatusForUser(
+        req.auth_context.actor_id,
+      )) satisfies GetGatewayConfigResponse,
+    );
+}
+
 export type GetGatewayConfigResponse = {
-  key: {
-    type: string;
-    key_last_four: string | null;
-  } | null;
+  configured: boolean;
+  key_last_four: string | null;
 };

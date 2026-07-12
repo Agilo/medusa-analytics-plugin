@@ -1,18 +1,18 @@
 import { generateJwtToken } from '@medusajs/framework/utils';
 import { MedusaContainer } from '@medusajs/types';
 
-export async function createAdminHeaders({
+export async function createAdminActor({
   container,
   emailPrefix = 'test-admin',
 }: {
   container: MedusaContainer;
   emailPrefix?: string;
-}): Promise<Record<string, string>> {
+}): Promise<{ headers: Record<string, string>; userId: string }> {
   const authModuleService = container.resolve('auth');
   const userModuleService = container.resolve('user');
 
   const user = await userModuleService.createUsers({
-    email: `${emailPrefix}-${Date.now()}@test.com`,
+    email: `${emailPrefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`,
   });
 
   const authIdentity = await authModuleService.createAuthIdentities({
@@ -42,5 +42,13 @@ export async function createAdminHeaders({
     },
   );
 
-  return { Authorization: `Bearer ${token}` };
+  return { headers: { Authorization: `Bearer ${token}` }, userId: user.id };
+}
+
+export async function createAdminHeaders(args: {
+  container: MedusaContainer;
+  emailPrefix?: string;
+}): Promise<Record<string, string>> {
+  const { headers } = await createAdminActor(args);
+  return headers;
 }

@@ -7,7 +7,7 @@ description: Always load at the start of every conversation for baseline project
 
 ## What This Is
 
-A **Medusa v2 plugin** (`@agilo/medusa-analytics-plugin`) that adds an analytics dashboard and AI assistant to the Medusa admin. **Read-only by design** — it aggregates existing store data (orders, customers, products) on demand. The only data it ever writes is a single Vercel AI Gateway API key.
+A **Medusa v2 plugin** (`@agilo/medusa-analytics-plugin`) that adds an analytics dashboard and AI assistant to the Medusa admin. **Read-only by design** — it aggregates existing store data (orders, customers, products) on demand. The only data it ever writes is per-admin-user Vercel AI Gateway API keys.
 
 Stack: TypeScript, Medusa v2, Recharts, TanStack Query v5, Vercel AI SDK, React Hook Form + Zod, Tailwind CSS, Yarn 4, Node ≥20.
 
@@ -55,11 +55,11 @@ All under `/admin/agilo-analytics/` (admin-protected):
 
 **2. The AI outputs JSON specs, not text.** The chat endpoint streams a typed JSON-render spec. `lib/ai/catalog.ts` defines the Zod schema of what the AI can produce. `lib/ai/registry.tsx` maps those schema names to actual React components. **Adding a new AI-renderable component requires updating both files.**
 
-**3. Single DB table.** `ai_gateway_key` (in `modules/ai-gateway/`) is the only table this plugin (currently) owns. It stores hashed key + last 4 digits. Soft-delete enabled.
+**3. Single DB table.** `ai_gateway_key` (in `modules/ai-gateway/`) is the only table this plugin (currently) owns. One row per admin user (`user_id` from `req.auth_context.actor_id`): AES-256-GCM-encrypted key (`key_encrypted`, `iv:tag:ciphertext` base64) + last 4 digits. Requires the `AI_GATEWAY_ENCRYPTION_KEY` env var; the raw key never reaches the client. Soft-delete enabled.
 
 **4. Order queries always exclude `draft` + `canceled`** (`$nin: ['draft', 'canceled']`). Do not remove this filter.
 
-**5. Exchange rates are the only cached data.** Medusa Cache module, 24h TTL, resets 16:00 Berlin time. Nothing else is cached server-side.
+**5. Only exchange rates and the AI model catalog are cached.** Medusa Cache module, 24h TTL (exchange rates reset 16:00 Berlin time; model catalog is key-independent and shared across users). Nothing else is cached server-side.
 
 ---
 

@@ -60,11 +60,21 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
    ```bash
    yarn
    ```
-4. **Start your Medusa server:**
+4. **Set the AI Gateway encryption secret** (required for the AI dashboard). This is **not** a Vercel AI Gateway API key — it's a random secret used locally to encrypt admins' API keys at rest, similar to `JWT_SECRET`. Generate one with:
    ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+   Then set it as an environment variable:
+   ```bash
+   AI_GATEWAY_ENCRYPTION_KEY=<generated value>
+   ```
+   Keep it stable — changing it invalidates stored keys and admins must re-enter them.
+5. **Run migrations and start your Medusa server:**
+   ```bash
+   npx medusa db:migrate
    yarn dev
    ```
-5. **Access the Analytics page** from the Medusa Admin dashboard.
+6. **Access the Analytics page** from the Medusa Admin dashboard.
 
 ## Contributing
 

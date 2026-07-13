@@ -1,7 +1,16 @@
 import { MedusaError, MedusaService } from '@medusajs/framework/utils';
 
-import { AiGatewayKey } from './models/ai-gateway-key';
+import { AiGatewayKey, AiGatewayKeyType } from './models/ai-gateway-key';
+import type { AdminSetGatewayKeyInputArgs } from '../../api/admin/agilo-analytics/analytics-ai/validators';
 import { encryptApiKey, decryptApiKey } from './utils/crypto';
+
+export type SetKeyForUserInput = Pick<AiGatewayKeyType, 'user_id'> &
+  AdminSetGatewayKeyInputArgs;
+
+export type GatewayKeyStatus = {
+  configured: boolean;
+  key_last_four: AiGatewayKeyType['key_last_four'];
+};
 
 export class AiGatewayModuleService extends MedusaService({
   AiGatewayKey,
@@ -9,10 +18,9 @@ export class AiGatewayModuleService extends MedusaService({
   async createKeyForUser({
     user_id,
     api_key,
-  }: {
-    user_id: string;
-    api_key: string;
-  }): Promise<{ key_last_four: string | null }> {
+  }: SetKeyForUserInput): Promise<
+    Pick<AiGatewayKeyType, 'id' | 'key_last_four'>
+  > {
     const [existing] = await this.listAiGatewayKeys({ user_id });
 
     if (existing) {
@@ -24,22 +32,19 @@ export class AiGatewayModuleService extends MedusaService({
 
     const keyLastFour = api_key.length >= 4 ? api_key.slice(-4) : null;
 
-    await this.createAiGatewayKeys({
+    const created = await this.createAiGatewayKeys({
       user_id,
       key_encrypted: encryptApiKey(api_key),
       key_last_four: keyLastFour,
     });
 
-    return { key_last_four: keyLastFour };
+    return { id: created.id, key_last_four: keyLastFour };
   }
 
   async updateKeyForUser({
     user_id,
     api_key,
-  }: {
-    user_id: string;
-    api_key: string;
-  }): Promise<{ key_last_four: string | null }> {
+  }: SetKeyForUserInput): Promise<Pick<AiGatewayKeyType, 'key_last_four'>> {
     const [existing] = await this.listAiGatewayKeys({ user_id });
 
     if (!existing) {
@@ -61,8 +66,8 @@ export class AiGatewayModuleService extends MedusaService({
   }
 
   async getKeyStatusForUser(
-    userId: string,
-  ): Promise<{ configured: boolean; key_last_four: string | null }> {
+    userId: AiGatewayKeyType['user_id'],
+  ): Promise<GatewayKeyStatus> {
     const [existing] = await this.listAiGatewayKeys({ user_id: userId });
 
     return {
@@ -71,7 +76,9 @@ export class AiGatewayModuleService extends MedusaService({
     };
   }
 
-  async getDecryptedKeyForUser(userId: string): Promise<string> {
+  async getDecryptedKeyForUser(
+    userId: AiGatewayKeyType['user_id'],
+  ): Promise<string> {
     const [existing] = await this.listAiGatewayKeys({ user_id: userId });
 
     if (!existing) {

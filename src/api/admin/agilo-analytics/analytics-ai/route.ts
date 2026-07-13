@@ -2,9 +2,16 @@ import type {
   AuthenticatedMedusaRequest,
   MedusaResponse,
 } from '@medusajs/framework/http';
-import { MedusaError } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
 import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
-import { AiGatewayModuleService } from '../../../../modules/ai-gateway/service';
+import {
+  AiGatewayModuleService,
+  type GatewayKeyStatus,
+} from '../../../../modules/ai-gateway/service';
 import { adminSetGatewayKeySchema } from './validators';
 import { assertValidGatewayKey } from '../../../../utils/gateway-key';
 import { isDataValid } from '../../../../utils/data-validation';
@@ -44,9 +51,15 @@ export async function POST(
 
   await assertValidGatewayKey(apiKey);
 
-  const { key_last_four } = await aiGatewayModuleService.createKeyForUser({
+  const { id, key_last_four } = await aiGatewayModuleService.createKeyForUser({
     user_id: userId,
     api_key: apiKey,
+  });
+
+  const link = req.scope.resolve(ContainerRegistrationKeys.LINK);
+  await link.create({
+    [Modules.USER]: { user_id: userId },
+    [AI_GATEWAY_MODULE]: { ai_gateway_key_id: id },
   });
 
   res.status(201).json({
@@ -116,7 +129,4 @@ export async function GET(
     );
 }
 
-export type GetGatewayConfigResponse = {
-  configured: boolean;
-  key_last_four: string | null;
-};
+export type GetGatewayConfigResponse = GatewayKeyStatus;

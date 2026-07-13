@@ -1,10 +1,8 @@
 import { DateRange } from 'react-day-picker';
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions } from '@tanstack/react-query';
-import {
-  OrderAnalyticsResponse,
-  retrieveOrderAnalytics,
-} from '../lib/data/order-analytics';
+import { retrieveOrderAnalytics } from '../lib/data/order-analytics';
+import { OrderAnalyticsResponse } from '../../api/admin/agilo-analytics/orders/route';
 
 export const useOrderAnalytics = (
   preset: string,

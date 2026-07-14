@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { Select } from '@medusajs/ui';
 import { IntervalOption, useIntervalRange } from '../hooks/use-interval-range';
 

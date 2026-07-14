@@ -7,7 +7,7 @@ import {
 import { IntervalRangeContextProvider } from '../hooks/use-interval-range';
 import { SelectInterval } from '../components/SelectInterval';
 
-export const ProductWidget = () => {
+const ProductWidget = () => {
   return (
     <IntervalRangeContextProvider>
       <div className="flex justify-end">

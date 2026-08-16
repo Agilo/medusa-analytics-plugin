@@ -64,7 +64,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      result.error.issues.map((err) => err.message).join(', '),
     );
   }
   const { data: orders } = (await query.graph({

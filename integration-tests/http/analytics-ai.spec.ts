@@ -11,27 +11,27 @@ const TEST_API_KEY = 'sk-gateway-test-abcd1234';
 medusaIntegrationTestRunner({
   testSuite: ({ getContainer, api }) => {
     describe('/admin/agilo-analytics/analytics-ai (gateway key)', () => {
-      let headers: Record<string, string>;
       let userId: string;
 
       beforeEach(async () => {
-        ({ headers, userId } = await createAdminActor({
+        const actor = await createAdminActor({
           container: getContainer(),
           emailPrefix: 'test-ai-key',
-        }));
+        });
+        userId = actor.userId;
+        api.defaults.headers.common.Authorization = actor.headers.Authorization;
       });
 
       describe('GET', () => {
         it('should return 401 if no authorization header', async () => {
+          delete api.defaults.headers.common.Authorization;
           await expect(
             api.get('/admin/agilo-analytics/analytics-ai'),
           ).rejects.toMatchObject({ response: { status: 401 } });
         });
 
         it('should return configured: false when no key is configured', async () => {
-          const res = await api.get('/admin/agilo-analytics/analytics-ai', {
-            headers,
-          });
+          const res = await api.get('/admin/agilo-analytics/analytics-ai');
 
           expect(res.status).toEqual(200);
           expect(res.data).toEqual({ configured: false, key_last_four: null });
@@ -47,9 +47,7 @@ medusaIntegrationTestRunner({
             api_key: TEST_API_KEY,
           });
 
-          const res = await api.get('/admin/agilo-analytics/analytics-ai', {
-            headers,
-          });
+          const res = await api.get('/admin/agilo-analytics/analytics-ai');
 
           expect(res.status).toEqual(200);
           expect(res.data).toEqual({ configured: true, key_last_four: '1234' });
@@ -91,9 +89,7 @@ medusaIntegrationTestRunner({
 
           const [row] = await service.listAiGatewayKeys({ user_id: userId });
 
-          const res = await api.get('/admin/agilo-analytics/analytics-ai', {
-            headers,
-          });
+          const res = await api.get('/admin/agilo-analytics/analytics-ai');
 
           expect(res.status).toEqual(200);
           expect(JSON.stringify(res.data)).not.toContain(TEST_API_KEY);
@@ -124,6 +120,7 @@ medusaIntegrationTestRunner({
 
       describe('POST', () => {
         it('should return 401 if no authorization header', async () => {
+          delete api.defaults.headers.common.Authorization;
           await expect(
             api.post('/admin/agilo-analytics/analytics-ai', {
               api_key: TEST_API_KEY,
@@ -133,27 +130,23 @@ medusaIntegrationTestRunner({
 
         it('should return 400 when api_key is missing', async () => {
           await expect(
-            api.post('/admin/agilo-analytics/analytics-ai', {}, { headers }),
+            api.post('/admin/agilo-analytics/analytics-ai', {}),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
         it('should return 400 when api_key is shorter than 10 characters', async () => {
           await expect(
-            api.post(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: 'short' },
-              { headers },
-            ),
+            api.post('/admin/agilo-analytics/analytics-ai', {
+              api_key: 'short',
+            }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
         it('should return 400 when api_key is only whitespace', async () => {
           await expect(
-            api.post(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: '               ' },
-              { headers },
-            ),
+            api.post('/admin/agilo-analytics/analytics-ai', {
+              api_key: '               ',
+            }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
@@ -168,17 +161,16 @@ medusaIntegrationTestRunner({
           });
 
           await expect(
-            api.post(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: TEST_API_KEY },
-              { headers },
-            ),
+            api.post('/admin/agilo-analytics/analytics-ai', {
+              api_key: TEST_API_KEY,
+            }),
           ).rejects.toMatchObject({ response: { status: 422 } });
         });
       });
 
       describe('PATCH', () => {
         it('should return 401 if no authorization header', async () => {
+          delete api.defaults.headers.common.Authorization;
           await expect(
             api.patch('/admin/agilo-analytics/analytics-ai', {
               api_key: TEST_API_KEY,
@@ -188,37 +180,31 @@ medusaIntegrationTestRunner({
 
         it('should return 400 when api_key is missing', async () => {
           await expect(
-            api.patch('/admin/agilo-analytics/analytics-ai', {}, { headers }),
+            api.patch('/admin/agilo-analytics/analytics-ai', {}),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
         it('should return 400 when api_key is shorter than 10 characters', async () => {
           await expect(
-            api.patch(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: 'short' },
-              { headers },
-            ),
+            api.patch('/admin/agilo-analytics/analytics-ai', {
+              api_key: 'short',
+            }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
         it('should return 400 when api_key is only whitespace', async () => {
           await expect(
-            api.patch(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: '               ' },
-              { headers },
-            ),
+            api.patch('/admin/agilo-analytics/analytics-ai', {
+              api_key: '               ',
+            }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
         it('should return 404 when the caller has no key', async () => {
           await expect(
-            api.patch(
-              '/admin/agilo-analytics/analytics-ai',
-              { api_key: TEST_API_KEY },
-              { headers },
-            ),
+            api.patch('/admin/agilo-analytics/analytics-ai', {
+              api_key: TEST_API_KEY,
+            }),
           ).rejects.toMatchObject({ response: { status: 404 } });
         });
       });

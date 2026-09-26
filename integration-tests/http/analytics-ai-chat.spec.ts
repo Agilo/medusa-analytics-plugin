@@ -9,7 +9,7 @@ medusaIntegrationTestRunner({
     describe('/admin/agilo-analytics/analytics-ai/chat', () => {
       const validBody = {
         prompt: 'How many orders did we get this month?',
-        context: { modelId: 'openai/gpt-5' },
+        context: { optionKey: 'anthropic:balanced' },
       };
 
       let headers: Record<string, string>;
@@ -37,7 +37,7 @@ medusaIntegrationTestRunner({
         await expect(
           api.post(
             '/admin/agilo-analytics/analytics-ai/chat',
-            { context: { modelId: 'openai/gpt-5' } },
+            { context: { optionKey: 'anthropic:balanced' } },
             { headers },
           ),
         ).rejects.toMatchObject({ response: { status: 400 } });
@@ -47,7 +47,7 @@ medusaIntegrationTestRunner({
         await expect(
           api.post(
             '/admin/agilo-analytics/analytics-ai/chat',
-            { prompt: '', context: { modelId: 'openai/gpt-5' } },
+            { prompt: '', context: { optionKey: 'anthropic:balanced' } },
             { headers },
           ),
         ).rejects.toMatchObject({ response: { status: 400 } });
@@ -63,7 +63,7 @@ medusaIntegrationTestRunner({
         ).rejects.toMatchObject({ response: { status: 400 } });
       });
 
-      it('should return 400 when context.modelId is missing', async () => {
+      it('should return 400 when context.optionKey is missing', async () => {
         await expect(
           api.post(
             '/admin/agilo-analytics/analytics-ai/chat',

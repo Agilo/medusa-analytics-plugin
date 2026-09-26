@@ -3,9 +3,16 @@ import {
   MedusaResponse,
 } from '@medusajs/framework/http';
 import { streamText, tool, stepCountIs } from 'ai';
-import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from '@medusajs/framework/utils';
 import { z } from 'zod';
 import { createConfiguredGateway } from '../../../../../utils/gateway-key';
+import {
+  getModelOptions,
+  getProviderOptions,
+} from '../../../../../utils/ai-models';
 import { catalog } from '../../../../../admin/lib/ai/catalog';
 import { analyticsChatRequestSchema } from './validators';
 import { isDataValid } from '../../../../../utils/data-validation';
@@ -16,7 +23,7 @@ export async function POST(
 ) {
   const {
     prompt,
-    context: { modelId },
+    context: { optionKey },
   } = isDataValid({
     data: req.body,
     schema: analyticsChatRequestSchema,
@@ -28,10 +35,21 @@ export async function POST(
     req.auth_context.actor_id,
   );
 
+  const options = await getModelOptions(req.scope, req.auth_context.actor_id);
+  // Option can disappear after the cache refreshes (family retired) — silently use the default
+  const option = options.find((o) => o.key === optionKey) ?? options[0];
+  if (!option) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      'No AI models are available right now. Please try again later.',
+    );
+  }
+
   const today = new Date().toISOString().split('T')[0];
 
   const result = streamText({
-    model: gateway(modelId),
+    model: gateway(option.modelId),
+    providerOptions: getProviderOptions(option),
     stopWhen: stepCountIs(12),
     prompt,
     system: `${catalog.prompt()}

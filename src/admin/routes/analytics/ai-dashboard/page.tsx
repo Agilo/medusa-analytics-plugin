@@ -30,7 +30,7 @@ export default function AnalyticsAIPage() {
   const { control, handleSubmit, reset, setValue, setFocus } =
     useForm<AnalyticsChatInput>({
       resolver: zodResolver(analyticsChatSchema),
-      defaultValues: { prompt: '', modelId: '' },
+      defaultValues: { prompt: '', optionKey: '' },
     });
 
   const { spec, isStreaming, error, send } = useUIStream({
@@ -41,8 +41,8 @@ export default function AnalyticsAIPage() {
 
   const onSubmit = async (data: AnalyticsChatInput) => {
     setLastPrompt('');
-    await send(data.prompt, { modelId: data.modelId });
-    reset({ prompt: '', modelId: data.modelId });
+    await send(data.prompt, { optionKey: data.optionKey });
+    reset({ prompt: '', optionKey: data.optionKey });
     setLastPrompt(data.prompt);
   };
 

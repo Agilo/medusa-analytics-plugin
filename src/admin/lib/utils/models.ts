@@ -1,19 +1,13 @@
-import { AvailableModel } from '../../../api/admin/agilo-analytics/analytics-ai/models/route';
+import type { Provider, Tier } from '../../../utils/ai-models';
 
-export const idLabels: Record<string, string> = {
-  openai: 'OpenAI',
+// Object order is the order of groups in the model picker
+export const providerLabels: Record<Provider, string> = {
   anthropic: 'Anthropic',
+  openai: 'OpenAI',
   google: 'Google',
-  xai: 'Grok',
 };
 
-export const normalizeGatewayModels = (models: AvailableModel[]) =>
-  models.map((model) => {
-    const idKey = Object.keys(idLabels).find((key) =>
-      model.id.toLowerCase().includes(key),
-    )!;
-    return {
-      ...model,
-      prettyName: idLabels[idKey],
-    };
-  });
+export const tierLabels: Record<Tier, string> = {
+  balanced: 'Balanced',
+  fast: 'Fast',
+};

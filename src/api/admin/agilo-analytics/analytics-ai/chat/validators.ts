@@ -12,14 +12,14 @@ export type AnalyticsAIArgs = z.infer<typeof analyticsAISchema>;
 
 export const analyticsChatSchema = z.object({
   prompt: z.string().min(1, 'Please enter a question'),
-  modelId: z.string().min(1, 'Please select a model'),
+  optionKey: z.string().min(1, 'Please select a model'),
 });
 export type AnalyticsChatInput = z.infer<typeof analyticsChatSchema>;
 
 export const analyticsChatRequestSchema = z.object({
   prompt: analyticsChatSchema.shape.prompt,
   context: z.object({
-    modelId: analyticsChatSchema.shape.modelId,
+    optionKey: analyticsChatSchema.shape.optionKey,
   }),
   currentSpec: z.unknown().optional(),
 });

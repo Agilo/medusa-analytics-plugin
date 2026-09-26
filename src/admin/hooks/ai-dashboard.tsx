@@ -4,7 +4,7 @@ import {
   UseQueryOptions,
   useQueryClient,
 } from '@tanstack/react-query';
-import type { AvailableModel } from '../../api/admin/agilo-analytics/analytics-ai/models/route';
+import type { ModelOption } from '../../utils/ai-models';
 import { retrieveAllAvailableModels } from '../lib/data/models';
 import {
   getGatewayConfig,
@@ -15,7 +15,7 @@ import { AdminSetGatewayKeyInputArgs } from '../../api/admin/agilo-analytics/ana
 
 export const useRetrieveModels = (
   options?: Omit<
-    UseQueryOptions<AvailableModel[] | undefined, Error>,
+    UseQueryOptions<ModelOption[] | undefined, Error>,
     'queryKey' | 'queryFn'
   >,
 ) => {

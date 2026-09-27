@@ -27,6 +27,21 @@ medusaIntegrationTestRunner({
         ).rejects.toMatchObject({ response: { status: 401 } });
       });
 
+      it('should return 400 when no gateway key is configured', async () => {
+        await expect(
+          api.post('/admin/agilo-analytics/analytics-ai/chat', validBody, {
+            headers,
+          }),
+        ).rejects.toMatchObject({
+          response: {
+            status: 400,
+            data: {
+              message: expect.stringContaining('Missing AI Gateway key'),
+            },
+          },
+        });
+      });
+
       it.each([
         ['the body is empty', {}],
         ['prompt is missing', { context: { optionKey: 'anthropic:balanced' } }],

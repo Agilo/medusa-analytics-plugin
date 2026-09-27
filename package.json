@@ -44,7 +44,7 @@
     "dev": "medusa plugin:develop",
     "prepublishOnly": "medusa plugin:build",
     "test": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
+    "test:unit": "TZ=UTC TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write ."
   },

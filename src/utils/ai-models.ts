@@ -243,10 +243,12 @@ export async function getModelOptions(
 ): Promise<ModelOption[]> {
   const cache = scope.resolve<ICacheService>(Modules.CACHE);
 
+  // Before the cache read so a user without a key never gets the shared cached list
+  const gateway = await createConfiguredGateway(scope, userId);
+
   const cached = await cache.get<ModelOption[]>(MODEL_OPTIONS_CACHE_KEY);
   if (cached) return cached;
 
-  const gateway = await createConfiguredGateway(scope, userId);
   const { models } = await gateway.getAvailableModels();
   const options =
     process.env.NODE_ENV === 'development'

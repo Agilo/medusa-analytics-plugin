@@ -207,6 +207,37 @@ medusaIntegrationTestRunner({
             }),
           ).rejects.toMatchObject({ response: { status: 404 } });
         });
+
+        it("should not touch another user's key", async () => {
+          const container = getContainer();
+          const service = container.resolve(
+            AI_GATEWAY_MODULE,
+          ) as AiGatewayModuleService;
+
+          const otherActor = await createAdminActor({
+            container,
+            emailPrefix: 'test-ai-key-other',
+          });
+          await service.createKeyForUser({
+            user_id: otherActor.userId,
+            api_key: TEST_API_KEY,
+          });
+          const [before] = await service.listAiGatewayKeys({
+            user_id: otherActor.userId,
+          });
+
+          await expect(
+            api.patch('/admin/agilo-analytics/analytics-ai', {
+              api_key: 'sk-gateway-test-other9999',
+            }),
+          ).rejects.toMatchObject({ response: { status: 404 } });
+
+          const [after] = await service.listAiGatewayKeys({
+            user_id: otherActor.userId,
+          });
+          expect(after.key_encrypted).toEqual(before.key_encrypted);
+          expect(after.key_last_four).toEqual('1234');
+        });
       });
     });
   },

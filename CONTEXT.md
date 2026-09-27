@@ -23,9 +23,5 @@ _Avoid_: Model choice, selection
 ## AI Gateway access
 
 **Gateway key**:
-One admin's Vercel AI Gateway API key. Each admin saves their own; it is stored encrypted and never shown again after saving.
-_Avoid_: API key (ambiguous), token
-
-**Encryption key**:
-One secret per install, set by the developer in the plugin options, used to encrypt every Gateway key at rest. It is not a Gateway key and is never sent to Vercel. Optional: without it, admins cannot save Gateway keys.
-_Avoid_: API key, encryption secret, gateway secret
+The one Vercel AI Gateway API key for the whole install, set by the developer in the plugin options. All admins share it. Admins never see or enter it. Optional: without it, the AI dashboard is off and the rest of the plugin works.
+_Avoid_: API key (ambiguous), token, per-admin key

@@ -35,15 +35,14 @@ Integration tests read `integration-tests/.env.test` (DB_HOST/DB_USERNAME/DB_PAS
 
 When changing what the AI can render, `catalog.ts` and `registry.tsx` must be updated together — the catalog is both the LLM's tool schema and the client-side validator, the registry is the only thing that turns a valid tree into UI.
 
-### AI Gateway key storage (`ai_gateway` module)
+### AI Gateway key (`ai_gateway` module)
 
-Per-admin-user Vercel AI Gateway API keys are stored server-side, never returned to the client after creation:
+One Vercel AI Gateway key per install, supplied by whoever installs the plugin — admins never see or enter it:
 
-- `src/modules/ai-gateway/` is a standalone Medusa module (`AiGatewayModuleService` extends `MedusaService`) with its own model (`AiGatewayKey`) and migrations.
-- `src/links/ai-gateway-key-user.ts` links `ai_gateway_key` to Medusa's core `user` module via `defineLink` — this is how a key is associated with an admin user without the module depending on the user module directly.
-- Keys are AES-256-GCM encrypted at rest (`src/modules/ai-gateway/utils/crypto.ts`) using the optional `aiGatewayEncryptionKey` plugin option (sha256-derived key; _not_ the Gateway API key itself — see README's "Getting Started" step 4). Missing option = AI dashboard disabled, not a boot error: `GET` reports `encryption_key_configured: false` and key-needing calls return 400 via `assertEncryptionKeyConfigured`. Empty-string option throws at boot (`loaders/validate-options.ts`). Changing that secret invalidates all stored keys.
-- `POST`/`PATCH` on `.../analytics-ai` route validate the key against the real Gateway (`assertValidGatewayKey` in `src/utils/gateway-key.ts`) before persisting; only `key_last_four` and `configured` ever go back to the client, never `key_encrypted` or the plaintext.
-- After migration changes in this module, consuming apps must run `npx medusa db:migrate`.
+- The consuming app passes `aiGatewayApiKey: process.env.AI_GATEWAY_API_KEY` in the plugin `options`; Medusa hands plugin options to every module in the plugin. Plugin code never reads `process.env` directly.
+- `src/modules/ai-gateway/` is a model-less module: `AiGatewayModuleService` is a plain class exposing `isEnabled()` and `getApiKey()`. Routes reach the key only through it (`createConfiguredGateway` in `src/utils/gateway-key.ts`).
+- Missing option = AI dashboard disabled, not a boot error: `GET .../analytics-ai` returns `{ enabled: false }` and chat/models return 400 via `getApiKey()`. Empty-string option throws at boot (`loaders/validate-options.ts`). No network check at boot; a wrong key surfaces from `assertValidGatewayKey` on the first models-cache miss.
+- The repo's `medusa-config.js` (integration tests only) deliberately passes no key, so tests cover the disabled path and never call Vercel.
 
 ### Analytics query pattern
 

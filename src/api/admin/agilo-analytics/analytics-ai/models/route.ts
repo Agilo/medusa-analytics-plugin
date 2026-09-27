@@ -8,7 +8,7 @@ export async function GET(
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse,
 ) {
-  const options = await getModelOptions(req.scope, req.auth_context.actor_id);
+  const options = await getModelOptions(req.scope);
 
   return res.json(options);
 }

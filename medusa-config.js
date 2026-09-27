@@ -21,9 +21,7 @@ module.exports = defineConfig({
     {
       key: 'ai_gateway',
       resolve: './src/modules/ai-gateway',
-      options: {
-        aiGatewayEncryptionKey: process.env.AI_GATEWAY_ENCRYPTION_KEY,
-      },
+      // No aiGatewayApiKey: integration tests cover the disabled AI dashboard and never call Vercel
     },
     {
       resolve: '@medusajs/medusa/fulfillment',

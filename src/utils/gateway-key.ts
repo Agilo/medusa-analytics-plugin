@@ -13,7 +13,7 @@ export async function assertValidGatewayKey(apiKey: string) {
     if (GatewayAuthenticationError.isInstance(error)) {
       throw new MedusaError(
         MedusaError.Types.NOT_ALLOWED,
-        'The provided key is not a valid Vercel AI Gateway key. Double-check the key and try again.',
+        'The configured AI_GATEWAY_API_KEY is not a valid Vercel AI Gateway key. Double-check the key and restart the server.',
       );
     }
 
@@ -24,15 +24,10 @@ export async function assertValidGatewayKey(apiKey: string) {
   }
 }
 
-export async function createConfiguredGateway(
-  scope: {
-    resolve: (key: string) => AiGatewayModuleService;
-  },
-  userId: string,
-) {
-  const aiGatewayModuleService = scope.resolve(AI_GATEWAY_MODULE);
-
+export function createConfiguredGateway(scope: {
+  resolve: (key: string) => AiGatewayModuleService;
+}) {
   return createGateway({
-    apiKey: await aiGatewayModuleService.getDecryptedKeyForUser(userId),
+    apiKey: scope.resolve(AI_GATEWAY_MODULE).getApiKey(),
   });
 }

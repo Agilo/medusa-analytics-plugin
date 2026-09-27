@@ -1,7 +1,9 @@
 import { gateway, generateText, streamText } from 'ai';
 import { Modules } from '@medusajs/framework/utils';
 import type { ICacheService, MedusaContainer } from '@medusajs/framework/types';
-import { createConfiguredGateway } from './gateway-key';
+import { assertValidGatewayKey, createConfiguredGateway } from './gateway-key';
+import { AI_GATEWAY_MODULE } from '../modules/ai-gateway';
+import type { AiGatewayModuleService } from '../modules/ai-gateway/service';
 
 const MODEL_OPTIONS_CACHE_KEY = 'agilo-analytics:ai-model-options';
 const MODEL_OPTIONS_CACHE_TTL_SECONDS = 60 * 60 * 24; // 24h
@@ -160,7 +162,7 @@ const DEV_CHEAP_PROVIDERS = [
 ] as const;
 const DEV_CHEAP_MAX_PROBES = 10;
 
-type Gateway = Awaited<ReturnType<typeof createConfiguredGateway>>;
+type Gateway = ReturnType<typeof createConfiguredGateway>;
 
 // 400 too: an older fallback model may reject the family's providerOptions (e.g. reasoningEffort 'none')
 async function isModelUsable(
@@ -239,15 +241,19 @@ async function resolveDevModelOptions(
 
 export async function getModelOptions(
   scope: MedusaContainer,
-  userId: string,
 ): Promise<ModelOption[]> {
   const cache = scope.resolve<ICacheService>(Modules.CACHE);
 
-  // Before the cache read so a user without a key never gets the shared cached list
-  const gateway = await createConfiguredGateway(scope, userId);
+  // Before the cache read so a disabled install never serves a cached list
+  const gateway = createConfiguredGateway(scope);
 
   const cached = await cache.get<ModelOption[]>(MODEL_OPTIONS_CACHE_KEY);
   if (cached) return cached;
+
+  // Once per cache TTL, so a wrong AI_GATEWAY_API_KEY surfaces as a clear error on page load
+  await assertValidGatewayKey(
+    scope.resolve<AiGatewayModuleService>(AI_GATEWAY_MODULE).getApiKey(),
+  );
 
   const { models } = await gateway.getAvailableModels();
   const options =

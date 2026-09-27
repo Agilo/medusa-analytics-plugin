@@ -30,12 +30,9 @@ export async function POST(
   });
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const gateway = await createConfiguredGateway(
-    req.scope,
-    req.auth_context.actor_id,
-  );
+  const gateway = createConfiguredGateway(req.scope);
 
-  const options = await getModelOptions(req.scope, req.auth_context.actor_id);
+  const options = await getModelOptions(req.scope);
   // Option can disappear after the cache refreshes (family retired) — silently use the default
   const option = options.find((o) => o.key === optionKey) ?? options[0];
   if (!option) {

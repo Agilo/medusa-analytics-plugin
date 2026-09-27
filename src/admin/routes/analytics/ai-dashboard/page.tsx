@@ -2,6 +2,7 @@ import * as React from 'react';
 import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { AiAssistent, Spinner } from '@medusajs/icons';
 import { Button, Container, Heading, Text } from '@medusajs/ui';
+import { Sparkles } from 'lucide-react';
 import { useUIStream, JSONUIProvider, Renderer } from '@json-render/react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +17,6 @@ import {
   AnalyticsChatInput,
   analyticsChatSchema,
 } from '../../../../api/admin/agilo-analytics/analytics-ai/chat/validators';
-import { cn } from '../../../lib/utils/general-utils';
 
 const randomGenerationWord = [
   'Thinking...',
@@ -39,6 +39,19 @@ export default function AnalyticsAIPage() {
   });
 
   const [lastPrompt, setLastPrompt] = React.useState('');
+
+  // Height animation for the content area, for the streaming content
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = React.useState<number>();
+  React.useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() =>
+      setContentHeight(el.offsetHeight),
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [config?.configured]);
 
   const onSubmit = async (data: AnalyticsChatInput) => {
     setLastPrompt('');
@@ -65,9 +78,7 @@ export default function AnalyticsAIPage() {
   }
 
   return (
-    <Container
-      className={cn('relative divide-y p-0', !!spec && 'h-[calc(100vh-80px)]')}
-    >
+    <Container className="relative divide-y p-0">
       <div className="px-6 py-4">
         <div className="flex flex-wrap items-start gap-4">
           <div className="min-w-65">
@@ -111,7 +122,7 @@ export default function AnalyticsAIPage() {
             )}
           />
           <Button type="submit" variant="primary" disabled={isStreaming}>
-            {isStreaming ? <Spinner className="animate-spin" /> : 'Generate'}
+            Generate
           </Button>
         </form>
 
@@ -120,51 +131,62 @@ export default function AnalyticsAIPage() {
         </div>
       </div>
 
-      <div className="px-6 py-6 overflow-y-auto max-h-[calc(100vh-280px)]">
-        {!(lastPrompt !== '' || isStreaming) ? (
-          <div className="h-90 flex flex-col items-center justify-center text-center gap-2">
-            <AiAssistent className="text-ui-fg-subtle" />
-            <Text size="small" weight="plus">
-              Find everything you need to know about your store data in one
-              place
-            </Text>
-            <Text size="small" className="text-ui-fg-muted max-w-130">
-              Enter a question above to get started. Results are cleared on
-              refresh
-            </Text>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {lastPrompt && (
-              <div className="px-4 py-3 shadow-elevation-card-rest flex items-center gap-2 border rounded-lg items-baseline">
-                <Text size="small" className="text-ui-fg-muted">
-                  Your last question:
-                </Text>
-                <Text size="base">{lastPrompt}</Text>
-              </div>
-            )}
+      <div
+        className="overflow-y-auto max-h-[calc(100vh-280px)] transition-[height] duration-300 ease-out"
+        style={{ height: contentHeight }}
+      >
+        <div ref={contentRef} className="px-6 py-6">
+          {!(lastPrompt !== '' || isStreaming) ? (
+            <div className="h-90 flex flex-col items-center justify-center text-center gap-2">
+              <AiAssistent className="text-ui-fg-subtle" />
+              <Text size="small" weight="plus">
+                Find everything you need to know about your store data in one
+                place
+              </Text>
+              <Text size="small" className="text-ui-fg-muted max-w-130">
+                Enter a question above to get started. Results are cleared on
+                refresh
+              </Text>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {lastPrompt && (
+                <div className="px-4 py-3 shadow-elevation-card-rest flex items-center gap-2 border rounded-lg items-baseline">
+                  <Text size="small" className="text-ui-fg-muted">
+                    Your last question:
+                  </Text>
+                  <Text size="base">{lastPrompt}</Text>
+                </div>
+              )}
 
-            {error && (
-              <Container className="p-4 bg-ui-bg-subtle border border-ui-border-error">
-                <Text size="small" className="text-ui-fg-error">
-                  {error.message || 'The dashboard could not be generated.'}
-                </Text>
-              </Container>
-            )}
+              {error && (
+                <Container className="p-4 bg-ui-bg-subtle border border-ui-border-error">
+                  <Text size="small" className="text-ui-fg-error">
+                    {error.message || 'The dashboard could not be generated.'}
+                  </Text>
+                </Container>
+              )}
 
-            <JSONUIProvider registry={registry} initialState={spec?.state}>
-              <Renderer spec={spec} registry={registry} loading={isStreaming} />
-            </JSONUIProvider>
-            {isStreaming && (
-              <div className="flex w-full items-center justify-end w-full gap-2">
-                <Text size="small" className="text-ui-fg-muted">
-                  {randomGenerationWord}
-                </Text>
-                <Spinner className="size-4 animate-spin text-ui-fg-muted" />
-              </div>
-            )}
-          </div>
-        )}
+              <JSONUIProvider registry={registry} initialState={spec?.state}>
+                <Renderer
+                  spec={spec}
+                  registry={registry}
+                  loading={isStreaming}
+                />
+              </JSONUIProvider>
+              {isStreaming && (
+                <div
+                  className={`flex flex-col items-center justify-center gap-3 ${spec?.root ? 'py-6' : 'min-h-64'}`}
+                >
+                  <Sparkles className="size-8 text-ui-fg-muted animate-pulse" />
+                  <Text size="base" className="text-ui-fg-muted">
+                    {randomGenerationWord}
+                  </Text>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </Container>
   );

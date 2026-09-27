@@ -1,4 +1,12 @@
-import { Button, FocusModal, Heading, Label, Text, toast } from '@medusajs/ui';
+import {
+  Button,
+  FocusModal,
+  IconButton,
+  Heading,
+  Label,
+  Text,
+  toast,
+} from '@medusajs/ui';
 import { Input } from './Input';
 import { PencilSquare } from '@medusajs/icons';
 import { useGatewayConfig, useUpdateGatewayKey } from '../hooks/ai-dashboard';
@@ -47,9 +55,9 @@ export const EditApiKeyForm = () => {
   return (
     <FocusModal open={isOpen} onOpenChange={setIsOpen}>
       <FocusModal.Trigger asChild>
-        <Button variant="secondary">
-          <PencilSquare className="size-fit" />
-        </Button>
+        <IconButton size="small">
+          <PencilSquare />
+        </IconButton>
       </FocusModal.Trigger>
       <FocusModal.Content>
         <FocusModal.Header>

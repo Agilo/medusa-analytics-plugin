@@ -34,7 +34,11 @@ medusaIntegrationTestRunner({
           const res = await api.get('/admin/agilo-analytics/analytics-ai');
 
           expect(res.status).toEqual(200);
-          expect(res.data).toEqual({ configured: false, key_last_four: null });
+          expect(res.data).toEqual({
+            encryption_key_configured: true,
+            configured: false,
+            key_last_four: null,
+          });
         });
 
         it('should return the stored key metadata when a key exists', async () => {
@@ -50,7 +54,11 @@ medusaIntegrationTestRunner({
           const res = await api.get('/admin/agilo-analytics/analytics-ai');
 
           expect(res.status).toEqual(200);
-          expect(res.data).toEqual({ configured: true, key_last_four: '1234' });
+          expect(res.data).toEqual({
+            encryption_key_configured: true,
+            configured: true,
+            key_last_four: '1234',
+          });
         });
 
         it("should not expose another user's key", async () => {
@@ -74,7 +82,11 @@ medusaIntegrationTestRunner({
           });
 
           expect(res.status).toEqual(200);
-          expect(res.data).toEqual({ configured: false, key_last_four: null });
+          expect(res.data).toEqual({
+            encryption_key_configured: true,
+            configured: false,
+            key_last_four: null,
+          });
         });
 
         it('should never expose the raw or encrypted key', async () => {
@@ -128,25 +140,13 @@ medusaIntegrationTestRunner({
           ).rejects.toMatchObject({ response: { status: 401 } });
         });
 
-        it('should return 400 when api_key is missing', async () => {
+        it.each([
+          ['missing', undefined],
+          ['shorter than 10 characters', 'short'],
+          ['only whitespace', '               '],
+        ])('should return 400 when api_key is %s', async (_, api_key) => {
           await expect(
-            api.post('/admin/agilo-analytics/analytics-ai', {}),
-          ).rejects.toMatchObject({ response: { status: 400 } });
-        });
-
-        it('should return 400 when api_key is shorter than 10 characters', async () => {
-          await expect(
-            api.post('/admin/agilo-analytics/analytics-ai', {
-              api_key: 'short',
-            }),
-          ).rejects.toMatchObject({ response: { status: 400 } });
-        });
-
-        it('should return 400 when api_key is only whitespace', async () => {
-          await expect(
-            api.post('/admin/agilo-analytics/analytics-ai', {
-              api_key: '               ',
-            }),
+            api.post('/admin/agilo-analytics/analytics-ai', { api_key }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 
@@ -178,25 +178,13 @@ medusaIntegrationTestRunner({
           ).rejects.toMatchObject({ response: { status: 401 } });
         });
 
-        it('should return 400 when api_key is missing', async () => {
+        it.each([
+          ['missing', undefined],
+          ['shorter than 10 characters', 'short'],
+          ['only whitespace', '               '],
+        ])('should return 400 when api_key is %s', async (_, api_key) => {
           await expect(
-            api.patch('/admin/agilo-analytics/analytics-ai', {}),
-          ).rejects.toMatchObject({ response: { status: 400 } });
-        });
-
-        it('should return 400 when api_key is shorter than 10 characters', async () => {
-          await expect(
-            api.patch('/admin/agilo-analytics/analytics-ai', {
-              api_key: 'short',
-            }),
-          ).rejects.toMatchObject({ response: { status: 400 } });
-        });
-
-        it('should return 400 when api_key is only whitespace', async () => {
-          await expect(
-            api.patch('/admin/agilo-analytics/analytics-ai', {
-              api_key: '               ',
-            }),
+            api.patch('/admin/agilo-analytics/analytics-ai', { api_key }),
           ).rejects.toMatchObject({ response: { status: 400 } });
         });
 

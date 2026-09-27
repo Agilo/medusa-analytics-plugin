@@ -73,6 +73,26 @@ export default function AnalyticsAIPage() {
     );
   }
 
+  if (config && !config.encryption_key_configured) {
+    return (
+      <div className="flex items-center justify-center p-6 h-[calc(100vh-60px)]">
+        <Container className="w-full max-w-lg p-6">
+          <div className="flex items-start gap-3">
+            <AiAssistent className="text-ui-fg-subtle mt-0.5" />
+            <div className="flex-1">
+              <Heading level="h2">AI dashboard is not enabled</Heading>
+              <Text size="small" className="text-ui-fg-muted mt-1">
+                Ask your developer to set the{' '}
+                <code>aiGatewayEncryptionKey</code> option of the analytics
+                plugin in <code>medusa-config</code>.
+              </Text>
+            </div>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
   if (!config?.configured) {
     return <GatewayForm />;
   }

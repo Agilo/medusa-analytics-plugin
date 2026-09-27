@@ -49,6 +49,7 @@ export async function POST(
     );
   }
 
+  aiGatewayModuleService.assertEncryptionKeyConfigured();
   await assertValidGatewayKey(apiKey);
 
   const { id, key_last_four } = await aiGatewayModuleService.createKeyForUser({
@@ -63,6 +64,7 @@ export async function POST(
   });
 
   res.status(201).json({
+    encryption_key_configured: true,
     configured: true,
     key_last_four,
   } satisfies GetGatewayConfigResponse);
@@ -99,6 +101,7 @@ export async function PATCH(
     );
   }
 
+  aiGatewayModuleService.assertEncryptionKeyConfigured();
   await assertValidGatewayKey(api_key);
 
   const { key_last_four } = await aiGatewayModuleService.updateKeyForUser({
@@ -107,6 +110,7 @@ export async function PATCH(
   });
 
   res.status(200).json({
+    encryption_key_configured: true,
     configured: true,
     key_last_four,
   } satisfies GetGatewayConfigResponse);

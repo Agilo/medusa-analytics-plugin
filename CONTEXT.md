@@ -19,3 +19,13 @@ _Avoid_: Mode, preset, level
 **Model option**:
 One entry in the picker: a provider and tier resolved to the newest available model in the matching family.
 _Avoid_: Model choice, selection
+
+## AI Gateway access
+
+**Gateway key**:
+One admin's Vercel AI Gateway API key. Each admin saves their own; it is stored encrypted and never shown again after saving.
+_Avoid_: API key (ambiguous), token
+
+**Encryption key**:
+One secret per install, set by the developer in the plugin options, used to encrypt every Gateway key at rest. It is not a Gateway key and is never sent to Vercel. Optional: without it, admins cannot save Gateway keys.
+_Avoid_: API key, encryption secret, gateway secret

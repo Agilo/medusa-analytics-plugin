@@ -41,7 +41,7 @@ Per-admin-user Vercel AI Gateway API keys are stored server-side, never returned
 
 - `src/modules/ai-gateway/` is a standalone Medusa module (`AiGatewayModuleService` extends `MedusaService`) with its own model (`AiGatewayKey`) and migrations.
 - `src/links/ai-gateway-key-user.ts` links `ai_gateway_key` to Medusa's core `user` module via `defineLink` — this is how a key is associated with an admin user without the module depending on the user module directly.
-- Keys are AES-256-GCM encrypted at rest (`src/modules/ai-gateway/utils/crypto.ts`) using `AI_GATEWAY_ENCRYPTION_KEY` (sha256-derived key; env var is _not_ the Gateway API key itself — see README's "Getting Started" step 4). Changing that secret invalidates all stored keys.
+- Keys are AES-256-GCM encrypted at rest (`src/modules/ai-gateway/utils/crypto.ts`) using the optional `aiGatewayEncryptionKey` plugin option (sha256-derived key; _not_ the Gateway API key itself — see README's "Getting Started" step 4). Missing option = AI dashboard disabled, not a boot error: `GET` reports `encryption_key_configured: false` and key-needing calls return 400 via `assertEncryptionKeyConfigured`. Empty-string option throws at boot (`loaders/validate-options.ts`). Changing that secret invalidates all stored keys.
 - `POST`/`PATCH` on `.../analytics-ai` route validate the key against the real Gateway (`assertValidGatewayKey` in `src/utils/gateway-key.ts`) before persisting; only `key_last_four` and `configured` ever go back to the client, never `key_encrypted` or the plaintext.
 - After migration changes in this module, consuming apps must run `npx medusa db:migrate`.
 

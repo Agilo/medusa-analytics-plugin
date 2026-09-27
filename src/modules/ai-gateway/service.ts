@@ -7,7 +7,12 @@ import { encryptApiKey, decryptApiKey } from './utils/crypto';
 export type SetKeyForUserInput = Pick<AiGatewayKeyType, 'user_id'> &
   AdminSetGatewayKeyInputArgs;
 
+export type AiGatewayModuleOptions = {
+  aiGatewayEncryptionKey?: string;
+};
+
 export type GatewayKeyStatus = {
+  encryption_key_configured: boolean;
   configured: boolean;
   key_last_four: AiGatewayKeyType['key_last_four'];
 };
@@ -15,6 +20,24 @@ export type GatewayKeyStatus = {
 export class AiGatewayModuleService extends MedusaService({
   AiGatewayKey,
 }) {
+  protected readonly encryptionKey_?: string;
+
+  constructor(container: any, options?: AiGatewayModuleOptions) {
+    super(container, options);
+    this.encryptionKey_ = options?.aiGatewayEncryptionKey;
+  }
+
+  // The Encryption key is optional: without it the AI dashboard stays off, so fail only when a key is actually needed.
+  assertEncryptionKeyConfigured(): string {
+    if (!this.encryptionKey_) {
+      throw new MedusaError(
+        MedusaError.Types.NOT_ALLOWED,
+        'AI dashboard is not enabled. Set the aiGatewayEncryptionKey option of @agilo/medusa-analytics-plugin in medusa-config.',
+      );
+    }
+
+    return this.encryptionKey_;
+  }
   async createKeyForUser({
     user_id,
     api_key,
@@ -34,7 +57,10 @@ export class AiGatewayModuleService extends MedusaService({
 
     const created = await this.createAiGatewayKeys({
       user_id,
-      key_encrypted: encryptApiKey(api_key),
+      key_encrypted: encryptApiKey(
+        api_key,
+        this.assertEncryptionKeyConfigured(),
+      ),
       key_last_four: keyLastFour,
     });
 
@@ -58,7 +84,10 @@ export class AiGatewayModuleService extends MedusaService({
 
     await this.updateAiGatewayKeys({
       id: existing.id,
-      key_encrypted: encryptApiKey(api_key),
+      key_encrypted: encryptApiKey(
+        api_key,
+        this.assertEncryptionKeyConfigured(),
+      ),
       key_last_four: keyLastFour,
     });
 
@@ -71,6 +100,7 @@ export class AiGatewayModuleService extends MedusaService({
     const [existing] = await this.listAiGatewayKeys({ user_id: userId });
 
     return {
+      encryption_key_configured: !!this.encryptionKey_,
       configured: !!existing,
       key_last_four: existing?.key_last_four ?? null,
     };
@@ -79,6 +109,7 @@ export class AiGatewayModuleService extends MedusaService({
   async getDecryptedKeyForUser(
     userId: AiGatewayKeyType['user_id'],
   ): Promise<string> {
+    const encryptionKey = this.assertEncryptionKeyConfigured();
     const [existing] = await this.listAiGatewayKeys({ user_id: userId });
 
     if (!existing) {
@@ -88,6 +119,6 @@ export class AiGatewayModuleService extends MedusaService({
       );
     }
 
-    return decryptApiKey(existing.key_encrypted);
+    return decryptApiKey(existing.key_encrypted, encryptionKey);
   }
 }

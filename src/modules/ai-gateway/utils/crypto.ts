@@ -9,22 +9,16 @@ import { MedusaError } from '@medusajs/framework/utils';
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 
-function getEncryptionKey(): Buffer {
-  const secret = process.env.AI_GATEWAY_ENCRYPTION_KEY;
-
-  if (!secret) {
-    throw new MedusaError(
-      MedusaError.Types.UNEXPECTED_STATE,
-      'Set AI_GATEWAY_ENCRYPTION_KEY in your environment to enable AI Gateway key storage.',
-    );
-  }
-
-  return createHash('sha256').update(secret).digest();
+function deriveKey(encryptionKey: string): Buffer {
+  return createHash('sha256').update(encryptionKey).digest();
 }
 
-export function encryptApiKey(plaintext: string): string {
+export function encryptApiKey(
+  plaintext: string,
+  encryptionKey: string,
+): string {
   const iv = randomBytes(IV_LENGTH);
-  const cipher = createCipheriv(ALGORITHM, getEncryptionKey(), iv);
+  const cipher = createCipheriv(ALGORITHM, deriveKey(encryptionKey), iv);
 
   const ciphertext = Buffer.concat([
     cipher.update(plaintext, 'utf8'),
@@ -38,27 +32,23 @@ export function encryptApiKey(plaintext: string): string {
   ].join(':');
 }
 
-export function decryptApiKey(payload: string): string {
+export function decryptApiKey(payload: string, encryptionKey: string): string {
   try {
     const [iv, authTag, ciphertext] = payload
       .split(':')
       .map((segment) => Buffer.from(segment, 'base64'));
 
-    const decipher = createDecipheriv(ALGORITHM, getEncryptionKey(), iv);
+    const decipher = createDecipheriv(ALGORITHM, deriveKey(encryptionKey), iv);
     decipher.setAuthTag(authTag);
 
     return Buffer.concat([
       decipher.update(ciphertext),
       decipher.final(),
     ]).toString('utf8');
-  } catch (error) {
-    if (error instanceof MedusaError) {
-      throw error;
-    }
-
+  } catch {
     throw new MedusaError(
       MedusaError.Types.UNEXPECTED_STATE,
-      'Stored AI Gateway key could not be decrypted — it may have been encrypted with a different AI_GATEWAY_ENCRYPTION_KEY. Re-enter your key in the admin dashboard.',
+      'Stored AI Gateway key could not be decrypted — it may have been encrypted with a different aiGatewayEncryptionKey. Re-enter your key in the admin dashboard.',
     );
   }
 }

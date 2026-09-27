@@ -71,7 +71,10 @@ Each widget includes its own interval selector (This Month, Last Month, Last 3 M
    plugins: [
      {
        resolve: '@agilo/medusa-analytics-plugin',
-       options: {},
+       options: {
+         // Optional: leave out to disable the AI dashboard (see step 4)
+         aiGatewayEncryptionKey: process.env.AI_GATEWAY_ENCRYPTION_KEY,
+       },
      },
      // ...other plugins
    ],
@@ -81,15 +84,15 @@ Each widget includes its own interval selector (This Month, Last Month, Last 3 M
    ```bash
    yarn
    ```
-4. **Set the AI Gateway encryption secret** (required for the AI dashboard). This is **not** a Vercel AI Gateway API key — it's a random secret used locally to encrypt admins' API keys at rest, similar to `JWT_SECRET`. Generate one with:
+4. **Set the AI Gateway encryption key** (optional, only needed for the AI dashboard). This is **not** a Vercel AI Gateway API key — it's a random secret used locally to encrypt admins' API keys at rest, similar to `JWT_SECRET`. Generate one with:
    ```bash
    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
    ```
-   Then set it as an environment variable:
+   Then set it as an environment variable and pass it as the `aiGatewayEncryptionKey` plugin option (step 2):
    ```bash
    AI_GATEWAY_ENCRYPTION_KEY=<generated value>
    ```
-   Keep it stable — changing it invalidates stored keys and admins must re-enter them.
+   Without it, the rest of the plugin works and the AI dashboard shows a "not enabled" notice. If the option is set but empty, the server fails to start. Keep it stable — changing it invalidates stored keys and admins must re-enter them.
 5. **Run migrations and start your Medusa server:**
    ```bash
    npx medusa db:migrate

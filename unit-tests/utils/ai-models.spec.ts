@@ -7,9 +7,14 @@ import {
   getProviderOptions,
   resolveModelOptions,
 } from '../../src/utils/ai-models';
-import { createConfiguredGateway } from '../../src/utils/gateway-key';
+import {
+  assertValidGatewayKey,
+  createConfiguredGateway,
+} from '../../src/utils/gateway-key';
+import { AI_GATEWAY_MODULE } from '../../src/modules/ai-gateway';
 
 jest.mock('../../src/utils/gateway-key', () => ({
+  assertValidGatewayKey: jest.fn(),
   createConfiguredGateway: jest.fn(),
 }));
 
@@ -311,6 +316,7 @@ describe('getModelOptions', () => {
   const scope = {
     resolve: jest.fn((key: string) => {
       if (key === Modules.CACHE) return cache;
+      if (key === AI_GATEWAY_MODULE) return { getApiKey: () => 'vck_env' };
       throw new Error(`Unexpected resolve: ${key}`);
     }),
   } as unknown as Parameters<typeof getModelOptions>[0];
@@ -320,38 +326,51 @@ describe('getModelOptions', () => {
     jest.clearAllMocks();
     jest
       .mocked(createConfiguredGateway)
-      .mockResolvedValue({ getAvailableModels } as never);
+      .mockReturnValue({ getAvailableModels } as never);
   });
 
   it('returns cached options without fetching models', async () => {
     const cached = [{ key: 'anthropic:balanced' }];
     cache.get.mockResolvedValue(cached);
 
-    await expect(getModelOptions(scope, 'user_1')).resolves.toBe(cached);
+    await expect(getModelOptions(scope)).resolves.toBe(cached);
     expect(cache.get).toHaveBeenCalledWith(CACHE_KEY);
     expect(getAvailableModels).not.toHaveBeenCalled();
   });
 
-  it('rejects a user without a key even when options are cached', async () => {
+  it('rejects a disabled install even when options are cached', async () => {
     cache.get.mockResolvedValue([{ key: 'anthropic:balanced' }]);
-    jest
-      .mocked(createConfiguredGateway)
-      .mockRejectedValue(new Error('Missing AI Gateway key'));
+    jest.mocked(createConfiguredGateway).mockImplementation(() => {
+      throw new Error('AI dashboard is not enabled');
+    });
 
-    await expect(getModelOptions(scope, 'user_1')).rejects.toThrow(
-      'Missing AI Gateway key',
+    await expect(getModelOptions(scope)).rejects.toThrow(
+      'AI dashboard is not enabled',
     );
   });
 
-  it('resolves options with the user key and caches them for 24h', async () => {
+  it('rejects an invalid key before fetching models', async () => {
+    cache.get.mockResolvedValue(null);
+    jest
+      .mocked(assertValidGatewayKey)
+      .mockRejectedValueOnce(new Error('not a valid Vercel AI Gateway key'));
+
+    await expect(getModelOptions(scope)).rejects.toThrow(
+      'not a valid Vercel AI Gateway key',
+    );
+    expect(assertValidGatewayKey).toHaveBeenCalledWith('vck_env');
+    expect(getAvailableModels).not.toHaveBeenCalled();
+  });
+
+  it('resolves options with the install key and caches them for 24h', async () => {
     cache.get.mockResolvedValue(null);
     getAvailableModels.mockResolvedValue({
       models: [model('anthropic/claude-sonnet-9')],
     });
 
-    const options = await getModelOptions(scope, 'user_1');
+    const options = await getModelOptions(scope);
 
-    expect(createConfiguredGateway).toHaveBeenCalledWith(scope, 'user_1');
+    expect(createConfiguredGateway).toHaveBeenCalledWith(scope);
     expect(options.map((o) => o.key)).toEqual(['anthropic:balanced']);
     expect(cache.set).toHaveBeenCalledWith(CACHE_KEY, options, 60 * 60 * 24);
   });
@@ -360,7 +379,7 @@ describe('getModelOptions', () => {
     cache.get.mockResolvedValue(null);
     getAvailableModels.mockResolvedValue({ models: [model('meta/llama-9')] });
 
-    await expect(getModelOptions(scope, 'user_1')).resolves.toEqual([]);
+    await expect(getModelOptions(scope)).resolves.toEqual([]);
     expect(cache.set).not.toHaveBeenCalled();
   });
 });

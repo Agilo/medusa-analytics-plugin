@@ -46,17 +46,14 @@ describe('assertValidGatewayKey', () => {
 });
 
 describe('createConfiguredGateway', () => {
-  it("builds the gateway from the user's decrypted key", async () => {
-    const getDecryptedKeyForUser = jest.fn().mockResolvedValue('vck_stored');
-    const scope = { resolve: jest.fn(() => ({ getDecryptedKeyForUser })) };
+  it("builds the gateway from the module's api key", () => {
+    const getApiKey = jest.fn().mockReturnValue('vck_env');
+    const scope = { resolve: jest.fn(() => ({ getApiKey })) };
     const gateway = {};
     jest.mocked(createGateway).mockReturnValue(gateway as never);
 
-    await expect(
-      createConfiguredGateway(scope as never, 'user_1'),
-    ).resolves.toBe(gateway);
+    expect(createConfiguredGateway(scope as never)).toBe(gateway);
     expect(scope.resolve).toHaveBeenCalledWith(AI_GATEWAY_MODULE);
-    expect(getDecryptedKeyForUser).toHaveBeenCalledWith('user_1');
-    expect(createGateway).toHaveBeenCalledWith({ apiKey: 'vck_stored' });
+    expect(createGateway).toHaveBeenCalledWith({ apiKey: 'vck_env' });
   });
 });

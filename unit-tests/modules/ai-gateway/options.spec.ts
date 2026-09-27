@@ -1,13 +1,7 @@
 import { AiGatewayModuleService } from '../../../src/modules/ai-gateway/service';
 import validateOptionsLoader from '../../../src/modules/ai-gateway/loaders/validate-options';
 
-const makeService = (aiGatewayEncryptionKey?: string) =>
-  Object.assign(Object.create(AiGatewayModuleService.prototype), {
-    encryptionKey_: aiGatewayEncryptionKey,
-    listAiGatewayKeys: jest.fn().mockResolvedValue([]),
-  }) as AiGatewayModuleService;
-
-describe('ai-gateway encryption key option', () => {
+describe('ai-gateway api key option', () => {
   describe('loader', () => {
     const run = (options: Record<string, unknown>) =>
       validateOptionsLoader({ options } as any);
@@ -18,46 +12,38 @@ describe('ai-gateway encryption key option', () => {
 
     it('allows a non-empty key', async () => {
       await expect(
-        run({ aiGatewayEncryptionKey: 'secret' }),
+        run({ aiGatewayApiKey: 'vck_123' }),
       ).resolves.toBeUndefined();
     });
 
     it.each(['', '   ', 123])('throws on invalid key %p', async (key) => {
-      await expect(run({ aiGatewayEncryptionKey: key })).rejects.toThrow(
+      await expect(run({ aiGatewayApiKey: key })).rejects.toThrow(
         'must be a non-empty string',
       );
     });
   });
 
-  describe('service without the key', () => {
-    it('reports the key as not configured instead of throwing', async () => {
-      await expect(
-        makeService().getKeyStatusForUser('user_1'),
-      ).resolves.toEqual({
-        encryption_key_configured: false,
-        configured: false,
-        key_last_four: null,
-      });
-    });
+  describe('service', () => {
+    it('is disabled and throws NOT_ALLOWED without the key', () => {
+      const service = new AiGatewayModuleService({});
 
-    it('throws NOT_ALLOWED when a key is needed', async () => {
-      const service = makeService();
-
-      expect(() => service.assertEncryptionKeyConfigured()).toThrow(
-        'aiGatewayEncryptionKey',
+      expect(service.isEnabled()).toBe(false);
+      expect(() => service.getApiKey()).toThrow(
+        expect.objectContaining({
+          type: 'not_allowed',
+          message: expect.stringContaining('AI_GATEWAY_API_KEY'),
+        }),
       );
-      await expect(
-        service.createKeyForUser({ user_id: 'user_1', api_key: 'vck_1234' }),
-      ).rejects.toMatchObject({ type: 'not_allowed' });
-      await expect(
-        service.getDecryptedKeyForUser('user_1'),
-      ).rejects.toMatchObject({ type: 'not_allowed' });
     });
-  });
 
-  it('returns the key when configured', () => {
-    expect(makeService('secret').assertEncryptionKeyConfigured()).toBe(
-      'secret',
-    );
+    it('is enabled and returns the key when configured', () => {
+      const service = new AiGatewayModuleService(
+        {},
+        { aiGatewayApiKey: 'vck_123' },
+      );
+
+      expect(service.isEnabled()).toBe(true);
+      expect(service.getApiKey()).toBe('vck_123');
+    });
   });
 });

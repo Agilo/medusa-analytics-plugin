@@ -22,14 +22,14 @@ medusaIntegrationTestRunner({
         ).rejects.toMatchObject({ response: { status: 401 } });
       });
 
-      it('should return 400 when no gateway key is configured', async () => {
+      it('should return 400 when the AI dashboard is not enabled', async () => {
         await expect(
           api.get('/admin/agilo-analytics/analytics-ai/models', { headers }),
         ).rejects.toMatchObject({
           response: {
             status: 400,
             data: {
-              message: expect.stringContaining('Missing AI Gateway key'),
+              message: expect.stringContaining('AI dashboard is not enabled'),
             },
           },
         });

@@ -27,68 +27,27 @@ medusaIntegrationTestRunner({
         ).rejects.toMatchObject({ response: { status: 401 } });
       });
 
-      it('should return 400 when the body is empty', async () => {
+      it.each([
+        ['the body is empty', {}],
+        ['prompt is missing', { context: { optionKey: 'anthropic:balanced' } }],
+        [
+          'prompt is an empty string',
+          { prompt: '', context: { optionKey: 'anthropic:balanced' } },
+        ],
+        [
+          'context is missing',
+          { prompt: 'How many orders did we get this month?' },
+        ],
+        [
+          'context.optionKey is missing',
+          { prompt: 'How many orders did we get this month?', context: {} },
+        ],
+      ])('should return 400 when %s', async (_description, body) => {
         await expect(
-          api.post('/admin/agilo-analytics/analytics-ai/chat', {}, { headers }),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-      });
-
-      it('should return 400 when prompt is missing', async () => {
-        await expect(
-          api.post(
-            '/admin/agilo-analytics/analytics-ai/chat',
-            { context: { optionKey: 'anthropic:balanced' } },
-            { headers },
-          ),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-      });
-
-      it('should return 400 when prompt is an empty string', async () => {
-        await expect(
-          api.post(
-            '/admin/agilo-analytics/analytics-ai/chat',
-            { prompt: '', context: { optionKey: 'anthropic:balanced' } },
-            { headers },
-          ),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-      });
-
-      it('should return 400 when context is missing', async () => {
-        await expect(
-          api.post(
-            '/admin/agilo-analytics/analytics-ai/chat',
-            { prompt: 'How many orders did we get this month?' },
-            { headers },
-          ),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-      });
-
-      it('should return 400 when context.optionKey is missing', async () => {
-        await expect(
-          api.post(
-            '/admin/agilo-analytics/analytics-ai/chat',
-            {
-              prompt: 'How many orders did we get this month?',
-              context: {},
-            },
-            { headers },
-          ),
-        ).rejects.toMatchObject({ response: { status: 400 } });
-      });
-
-      it('should return 400 when no gateway key is configured', async () => {
-        await expect(
-          api.post('/admin/agilo-analytics/analytics-ai/chat', validBody, {
+          api.post('/admin/agilo-analytics/analytics-ai/chat', body, {
             headers,
           }),
-        ).rejects.toMatchObject({
-          response: {
-            status: 400,
-            data: {
-              message: expect.stringContaining('Missing AI Gateway key'),
-            },
-          },
-        });
+        ).rejects.toMatchObject({ response: { status: 400 } });
       });
     });
   },

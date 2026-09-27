@@ -24,6 +24,7 @@ const randomGenerationWord = [
   'Generating...',
   'Cooking...',
 ][Math.floor(Math.random() * 4)];
+
 export default function AnalyticsAIPage() {
   const { data: config, isLoading: isLoadingConfig } = useGatewayConfig();
 
@@ -151,7 +152,7 @@ export default function AnalyticsAIPage() {
               </Container>
             )}
 
-            <JSONUIProvider registry={registry}>
+            <JSONUIProvider registry={registry} initialState={spec?.state}>
               <Renderer spec={spec} registry={registry} loading={isStreaming} />
             </JSONUIProvider>
             {isStreaming && (

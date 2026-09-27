@@ -1,4 +1,4 @@
-import { gateway, streamText } from 'ai';
+import { gateway, generateText, streamText } from 'ai';
 import { Modules } from '@medusajs/framework/utils';
 import type { ICacheService, MedusaContainer } from '@medusajs/framework/types';
 import { createConfiguredGateway } from './gateway-key';
@@ -12,11 +12,12 @@ type AvailableModel = Awaited<
 type ProviderOptions = Parameters<typeof streamText>[0]['providerOptions'];
 
 export type Provider = 'anthropic' | 'openai' | 'google';
-export type Tier = 'fast' | 'balanced';
+export type Tier = 'fast' | 'balanced' | 'dev-cheap';
 
 export type ModelOption = {
-  key: `${Provider}:${Tier}`;
-  provider: Provider;
+  key: string;
+  // Dev-cheap options aren't restricted to Provider — e.g. meta, xai
+  provider: string;
   tier: Tier;
   modelId: string;
   name: string;
@@ -27,7 +28,7 @@ const GEMINI_LOW_THINKING: ProviderOptions = {
 };
 
 // Each family resolves to its newest model; the version is captured from the id.
-const FAMILIES: {
+export const FAMILIES: {
   provider: Provider;
   tier: Tier;
   patterns: RegExp[];
@@ -77,7 +78,7 @@ const FAMILIES: {
   },
 ];
 
-// Segment-wise so 3.10 > 3.8
+// Segment-wise so 3.10 > 3.8 (always picks up the newest version of some model)
 export function compareVersions(a: string, b: string) {
   const as = a.split('.').map(Number);
   const bs = b.split('.').map(Number);
@@ -88,38 +89,48 @@ export function compareVersions(a: string, b: string) {
   return 0;
 }
 
-// Default option (first Balanced, i.e. Anthropic's when available) is returned first
-export function resolveModelOptions(models: AvailableModel[]): ModelOption[] {
+export type Family = (typeof FAMILIES)[number];
+
+// Every model in the family, best first: newest version, then earlier pattern on a tie
+export function familyCandidates(family: Family, models: AvailableModel[]) {
+  const matches: { model: AvailableModel; version: string; rank: number }[] =
+    [];
+
+  for (const model of models) {
+    if (model.modelType !== 'language') continue;
+
+    const rank = family.patterns.findIndex((p) => p.test(model.id));
+    if (rank === -1) continue;
+
+    matches.push({
+      model,
+      version: model.id.match(family.patterns[rank])![1],
+      rank,
+    });
+  }
+
+  return matches
+    .sort((a, b) => compareVersions(b.version, a.version) || a.rank - b.rank)
+    .map((m) => m.model);
+}
+
+// `chosen[i]` is the model picked for FAMILIES[i]; default option (first Balanced) goes first
+function toFamilyOptions(
+  chosen: (AvailableModel | undefined)[],
+): ModelOption[] {
   const options: ModelOption[] = [];
 
-  for (const { provider, tier, patterns } of FAMILIES) {
-    let best: { model: AvailableModel; version: string; rank: number } | null =
-      null;
-
-    for (const model of models) {
-      if (model.modelType !== 'language') continue;
-
-      for (const [rank, pattern] of patterns.entries()) {
-        const version = model.id.match(pattern)?.[1];
-        if (!version) continue;
-
-        const diff = best ? compareVersions(version, best.version) : 1;
-        if (diff > 0 || (diff === 0 && best && rank < best.rank)) {
-          best = { model, version, rank };
-        }
-      }
-    }
-
-    if (best) {
-      options.push({
-        key: `${provider}:${tier}`,
-        provider,
-        tier,
-        modelId: best.model.id,
-        name: best.model.name,
-      });
-    }
-  }
+  FAMILIES.forEach(({ provider, tier }, i) => {
+    const model = chosen[i];
+    if (!model) return;
+    options.push({
+      key: `${provider}:${tier}`,
+      provider,
+      tier,
+      modelId: model.id,
+      name: model.name,
+    });
+  });
 
   const defaultIndex = options.findIndex((o) => o.tier === 'balanced');
   if (defaultIndex > 0) options.unshift(...options.splice(defaultIndex, 1));
@@ -127,9 +138,103 @@ export function resolveModelOptions(models: AvailableModel[]): ModelOption[] {
   return options;
 }
 
+// Newest model per family, Anthropic's Balanced as the default when available
+export function resolveModelOptions(models: AvailableModel[]): ModelOption[] {
+  return toFamilyOptions(FAMILIES.map((f) => familyCandidates(f, models)[0]));
+}
+
 export function getProviderOptions(option: ModelOption) {
   return FAMILIES.find((f) => `${f.provider}:${f.tier}` === option.key)
     ?.providerOptions;
+}
+
+// --- Dev-only: usable models for free-tier Gateway keys, for local testing without real spend ---
+// Free-tier keys get 403 (RestrictedModelsError) on the newest models, e.g. every Anthropic one
+
+const DEV_CHEAP_PROVIDERS = [
+  'anthropic',
+  'openai',
+  'google',
+  'meta',
+  'xai',
+] as const;
+const DEV_CHEAP_MAX_PROBES = 10;
+
+type Gateway = Awaited<ReturnType<typeof createConfiguredGateway>>;
+
+// 400 too: an older fallback model may reject the family's providerOptions (e.g. reasoningEffort 'none')
+async function isModelUsable(
+  gateway: Gateway,
+  modelId: string,
+  providerOptions?: ProviderOptions,
+) {
+  try {
+    await generateText({
+      model: gateway(modelId),
+      providerOptions,
+      prompt: 'hi',
+      maxOutputTokens: 16,
+      maxRetries: 0,
+    });
+    return true;
+  } catch (error) {
+    const status = (error as { statusCode?: number }).statusCode;
+    return status !== 403 && status !== 400;
+  }
+}
+
+async function firstUsable(
+  gateway: Gateway,
+  candidates: AvailableModel[],
+  providerOptions?: ProviderOptions,
+) {
+  for (const model of candidates) {
+    if (await isModelUsable(gateway, model.id, providerOptions)) return model;
+  }
+}
+
+// ponytail: sequential probes per family/provider, ~a few seconds once per cache TTL; dev only, so fine.
+// Each family falls back to its newest usable version, plus the cheapest usable model per provider.
+async function resolveDevModelOptions(
+  gateway: Gateway,
+  models: AvailableModel[],
+): Promise<ModelOption[]> {
+  const [chosen, devCheap] = await Promise.all([
+    Promise.all(
+      FAMILIES.map((f) =>
+        firstUsable(gateway, familyCandidates(f, models), f.providerOptions),
+      ),
+    ),
+    Promise.all(
+      DEV_CHEAP_PROVIDERS.map(async (provider): Promise<ModelOption | null> => {
+        const candidates = models
+          .filter(
+            (m) =>
+              m.modelType === 'language' &&
+              m.specification.provider.toLowerCase() === provider &&
+              !Number.isNaN(Number(m.pricing?.output ?? NaN)),
+          )
+          .sort((a, b) => Number(a.pricing!.output) - Number(b.pricing!.output))
+          .slice(0, DEV_CHEAP_MAX_PROBES);
+
+        const model = await firstUsable(gateway, candidates);
+        return model
+          ? {
+              key: `${provider}:dev-cheap`,
+              provider,
+              tier: 'dev-cheap',
+              modelId: model.id,
+              name: model.name,
+            }
+          : null;
+      }),
+    ),
+  ]);
+
+  return [
+    ...toFamilyOptions(chosen),
+    ...devCheap.filter((o): o is ModelOption => o !== null),
+  ];
 }
 
 export async function getModelOptions(
@@ -143,7 +248,10 @@ export async function getModelOptions(
 
   const gateway = await createConfiguredGateway(scope, userId);
   const { models } = await gateway.getAvailableModels();
-  const options = resolveModelOptions(models);
+  const options =
+    process.env.NODE_ENV === 'development'
+      ? await resolveDevModelOptions(gateway, models)
+      : resolveModelOptions(models);
 
   if (options.length > 0) {
     await cache.set(

@@ -100,6 +100,8 @@ Example of a correct BarChart \`data\` payload (wrapped in a ChartCard titled e.
   ], xKey: "region", yKey: "revenue"
 
 Currency & formatting:
+- All Medusa amounts (total, unit_price, subtotal, …) are already in MAJOR units (e.g. 540 means
+  €540, not €5.40). Never divide or multiply them by 100.
 - The store currency comes from the snapshot. Pre-format currency as a string ONLY where
   it is displayed as text: StatCard.value (e.g. "€12,400"), Table cells and Text. Do NOT
   format currency inside chart data — keep those raw numbers (see the chart data rules).

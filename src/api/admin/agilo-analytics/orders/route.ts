@@ -5,7 +5,6 @@ import {
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import {
   calculateDateRangeMethod,
@@ -13,23 +12,9 @@ import {
   getDateGroupingKey,
 } from '../../../../utils/orders';
 import { DateTime } from 'luxon';
+import { adminOrdersListQuerySchema } from './validators';
+import { isDataValid } from '../../../../utils/data-validation';
 
-export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
-  z.object({
-    preset: z.literal('custom'),
-    date_from: z.string(),
-    date_to: z.string(),
-  }),
-  z.object({
-    preset: z.literal('this-month'),
-  }),
-  z.object({
-    preset: z.literal('last-month'),
-  }),
-  z.object({
-    preset: z.literal('last-3-months'),
-  }),
-]);
 const DEFAULT_CURRENCY = 'EUR';
 
 function getPercentChange(current: number, previous: number) {
@@ -38,14 +23,11 @@ function getPercentChange(current: number, previous: number) {
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminOrdersListQuerySchema.safeParse(req.query);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
-    );
-  }
-  const validatedQuery = result.data;
+  const validatedQuery = isDataValid({
+    data: req.query,
+    schema: adminOrdersListQuerySchema,
+  });
+  const { preset } = validatedQuery;
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const storeModuleService = req.scope.resolve(Modules.STORE);
@@ -91,7 +73,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const cacheKey = `exchange_rates_${currencyCode}`;
 
-  let exchangeRates: { rates: Record<string, any> } | null =
+  let exchangeRates: { rates: Record<string, number> } | null =
     await cacheModuleService.get(cacheKey);
 
   if (!exchangeRates) {
@@ -111,7 +93,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     await cacheModuleService.set(cacheKey, exchangeRates, ttl);
   }
 
-  const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
+  const calculateDateRange = calculateDateRangeMethod[preset];
 
   if (!calculateDateRange) {
     throw new MedusaError(
@@ -156,7 +138,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of orders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        ? (exchangeRates?.rates[order.currency_code.toUpperCase()] ?? 1)
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
 
@@ -190,7 +172,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   for (const order of prevRangeOrders) {
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
+        ? (exchangeRates?.rates[order.currency_code.toUpperCase()] ?? 1)
         : 1;
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     prevTotalSales += orderTotal;

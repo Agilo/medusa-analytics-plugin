@@ -1,28 +1,17 @@
 import { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { OrderDTO } from '@medusajs/framework/types';
-import {
-  ContainerRegistrationKeys,
-  MedusaError,
-  Modules,
-} from '@medusajs/framework/utils';
-import { z } from 'zod';
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
+import { adminProductAnalyticsQuerySchema } from './validators';
+import { isDataValid } from '../../../../utils/data-validation';
 
 const DEFAULT_THRESHOLD = 5;
 
-export const adminProductAnalyticsQuerySchema = z.object({
-  date_from: z.string(),
-  date_to: z.string(),
-});
-
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const result = adminProductAnalyticsQuerySchema.safeParse(req.query);
-  if (!result.success) {
-    throw new MedusaError(
-      MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
-    );
-  }
-  const validatedQuery = result.data;
+  const { date_from, date_to } = isDataValid({
+    data: req.query,
+    schema: adminProductAnalyticsQuerySchema,
+  });
+
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const productService = req.scope.resolve(Modules.PRODUCT);
   const inventoryService = req.scope.resolve(Modules.INVENTORY);
@@ -56,8 +45,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     },
     filters: {
       created_at: {
-        $gte: validatedQuery.date_from + 'T00:00:00Z',
-        $lte: validatedQuery.date_to + 'T23:59:59.999Z',
+        $gte: date_from + 'T00:00:00Z',
+        $lte: date_to + 'T23:59:59.999Z',
       },
       status: { $nin: ['draft'] },
     },

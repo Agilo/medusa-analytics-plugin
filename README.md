@@ -71,7 +71,10 @@ Each widget includes its own interval selector (This Month, Last Month, Last 3 M
    plugins: [
      {
        resolve: '@agilo/medusa-analytics-plugin',
-       options: {},
+       options: {
+         // Optional: leave out to disable the AI dashboard (see step 4)
+         aiGatewayApiKey: process.env.AI_GATEWAY_API_KEY,
+       },
      },
      // ...other plugins
    ],
@@ -81,11 +84,17 @@ Each widget includes its own interval selector (This Month, Last Month, Last 3 M
    ```bash
    yarn
    ```
-4. **Start your Medusa server:**
+4. **Set the Vercel AI Gateway API key** (optional, only needed for the AI dashboard). Create a key in your [Vercel AI Gateway dashboard](https://vercel.com/docs/ai-gateway), then add it to your `.env` and pass it as the `aiGatewayApiKey` plugin option (step 2):
    ```bash
+   AI_GATEWAY_API_KEY=<your Vercel AI Gateway key>
+   ```
+   Without it, the rest of the plugin works and the AI dashboard shows a "not enabled" notice. If the option is set but empty, the server fails to start. All admins of the store share this key, and its usage is billed to your Vercel account.
+5. **Run migrations and start your Medusa server:**
+   ```bash
+   npx medusa db:migrate
    yarn dev
    ```
-5. **Access the Analytics page** from the Medusa Admin dashboard.
+6. **Access the Analytics page** from the Medusa Admin dashboard.
 
 ## Contributing
 

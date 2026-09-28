@@ -1,3 +1,4 @@
+import { MedusaError } from '@medusajs/framework/utils';
 import {
   addDays,
   isAfter,
@@ -30,7 +31,10 @@ export const calculateDateRangeMethod: Record<
 > = {
   custom: (query) => {
     if (!query.date_from || !query.date_to) {
-      throw new Error('No date range provided');
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        'No date range provided',
+      );
     }
 
     const start = parseISO(query.date_from);

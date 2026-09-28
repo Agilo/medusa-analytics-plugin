@@ -9,7 +9,7 @@ import {
   AdminShippingProfile,
   AdminStockLocation,
 } from '@medusajs/framework/types';
-import { generateJwtToken } from '@medusajs/framework/utils';
+import { createAdminHeaders } from '../fixtures/auth';
 import { createOrderSeeder } from '../fixtures/orders';
 import {
   addCustomerToGroup,
@@ -41,42 +41,13 @@ medusaIntegrationTestRunner({
         region: AdminRegion;
 
       beforeEach(async () => {
-        const container = getContainer();
-        const authModuleService = container.resolve('auth');
-        const userModuleService = container.resolve('user');
-
-        const user = await userModuleService.createUsers({
-          email: `test-customers-${Date.now()}@test.com`,
-        });
-
-        const authIdentity = await authModuleService.createAuthIdentities({
-          provider_identities: [
-            {
-              provider: 'emailpass',
-              entity_id: user.email,
-              provider_metadata: {
-                password: process.env.JWT_SECRET || 'test',
-              },
-            },
-          ],
-          app_metadata: {
-            user_id: user.id,
-          },
-        });
-
-        const token = generateJwtToken(
-          {
-            actor_id: user.id,
-            actor_type: 'user',
-            auth_identity_id: authIdentity.id,
-          },
-          {
-            secret: process.env.JWT_SECRET || 'test',
-            expiresIn: '1d',
-          },
+        Object.assign(
+          headers,
+          await createAdminHeaders({
+            container: getContainer(),
+            emailPrefix: 'test-customers',
+          }),
         );
-
-        headers['Authorization'] = `Bearer ${token}`;
         seeder = await createOrderSeeder({
           api,
           container: getContainer(),

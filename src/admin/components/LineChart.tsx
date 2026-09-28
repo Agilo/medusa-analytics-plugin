@@ -14,7 +14,7 @@ import { useDarkMode } from '../hooks/use-dark-mode';
 import { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 type LineChartProps = {
-  data: any[] | undefined;
+  data: Record<string, unknown>[] | undefined;
   xAxisDataKey: string;
   yAxisDataKey?: string;
   lineColor?: string;

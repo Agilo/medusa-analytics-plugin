@@ -44,7 +44,7 @@
     "dev": "medusa plugin:develop",
     "prepublishOnly": "medusa plugin:build",
     "test": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
-    "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
+    "test:unit": "TZ=UTC TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent=false --forceExit",
     "lint": "prettier --check .",
     "lint:fix": "prettier --write ."
   },
@@ -69,6 +69,7 @@
     "prop-types": "^15.8.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "tailwindcss": "3",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
@@ -86,9 +87,15 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^3.0.133",
+    "@ai-sdk/react": "^3.0.210",
+    "@hookform/resolvers": "^5.4.0",
+    "@json-render/core": "^0.19.0",
+    "@json-render/react": "^0.19.0",
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "5.64.2",
+    "ai": "^6.0.208",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -96,10 +103,13 @@
     "luxon": "^3.6.1",
     "react-aria-components": "^1.10.1",
     "react-day-picker": "^9.13.2",
+    "react-hook-form": "^7.79.0",
     "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.8",
-    "tw-animate-css": "^1.3.4"
+    "zod": "^4.1.8"
+  },
+  "resolutions": {
+    "zod": "^4.1.8"
   },
   "overrides": {
     "@opentelemetry/resources": "^2.0.0",

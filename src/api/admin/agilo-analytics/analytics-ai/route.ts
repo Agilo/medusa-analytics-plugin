@@ -1,0 +1,136 @@
+import type {
+  AuthenticatedMedusaRequest,
+  MedusaResponse,
+} from '@medusajs/framework/http';
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+} from '@medusajs/framework/utils';
+import { AI_GATEWAY_MODULE } from '../../../../modules/ai-gateway';
+import {
+  AiGatewayModuleService,
+  type GatewayKeyStatus,
+} from '../../../../modules/ai-gateway/service';
+import { adminSetGatewayKeySchema } from './validators';
+import { assertValidGatewayKey } from '../../../../utils/gateway-key';
+import { isDataValid } from '../../../../utils/data-validation';
+
+export async function POST(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
+  const validatedData = isDataValid({
+    data: req.body,
+    schema: adminSetGatewayKeySchema,
+  });
+
+  const apiKey = validatedData.api_key.trim();
+
+  if (!apiKey) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      'api_key is required',
+    );
+  }
+
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+  const userId = req.auth_context.actor_id;
+
+  const { configured } =
+    await aiGatewayModuleService.getKeyStatusForUser(userId);
+
+  if (configured) {
+    throw new MedusaError(
+      MedusaError.Types.DUPLICATE_ERROR,
+      'An AI Gateway key is already configured for your user. Replace it instead.',
+    );
+  }
+
+  aiGatewayModuleService.assertEncryptionKeyConfigured();
+  await assertValidGatewayKey(apiKey);
+
+  const { id, key_last_four } = await aiGatewayModuleService.createKeyForUser({
+    user_id: userId,
+    api_key: apiKey,
+  });
+
+  const link = req.scope.resolve(ContainerRegistrationKeys.LINK);
+  await link.create({
+    [Modules.USER]: { user_id: userId },
+    [AI_GATEWAY_MODULE]: { ai_gateway_key_id: id },
+  });
+
+  res.status(201).json({
+    encryption_key_configured: true,
+    configured: true,
+    key_last_four,
+  } satisfies GetGatewayConfigResponse);
+}
+
+export async function PATCH(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
+  const { api_key: rawKey } = isDataValid({
+    data: req.body,
+    schema: adminSetGatewayKeySchema,
+  });
+  const api_key = rawKey.trim();
+  if (!api_key) {
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      'api_key is required',
+    );
+  }
+
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+  const userId = req.auth_context.actor_id;
+
+  const { configured } =
+    await aiGatewayModuleService.getKeyStatusForUser(userId);
+
+  if (!configured) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      'No AI Gateway key is configured for your user. Save one first.',
+    );
+  }
+
+  aiGatewayModuleService.assertEncryptionKeyConfigured();
+  await assertValidGatewayKey(api_key);
+
+  const { key_last_four } = await aiGatewayModuleService.updateKeyForUser({
+    user_id: userId,
+    api_key,
+  });
+
+  res.status(200).json({
+    encryption_key_configured: true,
+    configured: true,
+    key_last_four,
+  } satisfies GetGatewayConfigResponse);
+}
+
+export async function GET(
+  req: AuthenticatedMedusaRequest,
+  res: MedusaResponse,
+) {
+  const aiGatewayModuleService = req.scope.resolve(
+    AI_GATEWAY_MODULE,
+  ) as AiGatewayModuleService;
+
+  res
+    .status(200)
+    .json(
+      (await aiGatewayModuleService.getKeyStatusForUser(
+        req.auth_context.actor_id,
+      )) satisfies GetGatewayConfigResponse,
+    );
+}
+
+export type GetGatewayConfigResponse = GatewayKeyStatus;

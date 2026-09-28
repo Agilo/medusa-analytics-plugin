@@ -9,7 +9,7 @@ import {
 import { useDarkMode } from '../hooks/use-dark-mode';
 
 type PieChartProps = {
-  data: any[] | undefined;
+  data: Record<string, unknown>[] | undefined;
   dataKey: string;
   hideTooltip?: boolean;
 };

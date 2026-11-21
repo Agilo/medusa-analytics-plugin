@@ -96,7 +96,11 @@ export async function createOrderSeeder({
     (
       await api.post(
         '/admin/regions',
-        { name: 'Test region', currency_code: 'eur' },
+        {
+          name: 'Test region',
+          currency_code: 'eur',
+          payment_providers: ['pp_system_default'],
+        },
         adminHeaders,
       )
     ).data.region;

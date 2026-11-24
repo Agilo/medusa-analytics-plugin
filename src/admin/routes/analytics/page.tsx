@@ -9,7 +9,9 @@ import {
   Text,
 } from '@medusajs/ui';
 import {
+  ArrowUturnLeft,
   ChartBar,
+  ReceiptPercent,
   ShoppingCart,
   Calendar as CalendarIcon,
   ChevronDown,
@@ -49,6 +51,14 @@ import { useCustomerAnalytics } from '../../hooks/customer-analytics';
 import { StackedBarChart } from '../../components/StackedBarChart';
 import { CustomersTableSkeleton } from '../../skeletons/CustomerTableSkeleton';
 import { CustomersTable } from '../../components/CustomersTable';
+import { useReturnAnalytics } from '../../hooks/return-analytics';
+import { ReturnedProductsTable } from '../../components/ReturnedProductsTable';
+import { ReturnedProductsTableSkeleton } from '../../skeletons/ReturnedProductsTableSkeleton';
+
+function formatPercentChange(value: number | undefined) {
+  const percent = value || 0;
+  return `${percent > 0 ? '+' : ''}${percent}% from previous period`;
+}
 
 // Helper functions to convert between DateRange and RangeValue<DateValue>
 function dateToCalendarDate(date: Date): CalendarDate {
@@ -142,6 +152,21 @@ const AnalyticsPage = () => {
       : 'custom',
     date,
   );
+
+  const activeTab = searchParams.get('tab') || 'orders';
+
+  // The returns endpoint is the heaviest one, so it only runs while its tab is
+  // open. The tab comes from the URL, so it also loads straight away on refresh.
+  const returnQuery = useReturnAnalytics(
+    ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
+      ? rangeParam
+      : 'custom',
+    date,
+    { enabled: activeTab === 'returns' },
+  );
+
+  const someReturnCountsGreaterThanZero =
+    returnQuery.data?.returns_over_time?.some((item) => item.count > 0);
 
   const someOrderCountsGreaterThanZero = orderQuery.data?.order_count?.some(
     (item) => item.count > 0,
@@ -335,7 +360,7 @@ const AnalyticsPage = () => {
       </div>
       <div className="px-6 py-4">
         <Tabs
-          value={searchParams.get('tab') || 'orders'}
+          value={activeTab}
           onValueChange={(value) => {
             const params = new URLSearchParams(searchParams.toString());
             params.set('tab', value);
@@ -360,6 +385,12 @@ const AnalyticsPage = () => {
               disabled={orderQuery.isLoading || productQuery.isLoading}
             >
               Customers
+            </Tabs.Trigger>
+            <Tabs.Trigger
+              value="returns"
+              disabled={orderQuery.isLoading || productQuery.isLoading}
+            >
+              Returns
             </Tabs.Trigger>
           </Tabs.List>
           <div className="mt-8">
@@ -787,6 +818,149 @@ const AnalyticsPage = () => {
                   )}
                 </Container>
               </div>
+            </Tabs.Content>
+            <Tabs.Content value="returns">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <Container className="relative">
+                  <ArrowUturnLeft className="absolute right-6 top-4 text-ui-fg-muted" />
+                  <Text size="small">Total Returns</Text>
+                  {returnQuery.isLoading ? (
+                    <SmallCardSkeleton />
+                  ) : (
+                    <>
+                      <Text size="xlarge" weight="plus">
+                        {returnQuery.data?.total_returns || 0}
+                      </Text>
+                      <Text size="xsmall" className="text-ui-fg-muted">
+                        {formatPercentChange(
+                          returnQuery.data?.prev_returns_percent,
+                        )}
+                      </Text>
+                    </>
+                  )}
+                </Container>
+                <Container className="relative">
+                  <ReceiptPercent className="absolute right-6 top-4 text-ui-fg-muted" />
+                  <Text size="small">Return Rate</Text>
+                  {returnQuery.isLoading ? (
+                    <SmallCardSkeleton />
+                  ) : (
+                    <>
+                      <Text size="xlarge" weight="plus">
+                        {returnQuery.data?.return_rate || 0}%
+                      </Text>
+                      <Text size="xsmall" className="text-ui-fg-muted">
+                        {formatPercentChange(
+                          returnQuery.data?.prev_return_rate_percent,
+                        )}
+                      </Text>
+                      <Text size="xsmall" className="text-ui-fg-muted">
+                        Of orders placed in this period
+                      </Text>
+                    </>
+                  )}
+                </Container>
+                <Container className="relative">
+                  <ChartNoAxesCombined className="absolute right-6 text-ui-fg-muted top-4 size-[15px]" />
+                  <Text size="small">Returned Value</Text>
+                  {returnQuery.isLoading ? (
+                    <SmallCardSkeleton />
+                  ) : (
+                    <>
+                      <Text size="xlarge" weight="plus">
+                        {new Intl.NumberFormat(undefined, {
+                          style: 'currency',
+                          currency: returnQuery.data?.currency_code || 'EUR',
+                        }).format(returnQuery.data?.returned_value || 0)}
+                      </Text>
+                      <Text size="xsmall" className="text-ui-fg-muted">
+                        {formatPercentChange(
+                          returnQuery.data?.prev_returned_value_percent,
+                        )}
+                      </Text>
+                    </>
+                  )}
+                </Container>
+              </div>
+              <div className="flex max-md:flex-col gap-4 mb-4">
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Returns Over Time
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Number of returns created in the selected period
+                    </Text>
+                    <ChartStateWrapper
+                      isLoading={returnQuery.isLoading}
+                      isError={returnQuery.isError}
+                      errorMessage={returnQuery.error?.message}
+                      isEmpty={
+                        !returnQuery.data?.returns_over_time ||
+                        returnQuery.data.returns_over_time.length === 0 ||
+                        !someReturnCountsGreaterThanZero
+                      }
+                    >
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <LineChart
+                          data={returnQuery.data?.returns_over_time}
+                          xAxisDataKey="name"
+                          yAxisDataKey="count"
+                        />
+                      </div>
+                    </ChartStateWrapper>
+                  </Container>
+                </div>
+                <div className="flex-1">
+                  <Container className="min-h-[9.375rem]">
+                    <Text size="xlarge" weight="plus">
+                      Return Reasons
+                    </Text>
+                    <Text size="small" className="mb-8 text-ui-fg-muted">
+                      Returned quantity by reason in the selected period
+                    </Text>
+                    <ChartStateWrapper
+                      isLoading={returnQuery.isLoading}
+                      isError={returnQuery.isError}
+                      errorMessage={returnQuery.error?.message}
+                      isEmpty={
+                        !returnQuery.data?.reasons ||
+                        returnQuery.data.reasons.length === 0
+                      }
+                    >
+                      <div className="w-full" style={{ aspectRatio: '16/9' }}>
+                        <BarChart
+                          data={returnQuery.data?.reasons ?? []}
+                          xAxisDataKey="name"
+                          yAxisDataKey="quantity"
+                          useStableColors={true}
+                          colorKeyField="name"
+                        />
+                      </div>
+                    </ChartStateWrapper>
+                  </Container>
+                </div>
+              </div>
+              <Container>
+                <Text size="xlarge" weight="plus">
+                  Most-Returned Products
+                </Text>
+                <Text size="small" className="mb-8 text-ui-fg-muted">
+                  Products from orders placed in the selected period, by
+                  returned quantity
+                </Text>
+                {returnQuery.isLoading ? (
+                  <ReturnedProductsTableSkeleton />
+                ) : returnQuery.isError ? (
+                  <Text size="small" className="text-ui-fg-error">
+                    Unable to load returned products.
+                  </Text>
+                ) : (
+                  <ReturnedProductsTable
+                    products={returnQuery.data?.top_returned_variants || []}
+                  />
+                )}
+              </Container>
             </Tabs.Content>
           </div>
         </Tabs>

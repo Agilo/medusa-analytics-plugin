@@ -45,7 +45,8 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const navigate = useNavigate();
 
-  const shownCustomers = React.useMemo(() => {
+  // Search and sort the whole list; pagination counts and slices this list.
+  const filteredCustomers = React.useMemo(() => {
     let filtered = customers.filter(
       (customer) =>
         customer.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -68,11 +69,34 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
       });
     }
 
-    return filtered.slice(
-      pagination.pageIndex * pagination.pageSize,
-      (pagination.pageIndex + 1) * pagination.pageSize,
+    return filtered;
+  }, [customers, search, sorting]);
+
+  const shownCustomers = React.useMemo(
+    () =>
+      filteredCustomers.slice(
+        pagination.pageIndex * pagination.pageSize,
+        (pagination.pageIndex + 1) * pagination.pageSize,
+      ),
+    [filteredCustomers, pagination],
+  );
+
+  // A new search starts on the first page.
+  const handleSearchChange = React.useCallback((value: string) => {
+    setSearch(value);
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  }, []);
+
+  // Keep the page in range when the list shrinks (e.g. a new date range).
+  React.useEffect(() => {
+    const lastPageIndex = Math.max(
+      0,
+      Math.ceil(filteredCustomers.length / pagination.pageSize) - 1,
     );
-  }, [customers, search, sorting, pagination]);
+    if (pagination.pageIndex > lastPageIndex) {
+      setPagination((current) => ({ ...current, pageIndex: lastPageIndex }));
+    }
+  }, [filteredCustomers.length, pagination.pageIndex, pagination.pageSize]);
 
   const columns = React.useMemo(
     () => [
@@ -145,10 +169,10 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
     columns,
     data: shownCustomers,
     getRowId: (customer) => customer.customer_id,
-    rowCount: customers.length,
+    rowCount: filteredCustomers.length,
     search: {
       state: search,
-      onSearchChange: setSearch,
+      onSearchChange: handleSearchChange,
     },
     pagination: {
       state: pagination,
@@ -180,7 +204,7 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
           },
         }}
       />
-      {customers.length > PAGE_SIZE && <DataTable.Pagination />}
+      {filteredCustomers.length > PAGE_SIZE && <DataTable.Pagination />}
     </DataTable>
   );
 };

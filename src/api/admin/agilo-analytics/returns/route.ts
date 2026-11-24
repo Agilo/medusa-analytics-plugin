@@ -30,7 +30,6 @@ export const ELIGIBLE_RETURN_STATUSES = [
   'partially_received',
 ] as const;
 
-const TOP_RETURNED_VARIANTS_LIMIT = 10;
 const NO_REASON_LABEL = 'No reason';
 
 type NumericLike = BigNumberInput | null | undefined;
@@ -297,8 +296,8 @@ export async function GET(
     .map(([name, quantity]) => ({ name, quantity }))
     .sort((a, b) => b.quantity - a.quantity);
 
-  // Most-returned variants (cohort-based: returned and sold quantities come
-  // from the same orders, so the rate can't exceed 100%).
+  // Every returned variant (cohort-based: returned and sold quantities come
+  // from the same orders, so the rate can't exceed 100%), most returned first.
   const variants: Record<
     string,
     {
@@ -337,7 +336,7 @@ export async function GET(
       }
     }
   }
-  const topReturnedVariants = Object.values(variants)
+  const returnedVariants = Object.values(variants)
     .filter((v) => v.returned_quantity > 0)
     .map((v) => ({
       ...v,
@@ -350,8 +349,7 @@ export async function GET(
       (a, b) =>
         b.returned_quantity - a.returned_quantity ||
         b.return_rate - a.return_rate,
-    )
-    .slice(0, TOP_RETURNED_VARIANTS_LIMIT);
+    );
 
   const returnRate = getReturnRate(cohortOrders);
   const prevReturnRate = getReturnRate(prevCohortOrders);
@@ -370,7 +368,7 @@ export async function GET(
     ),
     returns_over_time: returnsOverTime,
     reasons,
-    top_returned_variants: topReturnedVariants,
+    returned_variants: returnedVariants,
     currency_code: currencyCode,
   } satisfies ReturnAnalyticsResponse);
 }
@@ -386,8 +384,11 @@ export type ReturnAnalyticsResponse = {
   prev_returned_value_percent: number;
   returns_over_time: { name: string; count: number }[];
   reasons: { name: string; quantity: number }[];
-  /** Cohort-based: returned and sold quantities of orders created in the range. */
-  top_returned_variants: {
+  /**
+   * Cohort-based: every variant returned from orders created in the range,
+   * with returned and sold quantities of those orders. Most returned first.
+   */
+  returned_variants: {
     variant_id: string | null;
     product_id: string | null;
     title: string;

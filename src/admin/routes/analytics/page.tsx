@@ -957,7 +957,7 @@ const AnalyticsPage = () => {
                   </Text>
                 ) : (
                   <ReturnedProductsTable
-                    products={returnQuery.data?.top_returned_variants || []}
+                    products={returnQuery.data?.returned_variants || []}
                   />
                 )}
               </Container>

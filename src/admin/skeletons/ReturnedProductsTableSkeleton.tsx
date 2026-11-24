@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   createDataTableColumnHelper,
   useDataTable,
@@ -24,15 +25,25 @@ const columns = (['a', 'b', 'c', 'd'] as const).map((key) =>
 );
 
 export const ReturnedProductsTableSkeleton = () => {
+  const [search, setSearch] = React.useState<string>('');
+
   const table = useDataTable({
     columns,
     data: dummyData,
     getRowId: (row) => row.id,
     rowCount: dummyData.length,
+    search: {
+      state: search,
+      onSearchChange: setSearch,
+    },
   });
 
+  // Same toolbar layout as ReturnedProductsTable, so nothing jumps on load.
   return (
     <DataTable instance={table}>
+      <div className="flex items-center justify-end gap-2 mb-4">
+        <DataTable.Search placeholder="Search..." />
+      </div>
       <DataTable.Table />
     </DataTable>
   );

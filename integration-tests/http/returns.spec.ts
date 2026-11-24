@@ -23,7 +23,7 @@ const IN_RANGE_LATER = '2024-03-20T12:00:00Z';
 const BEFORE_RANGE = '2024-02-10T12:00:00Z';
 const AFTER_RANGE = '2024-04-10T12:00:00Z';
 
-type TopVariant = {
+type ReturnedVariant = {
   variant_id: string | null;
   product_id: string | null;
   title: string;
@@ -32,7 +32,7 @@ type TopVariant = {
   return_rate: number;
 };
 
-function expectValidTopVariants(rows: TopVariant[]) {
+function expectValidReturnedVariants(rows: ReturnedVariant[]) {
   for (const row of rows) {
     expect(row.return_rate).toBeLessThanOrEqual(100);
     expect(row.returned_quantity).toBeLessThanOrEqual(row.sold_quantity);
@@ -210,7 +210,7 @@ medusaIntegrationTestRunner({
             return_rate: 0,
             returned_value: 0,
             reasons: [],
-            top_returned_variants: [],
+            returned_variants: [],
             currency_code: 'EUR',
           });
           expect(res.data.returns_over_time.length).toBeGreaterThan(0);
@@ -248,7 +248,7 @@ medusaIntegrationTestRunner({
               0,
             ),
           ).toEqual(1);
-          expect(res.data.top_returned_variants).toEqual([
+          expect(res.data.returned_variants).toEqual([
             {
               variant_id: item.variant_id,
               product_id: item.product_id,
@@ -288,11 +288,11 @@ medusaIntegrationTestRunner({
             2,
           );
           // The first seeded order (1 unit, no return) is in the cohort too.
-          const row = res.data.top_returned_variants[0];
+          const row = res.data.returned_variants[0];
           expect(row.returned_quantity).toEqual(1);
           expect(row.sold_quantity).toEqual(3);
           expect(row.return_rate).toEqual(33.33);
-          expectValidTopVariants(res.data.top_returned_variants);
+          expectValidReturnedVariants(res.data.returned_variants);
         });
 
         it('excludes a canceled return', async () => {
@@ -306,7 +306,7 @@ medusaIntegrationTestRunner({
 
           expect(res.data.total_returns).toEqual(0);
           expect(res.data.return_rate).toEqual(0);
-          expect(res.data.top_returned_variants).toEqual([]);
+          expect(res.data.returned_variants).toEqual([]);
         });
 
         it('excludes an open (unconfirmed) return', async () => {
@@ -352,8 +352,8 @@ medusaIntegrationTestRunner({
           const res = await api.get(RANGE_URL, { headers });
 
           expect(res.data.return_rate).toEqual(100);
-          expect(res.data.top_returned_variants).toHaveLength(1);
-          expect(res.data.top_returned_variants[0]).toMatchObject({
+          expect(res.data.returned_variants).toHaveLength(1);
+          expect(res.data.returned_variants[0]).toMatchObject({
             returned_quantity: 1,
             sold_quantity: 1,
             return_rate: 100,
@@ -372,7 +372,7 @@ medusaIntegrationTestRunner({
           // ...but not part of the cohort: 0 of 1 orders returned.
           expect(res.data.return_rate).toEqual(0);
           // The product was sold before the range, so it's not in the table.
-          expect(res.data.top_returned_variants).toEqual([]);
+          expect(res.data.returned_variants).toEqual([]);
         });
 
         it('counts an order with several returns once', async () => {
@@ -389,12 +389,12 @@ medusaIntegrationTestRunner({
 
           expect(res.data.total_returns).toEqual(2);
           expect(res.data.return_rate).toEqual(50);
-          expect(res.data.top_returned_variants[0]).toMatchObject({
+          expect(res.data.returned_variants[0]).toMatchObject({
             returned_quantity: 2,
             sold_quantity: 3,
             return_rate: 66.67,
           });
-          expectValidTopVariants(res.data.top_returned_variants);
+          expectValidReturnedVariants(res.data.returned_variants);
         });
 
         it('leaves draft and canceled orders out of the cohort', async () => {
@@ -418,7 +418,7 @@ medusaIntegrationTestRunner({
           const res = await api.get(RANGE_URL, { headers });
 
           expect(res.data.return_rate).toEqual(100);
-          expect(res.data.top_returned_variants[0]).toMatchObject({
+          expect(res.data.returned_variants[0]).toMatchObject({
             returned_quantity: 1,
             sold_quantity: 1,
           });
@@ -433,7 +433,7 @@ medusaIntegrationTestRunner({
           expect(res.status).toEqual(200);
           expect(res.data.return_rate).toEqual(0);
           expect(res.data.prev_return_rate_percent).toEqual(0);
-          expect(res.data.top_returned_variants).toEqual([]);
+          expect(res.data.returned_variants).toEqual([]);
         });
       });
     });

@@ -1,8 +1,72 @@
 import {
+  adminOrdersListQuerySchema,
+  formatZodIssues,
   getAllDateGroupingKeys,
   getDateGroupingKey,
+  getPercentChange,
   getWeekRangeKeyForDate,
 } from '../../src/utils/orders';
+
+describe('getPercentChange', () => {
+  it('returns 0 when both values are 0', () => {
+    expect(getPercentChange(0, 0)).toBe(0);
+  });
+
+  it('returns 100 when the previous value is 0 and the current one is not', () => {
+    expect(getPercentChange(5, 0)).toBe(100);
+  });
+
+  it('returns the relative increase', () => {
+    expect(getPercentChange(3, 2)).toBe(50);
+  });
+
+  it('returns the relative decrease', () => {
+    expect(getPercentChange(1, 4)).toBe(-75);
+  });
+
+  it('rounds to 2 decimals', () => {
+    expect(getPercentChange(1, 3)).toBe(-66.67);
+  });
+});
+
+describe('adminOrdersListQuerySchema + formatZodIssues', () => {
+  it('accepts a preset', () => {
+    expect(
+      adminOrdersListQuerySchema.safeParse({ preset: 'this-month' }).success,
+    ).toBe(true);
+  });
+
+  it('accepts a custom range with both dates', () => {
+    expect(
+      adminOrdersListQuerySchema.safeParse({
+        preset: 'custom',
+        date_from: '2024-01-01',
+        date_to: '2024-01-31',
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects an unknown preset with a readable message', () => {
+    const result = adminOrdersListQuerySchema.safeParse({ preset: 'nope' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(typeof formatZodIssues(result.error)).toBe('string');
+      expect(formatZodIssues(result.error).length).toBeGreaterThan(0);
+    }
+  });
+
+  it('rejects a custom range without dates', () => {
+    expect(
+      adminOrdersListQuerySchema.safeParse({ preset: 'custom' }).success,
+    ).toBe(false);
+  });
+
+  it('joins several issues', () => {
+    expect(
+      formatZodIssues({ issues: [{ message: 'a' }, { message: 'b' }] }),
+    ).toBe('a, b');
+  });
+});
 
 describe('date utils', () => {
   describe('getWeekRangeKeyForDate', () => {

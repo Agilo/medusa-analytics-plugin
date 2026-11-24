@@ -3,53 +3,36 @@ import {
   BigNumber,
   ContainerRegistrationKeys,
   MedusaError,
-  Modules,
 } from '@medusajs/framework/utils';
-import { z } from 'zod';
 import { format } from 'date-fns';
 import {
+  adminOrdersListQuerySchema,
   calculateDateRangeMethod,
+  formatZodIssues,
   getAllDateGroupingKeys,
   getDateGroupingKey,
+  getPercentChange,
 } from '../../../../utils/orders';
-import { DateTime } from 'luxon';
+import {
+  createStoreCurrencyConverter,
+  getStoreCurrencyAndRates,
+} from '../../../../utils/currency';
 
-export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
-  z.object({
-    preset: z.literal('custom'),
-    date_from: z.string(),
-    date_to: z.string(),
-  }),
-  z.object({
-    preset: z.literal('this-month'),
-  }),
-  z.object({
-    preset: z.literal('last-month'),
-  }),
-  z.object({
-    preset: z.literal('last-3-months'),
-  }),
-]);
-const DEFAULT_CURRENCY = 'EUR';
-
-function getPercentChange(current: number, previous: number) {
-  if (previous === 0) return current === 0 ? 0 : 100;
-  return Number((((current - previous) / previous) * 100).toFixed(2));
-}
+// Kept for backwards compatibility; the schema now lives in `utils/orders`.
+export { adminOrdersListQuerySchema };
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const result = adminOrdersListQuerySchema.safeParse(req.query);
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      formatZodIssues(result.error),
     );
   }
   const validatedQuery = result.data;
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const storeModuleService = req.scope.resolve(Modules.STORE);
-  const cacheModuleService = req.scope.resolve(Modules.CACHE);
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
 
   const fetchOrders = async (dateRange: { from: string; to: string }) => {
     const { data: orders } = await query.graph({
@@ -78,38 +61,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return orders;
   };
 
-  const stores = await storeModuleService.listStores(
-    {},
-    { relations: ['supported_currencies'] },
+  const { currencyCode, exchangeRates } = await getStoreCurrencyAndRates(
+    req.scope,
   );
-
-  const store = stores?.[0];
-  const currencyCode =
-    store?.supported_currencies
-      ?.find((c) => c.is_default)
-      ?.currency_code?.toUpperCase() || DEFAULT_CURRENCY;
-
-  const cacheKey = `exchange_rates_${currencyCode}`;
-
-  let exchangeRates: { rates: Record<string, any> } | null =
-    await cacheModuleService.get(cacheKey);
-
-  if (!exchangeRates) {
-    const response = await fetch(
-      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
-    );
-    exchangeRates = await response.json();
-
-    const now = DateTime.now().setZone('Europe/Berlin');
-    let expireAt = now.set({ hour: 16, minute: 0, second: 0, millisecond: 0 });
-    if (now >= expireAt) {
-      expireAt = expireAt.plus({ days: 1 });
-    }
-
-    const ttl = Math.floor(expireAt.diff(now, 'seconds').seconds);
-
-    await cacheModuleService.set(cacheKey, exchangeRates, ttl);
-  }
+  const toStoreCurrency = createStoreCurrencyConverter({
+    currencyCode,
+    exchangeRates,
+    logger,
+  });
 
   const calculateDateRange = calculateDateRangeMethod[validatedQuery.preset];
 
@@ -154,11 +113,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     {};
 
   for (const order of orders) {
-    const exchangeRate =
-      order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
-        : 1;
-    const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
+    const orderTotal = toStoreCurrency(
+      new BigNumber(order.total).numeric,
+      order.currency_code,
+    );
 
     const key = getDateGroupingKey(
       new Date(order.created_at),
@@ -172,13 +130,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     }
 
     groupedByKey[key].orderCount += 1;
-    groupedByKey[key].sales += orderTotal;
 
-    totalSales += orderTotal;
+    if (orderTotal !== null) {
+      groupedByKey[key].sales += orderTotal;
+      totalSales += orderTotal;
 
-    if (order.region?.name) {
-      regions[order.region.name] =
-        (regions[order.region.name] ?? 0) + orderTotal;
+      if (order.region?.name) {
+        regions[order.region.name] =
+          (regions[order.region.name] ?? 0) + orderTotal;
+      }
     }
 
     if (order.status) {
@@ -188,12 +148,13 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   let prevTotalSales = 0;
   for (const order of prevRangeOrders) {
-    const exchangeRate =
-      order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
-        : 1;
-    const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
-    prevTotalSales += orderTotal;
+    const orderTotal = toStoreCurrency(
+      new BigNumber(order.total).numeric,
+      order.currency_code,
+    );
+    if (orderTotal !== null) {
+      prevTotalSales += orderTotal;
+    }
   }
   const prevTotalOrders = prevRangeOrders.length;
 

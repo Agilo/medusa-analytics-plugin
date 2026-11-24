@@ -12,8 +12,49 @@ import {
   startOfDay,
   endOfDay,
 } from 'date-fns';
+import { z } from 'zod';
 
 type DateRange = { start: Date; end: Date };
+
+/**
+ * Query schema shared by the analytics routes that support presets
+ * (with a previous-period comparison) and custom date ranges.
+ */
+export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
+  z.object({
+    preset: z.literal('custom'),
+    date_from: z.string(),
+    date_to: z.string(),
+  }),
+  z.object({
+    preset: z.literal('this-month'),
+  }),
+  z.object({
+    preset: z.literal('last-month'),
+  }),
+  z.object({
+    preset: z.literal('last-3-months'),
+  }),
+]);
+
+/**
+ * Formats zod validation issues into a single error message.
+ * Uses `issues`, which exists in both zod v3 and v4 (`errors` was removed in v4).
+ */
+export function formatZodIssues(error: {
+  issues: { message: string }[];
+}): string {
+  return error.issues.map((issue) => issue.message).join(', ');
+}
+
+/**
+ * Relative change between two values, in percent, rounded to 2 decimals.
+ * Returns 100 when the previous value is 0 and the current value isn't.
+ */
+export function getPercentChange(current: number, previous: number) {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return Number((((current - previous) / previous) * 100).toFixed(2));
+}
 
 /**
  * Preset functions to calculate current and previous date ranges.

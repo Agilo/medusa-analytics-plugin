@@ -6,6 +6,7 @@ import {
   Modules,
 } from '@medusajs/framework/utils';
 import { z } from 'zod';
+import { formatZodIssues } from '../../../../utils/orders';
 
 const DEFAULT_THRESHOLD = 5;
 
@@ -19,7 +20,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      formatZodIssues(result.error),
     );
   }
   const validatedQuery = result.data;

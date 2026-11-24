@@ -30,12 +30,17 @@ type ReturnedVariant = {
   returned_quantity: number;
   sold_quantity: number;
   return_rate: number;
+  reasons: { name: string; quantity: number }[];
 };
 
 function expectValidReturnedVariants(rows: ReturnedVariant[]) {
   for (const row of rows) {
     expect(row.return_rate).toBeLessThanOrEqual(100);
     expect(row.returned_quantity).toBeLessThanOrEqual(row.sold_quantity);
+    // The reason breakdown always adds up to the returned quantity.
+    expect(row.reasons.reduce((sum, r) => sum + r.quantity, 0)).toEqual(
+      row.returned_quantity,
+    );
   }
 }
 
@@ -78,18 +83,25 @@ medusaIntegrationTestRunner({
         return order;
       };
 
-      /** Fulfills the order, then returns `quantity` units of its first item. */
+      /**
+       * Fulfills the order, then returns `quantity` units of one item (the
+       * first by default) with the test's return reason.
+       */
       const fulfillAndReturn = async (
         order: AdminOrder,
         {
           quantity = 1,
           itemIndex = 0,
+          itemId,
           fulfill = true,
+          withReason = true,
           ...options
         }: {
           quantity?: number;
           itemIndex?: number;
+          itemId?: string;
           fulfill?: boolean;
+          withReason?: boolean;
           confirm?: boolean;
           receive?: boolean;
           createdAt?: string;
@@ -111,9 +123,9 @@ medusaIntegrationTestRunner({
           locationId: seeder.stockLocation.id,
           items: [
             {
-              id: order.items[itemIndex].id,
+              id: itemId ?? order.items[itemIndex].id,
               quantity,
-              reason_id: reason.id,
+              reason_id: withReason ? reason.id : undefined,
             },
           ],
           ...options,
@@ -256,8 +268,40 @@ medusaIntegrationTestRunner({
               returned_quantity: 1,
               sold_quantity: 1,
               return_rate: 100,
+              reasons: [{ name: reason.label, quantity: 1 }],
             },
           ]);
+        });
+
+        it('breaks a variant’s returns down by reason', async () => {
+          const order = await seedOrder({ extraUnits: 2 });
+          // One entry per unit, so each return can take a different unit,
+          // whether the 3 units are on one line or several.
+          const units = order.items.flatMap(
+            (item: { id: string; quantity: number }) =>
+              Array.from({ length: item.quantity }, () => item.id),
+          );
+          expect(units).toHaveLength(3);
+          await fulfillAndReturn(order, { itemId: units[0] });
+          await fulfillAndReturn(order, { itemId: units[1], fulfill: false });
+          await fulfillAndReturn(order, {
+            itemId: units[2],
+            fulfill: false,
+            withReason: false,
+          });
+
+          const res = await api.get(
+            '/admin/agilo-analytics/returns?preset=this-month',
+            { headers },
+          );
+
+          const row = res.data.returned_variants[0];
+          expect(row.returned_quantity).toEqual(3);
+          expect(row.reasons).toEqual([
+            { name: reason.label, quantity: 2 },
+            { name: 'No reason', quantity: 1 },
+          ]);
+          expectValidReturnedVariants(res.data.returned_variants);
         });
 
         it('counts a received return', async () => {

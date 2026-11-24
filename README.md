@@ -59,7 +59,7 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
   - Return Reasons sums the requested quantity per reason. Items without a reason are shown as "No reason".
 - **Return Rate** and **Most-Returned Products** are based on the **orders placed in the selected period** (draft and canceled orders excluded), whenever they were returned:
   - Return Rate is the share of those orders with at least one return.
-  - Most-Returned Products lists every returned variant, most returned first, with the quantity sold in those same orders and the resulting return rate. The table can be searched, sorted and paged.
+  - Most-Returned Products lists every returned variant, most returned first, with the quantity sold in those same orders, the resulting return rate and its most common return reason (hover "+N more" to see every reason with its quantity). The table can be searched by product or reason, sorted and paged.
 - Because Return Rate follows the orders placed in the period, it can rise later as more of those orders are returned. Recent periods may therefore show a lower rate than they will end up with, and the change against the previous period tends to look negative, because the previous period's orders have had more time to be returned.
 
 ### Widgets

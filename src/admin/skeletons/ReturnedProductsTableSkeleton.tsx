@@ -13,11 +13,13 @@ const dummyData = Array.from({ length: 5 }, (_, i) => ({
   b: '',
   c: '',
   d: '',
+  e: '',
 }));
 
 const columnHelper = createDataTableColumnHelper<(typeof dummyData)[0]>();
 
-const columns = (['a', 'b', 'c', 'd'] as const).map((key) =>
+// One column per ReturnedProductsTable column.
+const columns = (['a', 'b', 'c', 'd', 'e'] as const).map((key) =>
   columnHelper.accessor(key, {
     header: () => null,
     cell: () => <Skeleton className="w-full h-5" />,

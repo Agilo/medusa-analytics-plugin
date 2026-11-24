@@ -5,6 +5,9 @@ import {
   DataTable,
   DataTablePaginationState,
   DataTableSortingState,
+  Text,
+  Tooltip,
+  TooltipProvider,
 } from '@medusajs/ui';
 import { useNavigate } from 'react-router-dom';
 import type { ReturnAnalyticsResponse } from '../lib/data/return-analytics';
@@ -47,7 +50,69 @@ const columns = [
     sortDescLabel: 'High to Low',
     cell: ({ getValue }) => `${getValue()}%`,
   }),
+  columnHelper.accessor('reasons', {
+    header: 'Top reason',
+    enableSorting: false,
+    cell: ({ getValue }) => <TopReasonCell reasons={getValue()} />,
+  }),
 ];
+
+/**
+ * The most common reason, plus "+N more" when there are others, like the
+ * Countries column in Medusa's Regions list. Hovering "+N more" shows every
+ * reason with its returned quantity.
+ */
+const TopReasonCell = ({
+  reasons,
+}: {
+  reasons: ReturnedProduct['reasons'];
+}) => {
+  const [top, ...rest] = reasons;
+  if (!top) {
+    return '-';
+  }
+
+  return (
+    <div className="flex items-center gap-x-1">
+      <Text size="small" leading="compact" className="truncate">
+        {top.name}
+      </Text>
+      {rest.length > 0 && (
+        <Tooltip
+          content={
+            <div className="flex min-w-32 flex-col gap-y-1">
+              {reasons.map((reason) => (
+                <div
+                  key={reason.name}
+                  className="flex items-center justify-between gap-x-4"
+                >
+                  <Text size="xsmall" leading="compact">
+                    {reason.name}
+                  </Text>
+                  <Text
+                    size="xsmall"
+                    leading="compact"
+                    className="text-ui-fg-subtle"
+                  >
+                    {reason.quantity}
+                  </Text>
+                </div>
+              ))}
+            </div>
+          }
+        >
+          <Text
+            size="small"
+            leading="compact"
+            className="whitespace-nowrap text-ui-fg-subtle"
+          >
+            +{rest.length} more
+          </Text>
+        </Tooltip>
+      )}
+    </div>
+  );
+};
 
 const PAGE_SIZE = 10;
 
@@ -70,8 +135,15 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   // Search and sort the whole list; pagination counts and slices this list.
   // Without a sort, rows keep the API order (most returned first).
   const filteredProducts = React.useMemo(() => {
-    let filtered = products.filter((product) =>
-      product.title.toLowerCase().includes(search.toLowerCase()),
+    // Matches the product title or any of its return reasons, so searching
+    // "too small" lists the products returned for that reason.
+    const query = search.toLowerCase();
+    let filtered = products.filter(
+      (product) =>
+        product.title.toLowerCase().includes(query) ||
+        product.reasons.some((reason) =>
+          reason.name.toLowerCase().includes(query),
+        ),
     );
 
     if (sorting && sorting.id) {
@@ -145,22 +217,26 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   });
 
   return (
-    <DataTable instance={table}>
-      <div className="flex items-center justify-end gap-2 mb-4">
-        <DataTable.Search placeholder="Search..." />
-        <DataTable.SortingMenu />
-      </div>
-      <DataTable.Table
-        emptyState={{
-          filtered: {
-            heading: 'No returned products found',
-          },
-          empty: {
-            heading: 'No returned products available',
-          },
-        }}
-      />
-      {filteredProducts.length > PAGE_SIZE && <DataTable.Pagination />}
-    </DataTable>
+    // The reason tooltips need a provider; this one doesn't depend on the
+    // dashboard rendering one higher up.
+    <TooltipProvider>
+      <DataTable instance={table}>
+        <div className="flex items-center justify-end gap-2 mb-4">
+          <DataTable.Search placeholder="Search..." />
+          <DataTable.SortingMenu />
+        </div>
+        <DataTable.Table
+          emptyState={{
+            filtered: {
+              heading: 'No returned products found',
+            },
+            empty: {
+              heading: 'No returned products available',
+            },
+          }}
+        />
+        {filteredProducts.length > PAGE_SIZE && <DataTable.Pagination />}
+      </DataTable>
+    </TooltipProvider>
   );
 };

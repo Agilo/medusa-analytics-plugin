@@ -69,7 +69,13 @@ type CohortOrder = {
   returns?:
     | {
         status: string;
-        items?: { quantity: NumericLike; item_id: string }[] | null;
+        items?:
+          | {
+              quantity: NumericLike;
+              item_id: string;
+              reason_id?: string | null;
+            }[]
+          | null;
       }[]
     | null;
 };
@@ -166,6 +172,8 @@ export async function GET(
         'items.quantity',
         'items.detail.quantity',
         'returns.status',
+        // Includes `reason_id`. Joining `returns.items.reason` from an order is
+        // one level too deep for the ORM, so labels are looked up separately.
         'returns.items.*',
       ],
       filters: {
@@ -296,6 +304,30 @@ export async function GET(
     .map(([name, quantity]) => ({ name, quantity }))
     .sort((a, b) => b.quantity - a.quantity);
 
+  // Labels of the reasons used by the cohort's returns (see the cohort query).
+  const cohortReasonIds = [
+    ...new Set(
+      cohortOrders.flatMap((order) =>
+        (order.returns ?? []).flatMap((ret) =>
+          (ret.items ?? []).flatMap((item) =>
+            item.reason_id ? [item.reason_id] : [],
+          ),
+        ),
+      ),
+    ),
+  ];
+  const reasonLabelById: Record<string, string> = {};
+  if (cohortReasonIds.length) {
+    const { data } = await query.graph({
+      entity: 'return_reason',
+      fields: ['id', 'label'],
+      filters: { id: cohortReasonIds },
+    });
+    for (const reason of data as { id: string; label: string }[]) {
+      reasonLabelById[reason.id] = reason.label;
+    }
+  }
+
   // Every returned variant (cohort-based: returned and sold quantities come
   // from the same orders, so the rate can't exceed 100%), most returned first.
   const variants: Record<
@@ -306,6 +338,7 @@ export async function GET(
       title: string;
       returned_quantity: number;
       sold_quantity: number;
+      quantityByReason: Record<string, number>;
     }
   > = {};
   for (const order of cohortOrders) {
@@ -322,6 +355,7 @@ export async function GET(
             .join(' '),
           returned_quantity: 0,
           sold_quantity: 0,
+          quantityByReason: {},
         };
       }
       variants[key].sold_quantity += toNumber(item.quantity);
@@ -331,19 +365,31 @@ export async function GET(
       for (const returnItem of ret.items ?? []) {
         const key = keyByItemId[returnItem.item_id];
         if (key) {
-          variants[key].returned_quantity += toNumber(returnItem.quantity);
+          const quantity = toNumber(returnItem.quantity);
+          const reason =
+            (returnItem.reason_id && reasonLabelById[returnItem.reason_id]) ||
+            NO_REASON_LABEL;
+          variants[key].returned_quantity += quantity;
+          variants[key].quantityByReason[reason] =
+            (variants[key].quantityByReason[reason] ?? 0) + quantity;
         }
       }
     }
   }
   const returnedVariants = Object.values(variants)
     .filter((v) => v.returned_quantity > 0)
-    .map((v) => ({
+    .map(({ quantityByReason, ...v }) => ({
       ...v,
       return_rate:
         v.sold_quantity > 0
           ? roundTo2((v.returned_quantity / v.sold_quantity) * 100)
           : 0,
+      // Most common first; ties alphabetical, so the top reason is stable.
+      reasons: Object.entries(quantityByReason)
+        .map(([name, quantity]) => ({ name, quantity }))
+        .sort(
+          (a, b) => b.quantity - a.quantity || a.name.localeCompare(b.name),
+        ),
     }))
     .sort(
       (a, b) =>
@@ -395,6 +441,11 @@ export type ReturnAnalyticsResponse = {
     returned_quantity: number;
     sold_quantity: number;
     return_rate: number;
+    /**
+     * Returned quantity per reason label ("No reason" when none was given),
+     * most common first. The quantities add up to `returned_quantity`.
+     */
+    reasons: { name: string; quantity: number }[];
   }[];
   currency_code: string;
 };

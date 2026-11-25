@@ -45,7 +45,6 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const navigate = useNavigate();
 
-  // Search and sort the whole list; pagination counts and slices this list.
   const filteredCustomers = React.useMemo(() => {
     let filtered = customers.filter(
       (customer) =>
@@ -81,7 +80,6 @@ export const CustomersTable: React.FC<CustomersTableProps> = ({
     [filteredCustomers, pagination],
   );
 
-  // A new search starts on the first page.
   const handleSearchChange = React.useCallback((value: string) => {
     setSearch(value);
     setPagination((current) => ({ ...current, pageIndex: 0 }));

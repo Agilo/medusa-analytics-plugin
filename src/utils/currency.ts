@@ -69,7 +69,6 @@ async function fetchExchangeRates(
   }
 }
 
-/** The store's default currency in upper case, or `EUR` if none is set. */
 export async function getStoreCurrencyCode(
   scope: Pick<MedusaContainer, 'resolve'>,
 ): Promise<string> {
@@ -85,12 +84,7 @@ export async function getStoreCurrencyCode(
   );
 }
 
-/**
- * Returns the store's default currency (see `getStoreCurrencyCode`) and
- * exchange rates based on it. Rates are cached until the next 16:00
- * Europe/Berlin. A failed rates request is not cached, and returns
- * `exchangeRates: null`.
- */
+/** A failed rates request isn't cached and gives `exchangeRates: null`. */
 export async function getStoreCurrencyAndRates(
   scope: Pick<MedusaContainer, 'resolve'>,
 ): Promise<{ currencyCode: string; exchangeRates: ExchangeRates | null }> {
@@ -117,10 +111,7 @@ export async function getStoreCurrencyAndRates(
   return { currencyCode, exchangeRates };
 }
 
-/**
- * Converts an amount to the store currency. Returns `null` when the amount is
- * in another currency and there is no usable rate for it.
- */
+/** Returns `null` when there is no usable rate for the amount's currency. */
 export function convertToStoreCurrency(
   amount: number,
   amountCurrency: string,
@@ -138,10 +129,7 @@ export function convertToStoreCurrency(
   return amount / rate;
 }
 
-/**
- * Wraps `convertToStoreCurrency` for one request: logs a warning once per
- * currency that can't be converted. Callers skip `null` results.
- */
+/** Per request: warns once per currency that can't be converted. */
 export function createStoreCurrencyConverter({
   currencyCode,
   exchangeRates,

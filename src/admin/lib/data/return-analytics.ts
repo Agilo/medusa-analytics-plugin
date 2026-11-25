@@ -9,8 +9,7 @@ export async function retrieveReturnAnalytics(
   preset: string,
   date?: DateRange | undefined,
 ) {
-  // Same as `retrieveOrderAnalytics`, so both tabs use the same range and
-  // previous period for the same selection.
+  // Same as `retrieveOrderAnalytics`, so both tabs use the same periods.
   let url = `/admin/agilo-analytics/returns?preset=${preset}`;
   if (date && date.from && date.to) {
     const dateFrom = format(date.from, 'yyyy-MM-dd');

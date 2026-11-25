@@ -3,9 +3,7 @@ import { AdminOrder, MedusaContainer } from '@medusajs/framework/types';
 
 type AdminHeaders = { headers: Record<string, string> };
 
-/**
- * Fulfills every item of the order. Medusa only lets fulfilled items be returned.
- */
+/** Medusa only lets fulfilled items be returned. */
 export async function fulfillOrder({
   api,
   adminHeaders,
@@ -46,10 +44,8 @@ export async function createReturnReason({
 }
 
 /**
- * Creates a return through the admin flow: create → request items → confirm
- * the request (status `requested`). With `confirm: false` the return stays
- * `open`; with `receive: true` it's also received (status `received`).
- * `createdAt` backdates `return.created_at`.
+ * Uses the admin flow. `confirm: false` leaves the return `open`;
+ * `receive: true` also receives it.
  */
 export async function createReturn({
   api,

@@ -155,8 +155,7 @@ const AnalyticsPage = () => {
 
   const activeTab = searchParams.get('tab') || 'orders';
 
-  // The returns endpoint is the heaviest one, so it only runs while its tab is
-  // open. The tab comes from the URL, so it also loads straight away on refresh.
+  // The heaviest endpoint, so it only runs while its tab is open.
   const returnQuery = useReturnAnalytics(
     ['this-month', 'last-month', 'last-3-months'].includes(rangeParam)
       ? rangeParam

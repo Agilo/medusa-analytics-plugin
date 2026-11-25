@@ -22,10 +22,6 @@ type ReturnedProductsTableProps = {
 /** Medusa's name for the only variant of a product without options. */
 const DEFAULT_VARIANT_TITLE = 'Default variant';
 
-/**
- * The variant line under the product name: hidden for a product's only
- * "Default variant", and option values joined with "·" (e.g. "L · Black").
- */
 function getVariantLabel(product: ReturnedProduct) {
   const title = product.variant_title?.trim();
   if (
@@ -78,7 +74,6 @@ const columns = [
   }),
 ];
 
-/** Thumbnail, product name and (when useful) the variant underneath. */
 const ProductCell = ({ product }: { product: ReturnedProduct }) => {
   const variantLabel = getVariantLabel(product);
   return (
@@ -102,11 +97,7 @@ const ProductCell = ({ product }: { product: ReturnedProduct }) => {
   );
 };
 
-/**
- * The most common reason, plus "+N more" when there are others, like the
- * Countries column in Medusa's Regions list. Hovering "+N more" shows every
- * reason with its returned quantity.
- */
+/** "+N more" tooltip, like the Countries column in Medusa's Regions list. */
 const TopReasonCell = ({
   reasons,
 }: {
@@ -177,11 +168,8 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
 
   const navigate = useNavigate();
 
-  // Search and sort the whole list; pagination counts and slices this list.
   // Without a sort, rows keep the API order (most returned first).
   const filteredProducts = React.useMemo(() => {
-    // Matches the product name, the variant name or any of its return
-    // reasons, so searching "too small" lists the products returned for that.
     const query = search.toLowerCase();
     let filtered = products.filter(
       (product) =>
@@ -194,7 +182,6 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
 
     if (sorting && sorting.id) {
       const id = sorting.id as keyof ReturnedProduct;
-      // Sorting by Product orders by product name, then variant name.
       const sortValue = (product: ReturnedProduct) =>
         id === 'product_title'
           ? `${product.product_title} ${product.variant_title ?? ''}`
@@ -226,7 +213,6 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
     [filteredProducts, pagination],
   );
 
-  // A new search starts on the first page.
   const handleSearchChange = React.useCallback((value: string) => {
     setSearch(value);
     setPagination((current) => ({ ...current, pageIndex: 0 }));
@@ -246,7 +232,7 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   const table = useDataTable({
     columns,
     data: shownProducts,
-    // Custom line items have no variant, so fall back to the name + position.
+    // Custom line items have no variant.
     getRowId: (product, index) =>
       product.variant_id ?? `${product.product_title}-${index}`,
     rowCount: filteredProducts.length,
@@ -274,8 +260,7 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   });
 
   return (
-    // The reason tooltips need a provider; this one doesn't depend on the
-    // dashboard rendering one higher up.
+    // Don't rely on the dashboard providing one for the reason tooltips.
     <TooltipProvider>
       <DataTable instance={table}>
         <div className="flex items-center justify-end gap-2 mb-4">

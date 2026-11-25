@@ -1,10 +1,6 @@
 import { Photo } from '@medusajs/icons';
 
-/**
- * Small product image for table rows, styled like the thumbnails in Medusa's
- * admin. `@medusajs/ui` doesn't export a Thumbnail component, so the plugin
- * has its own. Shows a photo icon when there's no image.
- */
+/** `@medusajs/ui` has no Thumbnail component, so this mirrors the admin's. */
 export const ProductThumbnail = ({
   src,
   alt,

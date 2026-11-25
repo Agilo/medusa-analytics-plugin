@@ -18,7 +18,6 @@ const dummyData = Array.from({ length: 5 }, (_, i) => ({
 
 const columnHelper = createDataTableColumnHelper<(typeof dummyData)[0]>();
 
-// One column per ReturnedProductsTable column.
 const columns = (['a', 'b', 'c', 'd', 'e'] as const).map((key) =>
   columnHelper.accessor(key, {
     header: () => null,
@@ -40,7 +39,6 @@ export const ReturnedProductsTableSkeleton = () => {
     },
   });
 
-  // Same toolbar layout as ReturnedProductsTable, so nothing jumps on load.
   return (
     <DataTable instance={table}>
       <div className="flex items-center justify-end gap-2 mb-4">

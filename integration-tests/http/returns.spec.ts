@@ -39,7 +39,6 @@ function expectValidReturnedVariants(rows: ReturnedVariant[]) {
   for (const row of rows) {
     expect(row.return_rate).toBeLessThanOrEqual(100);
     expect(row.returned_quantity).toBeLessThanOrEqual(row.sold_quantity);
-    // The reason breakdown always adds up to the returned quantity.
     expect(row.reasons.reduce((sum, r) => sum + r.quantity, 0)).toEqual(
       row.returned_quantity,
     );
@@ -55,7 +54,6 @@ medusaIntegrationTestRunner({
 
       const adminHeaders = () => ({ headers });
 
-      /** Seeds another order that reuses the first seeder's product, region etc. */
       const seedOrder = async ({
         createdAt,
         extraUnits = 0,
@@ -85,10 +83,6 @@ medusaIntegrationTestRunner({
         return order;
       };
 
-      /**
-       * Fulfills the order, then returns `quantity` units of one item (the
-       * first by default) with the test's return reason.
-       */
       const fulfillAndReturn = async (
         order: AdminOrder,
         {
@@ -279,8 +273,7 @@ medusaIntegrationTestRunner({
 
         it('breaks a variant’s returns down by reason', async () => {
           const order = await seedOrder({ extraUnits: 2 });
-          // One entry per unit, so each return can take a different unit,
-          // whether the 3 units are on one line or several.
+          // The 3 units may be on one line or several.
           const units = order.items.flatMap(
             (item: { id: string; quantity: number }) =>
               Array.from({ length: item.quantity }, () => item.id),

@@ -72,7 +72,6 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
 
   const navigate = useNavigate();
 
-  // Search and sort the whole list; pagination counts and slices this list.
   const filteredProducts = React.useMemo(() => {
     let filtered = products.filter(
       (product) =>
@@ -108,7 +107,6 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
     [filteredProducts, pagination],
   );
 
-  // A new search starts on the first page.
   const handleSearchChange = React.useCallback((value: string) => {
     setSearch(value);
     setPagination((current) => ({ ...current, pageIndex: 0 }));

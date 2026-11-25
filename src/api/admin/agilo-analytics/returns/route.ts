@@ -23,7 +23,6 @@ import {
   getStoreCurrencyCode,
 } from '../../../../utils/currency';
 
-/** Returns that the customer has actually requested (confirmed) or that were received. */
 export const ELIGIBLE_RETURN_STATUSES = [
   'requested',
   'received',
@@ -133,7 +132,7 @@ export async function GET(
     $lte: range.to + 'T23:59:59.999Z',
   });
 
-  // Eligible returns created in the range (return-date-based metrics).
+  // Return-date-based metrics.
   const fetchReturnsInPeriod = async (range: { from: string; to: string }) => {
     const { data } = await query.graph({
       entity: 'return',
@@ -155,11 +154,9 @@ export async function GET(
     return data as unknown as ReturnInPeriod[];
   };
 
-  // Orders created in the range, with their returns (cohort-based metrics).
-  // Field notes (Order module formatting):
-  // - a line item's `quantity` lives on the order item detail, so
-  //   `items.detail.quantity` must be selected for `items.quantity` to be set;
-  // - nested return item quantities are only populated with `returns.items.*`.
+  // Cohort-based metrics. Order module quirks:
+  // - `items.quantity` is only set when `items.detail.quantity` is selected;
+  // - nested return item quantities are only set with `returns.items.*`.
   const fetchCohortOrders = async (range: { from: string; to: string }) => {
     const { data } = await query.graph({
       entity: 'order',
@@ -174,8 +171,8 @@ export async function GET(
         'items.quantity',
         'items.detail.quantity',
         'returns.status',
-        // Includes `reason_id`. Joining `returns.items.reason` from an order is
-        // one level too deep for the ORM, so labels are looked up separately.
+        // `returns.items.reason` is one level too deep for the ORM from an
+        // order, so reason labels are looked up by `reason_id` separately.
         'returns.items.*',
       ],
       filters: {
@@ -194,15 +191,14 @@ export async function GET(
       fetchCohortOrders(previousRange),
     ]);
 
-  // Per-unit value of each returned line item. The order may have been placed
-  // before the period, so this can't reuse the cohort query.
+  // Separate from the cohort query: a returned order may predate the period.
   const returnOrderIds = [
     ...new Set([...returns, ...prevReturns].map((r) => r.order_id)),
   ];
   const unitValueByItemId: Record<string, number> = {};
   if (returnOrderIds.length) {
-    // Medusa only calculates item totals when the order `total` is selected,
-    // and needs the price, quantity, tax and discount fields to do it.
+    // Item totals are only calculated when the order `total` and the price,
+    // quantity, tax and discount fields are selected.
     const { data } = await query.graph({
       entity: 'order',
       fields: [
@@ -228,7 +224,6 @@ export async function GET(
     }
   }
 
-  // Rates are only needed when there is a returned value to convert.
   const { currencyCode, exchangeRates } = returnOrderIds.length
     ? await getStoreCurrencyAndRates(req.scope)
     : {
@@ -266,7 +261,6 @@ export async function GET(
     return roundTo2((returnedOrders / orders.length) * 100);
   };
 
-  // Returns over time
   let groupBy: 'day' | 'week' | 'month' = 'day';
   if (days > 120) {
     groupBy = 'month';
@@ -293,7 +287,6 @@ export async function GET(
     count: countByKey[name] ?? 0,
   }));
 
-  // Return reasons (requested quantity per reason)
   const quantityByReason: Record<string, number> = {};
   for (const ret of returns) {
     for (const item of ret.items ?? []) {
@@ -306,7 +299,6 @@ export async function GET(
     .map(([name, quantity]) => ({ name, quantity }))
     .sort((a, b) => b.quantity - a.quantity);
 
-  // Labels of the reasons used by the cohort's returns (see the cohort query).
   const cohortReasonIds = [
     ...new Set(
       cohortOrders.flatMap((order) =>
@@ -330,8 +322,8 @@ export async function GET(
     }
   }
 
-  // Every returned variant (cohort-based: returned and sold quantities come
-  // from the same orders, so the rate can't exceed 100%), most returned first.
+  // Returned and sold quantities come from the same orders, so the rate can't
+  // exceed 100%.
   const variants: Record<
     string,
     {
@@ -351,8 +343,6 @@ export async function GET(
       const key = item.variant_id ?? item.id;
       keyByItemId[item.id] = key;
       if (!variants[key]) {
-        // Names and thumbnail as stored on the order line, i.e. as they were
-        // when the order was placed (still shown if the product was deleted).
         variants[key] = {
           variant_id: item.variant_id ?? null,
           product_id: item.product_id ?? null,
@@ -390,7 +380,7 @@ export async function GET(
         v.sold_quantity > 0
           ? roundTo2((v.returned_quantity / v.sold_quantity) * 100)
           : 0,
-      // Most common first; ties alphabetical, so the top reason is stable.
+      // Ties are alphabetical, so the top reason is stable.
       reasons: Object.entries(quantityByReason)
         .map(([name, quantity]) => ({ name, quantity }))
         .sort(
@@ -428,32 +418,25 @@ export async function GET(
 export type ReturnAnalyticsResponse = {
   total_returns: number;
   prev_returns_percent: number;
-  /** Cohort-based: % of orders created in the range with at least one eligible return (any return date). */
+  /** % of orders created in the range with at least one return, whenever it was made. */
   return_rate: number;
-  /** Relative % change of `return_rate` against the previous range's cohort. */
   prev_return_rate_percent: number;
   returned_value: number;
   prev_returned_value_percent: number;
   returns_over_time: { name: string; count: number }[];
   reasons: { name: string; quantity: number }[];
-  /**
-   * Cohort-based: every variant returned from orders created in the range,
-   * with returned and sold quantities of those orders. Most returned first.
-   */
+  /** Variants returned from orders created in the range, most returned first. */
   returned_variants: {
     variant_id: string | null;
     product_id: string | null;
-    /** As on the order line when the order was placed. */
+    /** Names and thumbnail as on the order line when the order was placed. */
     product_title: string;
     variant_title: string | null;
     thumbnail: string | null;
     returned_quantity: number;
     sold_quantity: number;
     return_rate: number;
-    /**
-     * Returned quantity per reason label ("No reason" when none was given),
-     * most common first. The quantities add up to `returned_quantity`.
-     */
+    /** Most common first; the quantities add up to `returned_quantity`. */
     reasons: { name: string; quantity: number }[];
   }[];
   currency_code: string;

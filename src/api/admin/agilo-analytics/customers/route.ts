@@ -3,7 +3,6 @@ import { CustomerDTO, OrderDTO } from '@medusajs/framework/types';
 import {
   ContainerRegistrationKeys,
   MedusaError,
-  Modules,
   BigNumber,
 } from '@medusajs/framework/utils';
 import { format } from 'date-fns';
@@ -11,62 +10,40 @@ import { z } from 'zod';
 
 import {
   calculateDateRangeMethod,
+  formatZodIssues,
   getAllDateGroupingKeys,
   getDateGroupingKey,
 } from '../../../../utils/orders';
-import { DateTime } from 'luxon';
+import {
+  createStoreCurrencyConverter,
+  getStoreCurrencyAndRates,
+} from '../../../../utils/currency';
 
 export const adminCustomerAnalyticsQuerySchema = z.object({
   date_from: z.string(),
   date_to: z.string(),
 });
 
-const DEFAULT_CURRENCY = 'EUR';
-
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const result = adminCustomerAnalyticsQuerySchema.safeParse(req.query);
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
-  const storeModuleService = req.scope.resolve(Modules.STORE);
-  const cacheModuleService = req.scope.resolve(Modules.CACHE);
-  const stores = await storeModuleService.listStores(
-    {},
-    { relations: ['supported_currencies'] },
-  );
-
-  const store = stores?.[0];
-  const currencyCode =
-    store?.supported_currencies
-      ?.find((c) => c.is_default)
-      ?.currency_code?.toUpperCase() || DEFAULT_CURRENCY;
-
-  const cacheKey = `exchange_rates_${currencyCode}`;
-
-  let exchangeRates: { rates: Record<string, any> } | null =
-    await cacheModuleService.get(cacheKey);
-
-  if (!exchangeRates) {
-    const response = await fetch(
-      `https://api.frankfurter.dev/v1/latest?base=${currencyCode}`,
-    );
-    exchangeRates = await response.json();
-
-    const now = DateTime.now().setZone('Europe/Berlin');
-    let expireAt = now.set({ hour: 16, minute: 0, second: 0, millisecond: 0 });
-    if (now >= expireAt) {
-      expireAt = expireAt.plus({ days: 1 });
-    }
-
-    const ttl = Math.floor(expireAt.diff(now, 'seconds').seconds);
-
-    await cacheModuleService.set(cacheKey, exchangeRates, ttl);
-  }
-
   if (!result.success) {
     throw new MedusaError(
       MedusaError.Types.INVALID_DATA,
-      result.error.errors.map((err) => err.message).join(', '),
+      formatZodIssues(result.error),
     );
   }
+
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER);
+  const { currencyCode, exchangeRates } = await getStoreCurrencyAndRates(
+    req.scope,
+  );
+  const toStoreCurrency = createStoreCurrencyConverter({
+    currencyCode,
+    exchangeRates,
+    logger,
+  });
+
   const { data: orders } = (await query.graph({
     entity: 'order',
     fields: [
@@ -156,11 +133,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   > = {};
 
   for (const order of orders) {
-    const exchangeRate =
-      order.currency_code.toUpperCase() !== currencyCode
-        ? exchangeRates?.rates[order.currency_code.toUpperCase()]
-        : 1;
-    const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
+    // Amounts that can't be converted are left out of the sales sums.
+    const orderTotal =
+      toStoreCurrency(
+        new BigNumber(order.total).numeric,
+        order.currency_code,
+      ) ?? 0;
     const key = getDateGroupingKey(
       new Date(order.created_at),
       groupBy,

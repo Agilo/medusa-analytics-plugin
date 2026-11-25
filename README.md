@@ -24,7 +24,7 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
 ## Features
 
 - **Date Range Picker** with presets: This Month, Last Month, Last 3 Months, Custom Range (applies to all analytics)
-- **Tabbed Interface**: Switch between Orders and Products analytics
+- **Tabbed Interface**: Switch between Orders, Products, Customers and Returns analytics
 - **Charts & KPIs**:
   - **Orders Tab**:
     - Total Orders (KPI)
@@ -37,6 +37,30 @@ The Medusa Analytics Plugin is a lightweight analytics extension for the Medusa 
     - Top-Selling Products (Bar Chart)
     - Out-of-Stock Variants (Table)
     - Low Stock Variants (Table)
+  - **Customers Tab**:
+    - Total, New and Returning Customers (KPIs)
+    - Average Sales per Customer (KPI)
+    - New vs. Returning Customers (Chart)
+    - Top Customer Groups by Sales (Chart)
+    - Top Customers by Sales (Table)
+  - **Returns Tab**:
+    - Total Returns (KPI)
+    - Return Rate (KPI)
+    - Returned Value (KPI)
+    - Returns Over Time (Line Chart)
+    - Return Reasons (Bar Chart)
+    - Most-Returned Products (Table)
+
+### How returns are counted
+
+- A return counts once it's confirmed: its status is **requested**, **received** or **partially received**. Returns that were started but not confirmed (**open**) and **canceled** returns are left out. Returns created as part of exchanges and claims are included.
+- **Total Returns**, **Returned Value**, **Returns Over Time** and **Return Reasons** use the **date the return was created**: they cover returns created in the selected period, whenever the order was placed.
+  - Returned Value is the value of the returned units (their share of the line item total), converted to the store's default currency.
+  - Return Reasons sums the requested quantity per reason. Items without a reason are shown as "No reason".
+- **Return Rate** and **Most-Returned Products** are based on the **orders placed in the selected period** (draft and canceled orders excluded), whenever they were returned:
+  - Return Rate is the share of those orders with at least one return.
+  - Most-Returned Products lists every returned variant, most returned first, with the quantity sold in those same orders, the resulting return rate and its most common return reason (hover "+N more" to see every reason with its quantity). The table can be searched by product or reason, sorted and paged.
+- Because Return Rate follows the orders placed in the period, it can rise later as more of those orders are returned. Recent periods may therefore show a lower rate than they will end up with, and the change against the previous period tends to look negative, because the previous period's orders have had more time to be returned.
 
 ### Widgets
 

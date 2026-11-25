@@ -72,7 +72,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
 
   const navigate = useNavigate();
 
-  const shownProducts = React.useMemo(() => {
+  const filteredProducts = React.useMemo(() => {
     let filtered = products.filter(
       (product) =>
         product.variantName.toLowerCase().includes(search.toLowerCase()) ||
@@ -95,20 +95,42 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
       });
     }
 
-    return filtered.slice(
-      pagination.pageIndex * pagination.pageSize,
-      (pagination.pageIndex + 1) * pagination.pageSize,
+    return filtered;
+  }, [products, search, sorting]);
+
+  const shownProducts = React.useMemo(
+    () =>
+      filteredProducts.slice(
+        pagination.pageIndex * pagination.pageSize,
+        (pagination.pageIndex + 1) * pagination.pageSize,
+      ),
+    [filteredProducts, pagination],
+  );
+
+  const handleSearchChange = React.useCallback((value: string) => {
+    setSearch(value);
+    setPagination((current) => ({ ...current, pageIndex: 0 }));
+  }, []);
+
+  // Keep the page in range when the list shrinks (e.g. a new date range).
+  React.useEffect(() => {
+    const lastPageIndex = Math.max(
+      0,
+      Math.ceil(filteredProducts.length / pagination.pageSize) - 1,
     );
-  }, [products, search, sorting, pagination]);
+    if (pagination.pageIndex > lastPageIndex) {
+      setPagination((current) => ({ ...current, pageIndex: lastPageIndex }));
+    }
+  }, [filteredProducts.length, pagination.pageIndex, pagination.pageSize]);
 
   const table = useDataTable({
     columns,
     data: shownProducts,
     getRowId: (product) => product.sku,
-    rowCount: products.length,
+    rowCount: filteredProducts.length,
     search: {
       state: search,
-      onSearchChange: setSearch,
+      onSearchChange: handleSearchChange,
     },
     pagination: {
       state: pagination,
@@ -141,7 +163,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
           },
         }}
       />
-      {products.length > PAGE_SIZE && <DataTable.Pagination />}
+      {filteredProducts.length > PAGE_SIZE && <DataTable.Pagination />}
     </DataTable>
   );
 };

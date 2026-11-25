@@ -64,6 +64,7 @@ type CohortOrder = {
         quantity: NumericLike;
         product_title: string | null;
         variant_title: string | null;
+        thumbnail: string | null;
       }[]
     | null;
   returns?:
@@ -169,6 +170,7 @@ export async function GET(
         'items.product_id',
         'items.product_title',
         'items.variant_title',
+        'items.thumbnail',
         'items.quantity',
         'items.detail.quantity',
         'returns.status',
@@ -335,7 +337,9 @@ export async function GET(
     {
       variant_id: string | null;
       product_id: string | null;
-      title: string;
+      product_title: string;
+      variant_title: string | null;
+      thumbnail: string | null;
       returned_quantity: number;
       sold_quantity: number;
       quantityByReason: Record<string, number>;
@@ -347,12 +351,14 @@ export async function GET(
       const key = item.variant_id ?? item.id;
       keyByItemId[item.id] = key;
       if (!variants[key]) {
+        // Names and thumbnail as stored on the order line, i.e. as they were
+        // when the order was placed (still shown if the product was deleted).
         variants[key] = {
           variant_id: item.variant_id ?? null,
           product_id: item.product_id ?? null,
-          title: [item.product_title, item.variant_title]
-            .filter(Boolean)
-            .join(' '),
+          product_title: item.product_title ?? '',
+          variant_title: item.variant_title ?? null,
+          thumbnail: item.thumbnail ?? null,
           returned_quantity: 0,
           sold_quantity: 0,
           quantityByReason: {},
@@ -437,7 +443,10 @@ export type ReturnAnalyticsResponse = {
   returned_variants: {
     variant_id: string | null;
     product_id: string | null;
-    title: string;
+    /** As on the order line when the order was placed. */
+    product_title: string;
+    variant_title: string | null;
+    thumbnail: string | null;
     returned_quantity: number;
     sold_quantity: number;
     return_rate: number;

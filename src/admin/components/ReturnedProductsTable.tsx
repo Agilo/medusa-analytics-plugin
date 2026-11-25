@@ -11,6 +11,7 @@ import {
 } from '@medusajs/ui';
 import { useNavigate } from 'react-router-dom';
 import type { ReturnAnalyticsResponse } from '../lib/data/return-analytics';
+import { ProductThumbnail } from './ProductThumbnail';
 
 type ReturnedProduct = ReturnAnalyticsResponse['returned_variants'][number];
 
@@ -18,15 +19,35 @@ type ReturnedProductsTableProps = {
   products: ReturnedProduct[];
 };
 
+/** Medusa's name for the only variant of a product without options. */
+const DEFAULT_VARIANT_TITLE = 'Default variant';
+
+/**
+ * The variant line under the product name: hidden for a product's only
+ * "Default variant", and option values joined with "·" (e.g. "L · Black").
+ */
+function getVariantLabel(product: ReturnedProduct) {
+  const title = product.variant_title?.trim();
+  if (
+    !title ||
+    title === DEFAULT_VARIANT_TITLE ||
+    title === product.product_title
+  ) {
+    return null;
+  }
+  return title.split(' / ').join(' · ');
+}
+
 const columnHelper = createDataTableColumnHelper<ReturnedProduct>();
 
 const columns = [
-  columnHelper.accessor('title', {
+  columnHelper.accessor('product_title', {
     header: 'Product',
     enableSorting: true,
     sortLabel: 'Product',
     sortAscLabel: 'A-Z',
     sortDescLabel: 'Z-A',
+    cell: ({ row }) => <ProductCell product={row.original} />,
   }),
   columnHelper.accessor('returned_quantity', {
     header: 'Returned quantity',
@@ -56,6 +77,30 @@ const columns = [
     cell: ({ getValue }) => <TopReasonCell reasons={getValue()} />,
   }),
 ];
+
+/** Thumbnail, product name and (when useful) the variant underneath. */
+const ProductCell = ({ product }: { product: ReturnedProduct }) => {
+  const variantLabel = getVariantLabel(product);
+  return (
+    <div className="flex items-center gap-x-3">
+      <ProductThumbnail src={product.thumbnail} alt={product.product_title} />
+      <div className="flex min-w-0 flex-col">
+        <Text size="small" leading="compact" weight="plus" className="truncate">
+          {product.product_title || '-'}
+        </Text>
+        {variantLabel && (
+          <Text
+            size="small"
+            leading="compact"
+            className="truncate text-ui-fg-subtle"
+          >
+            {variantLabel}
+          </Text>
+        )}
+      </div>
+    </div>
+  );
+};
 
 /**
  * The most common reason, plus "+N more" when there are others, like the
@@ -135,12 +180,13 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   // Search and sort the whole list; pagination counts and slices this list.
   // Without a sort, rows keep the API order (most returned first).
   const filteredProducts = React.useMemo(() => {
-    // Matches the product title or any of its return reasons, so searching
-    // "too small" lists the products returned for that reason.
+    // Matches the product name, the variant name or any of its return
+    // reasons, so searching "too small" lists the products returned for that.
     const query = search.toLowerCase();
     let filtered = products.filter(
       (product) =>
-        product.title.toLowerCase().includes(query) ||
+        product.product_title.toLowerCase().includes(query) ||
+        (product.variant_title ?? '').toLowerCase().includes(query) ||
         product.reasons.some((reason) =>
           reason.name.toLowerCase().includes(query),
         ),
@@ -148,12 +194,23 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
 
     if (sorting && sorting.id) {
       const id = sorting.id as keyof ReturnedProduct;
+      // Sorting by Product orders by product name, then variant name.
+      const sortValue = (product: ReturnedProduct) =>
+        id === 'product_title'
+          ? `${product.product_title} ${product.variant_title ?? ''}`
+          : product[id];
       filtered = filtered.slice().sort((a, b) => {
-        const aVal = a[id] ?? '';
-        const bVal = b[id] ?? '';
-        if (aVal < bVal) return sorting.desc ? 1 : -1;
-        if (aVal > bVal) return sorting.desc ? -1 : 1;
-        return 0;
+        const aVal = sortValue(a) ?? '';
+        const bVal = sortValue(b) ?? '';
+        const order =
+          typeof aVal === 'string' && typeof bVal === 'string'
+            ? aVal.localeCompare(bVal)
+            : aVal < bVal
+              ? -1
+              : aVal > bVal
+                ? 1
+                : 0;
+        return sorting.desc ? -order : order;
       });
     }
 
@@ -189,9 +246,9 @@ export const ReturnedProductsTable: React.FC<ReturnedProductsTableProps> = ({
   const table = useDataTable({
     columns,
     data: shownProducts,
-    // Custom line items have no variant, so fall back to the title + position.
+    // Custom line items have no variant, so fall back to the name + position.
     getRowId: (product, index) =>
-      product.variant_id ?? `${product.title}-${index}`,
+      product.variant_id ?? `${product.product_title}-${index}`,
     rowCount: filteredProducts.length,
     search: {
       state: search,

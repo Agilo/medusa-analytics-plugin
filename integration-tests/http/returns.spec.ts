@@ -26,7 +26,9 @@ const AFTER_RANGE = '2024-04-10T12:00:00Z';
 type ReturnedVariant = {
   variant_id: string | null;
   product_id: string | null;
-  title: string;
+  product_title: string;
+  variant_title: string | null;
+  thumbnail: string | null;
   returned_quantity: number;
   sold_quantity: number;
   return_rate: number;
@@ -264,7 +266,9 @@ medusaIntegrationTestRunner({
             {
               variant_id: item.variant_id,
               product_id: item.product_id,
-              title: expect.any(String),
+              product_title: item.product_title,
+              variant_title: item.variant_title,
+              thumbnail: item.thumbnail ?? null,
               returned_quantity: 1,
               sold_quantity: 1,
               return_rate: 100,

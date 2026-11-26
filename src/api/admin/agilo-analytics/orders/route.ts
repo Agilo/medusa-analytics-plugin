@@ -31,6 +31,7 @@ export const adminOrdersListQuerySchema = z.discriminatedUnion('preset', [
   }),
 ]);
 const DEFAULT_CURRENCY = 'EUR';
+const CANCELED_STATUS = 'canceled';
 
 function getPercentChange(current: number, previous: number) {
   if (previous === 0) return current === 0 ? 0 : 100;
@@ -153,7 +154,22 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const groupedByKey: Record<string, { orderCount: number; sales: number }> =
     {};
 
+  let totalOrders = 0;
+
   for (const order of orders) {
+    // Tallied before the cancelled orders are skipped, so the status breakdown
+    // stays a complete picture of the period. It is the only place in the UI
+    // where a merchant can see cancellations at all.
+    if (order.status) {
+      statuses[order.status] = (statuses[order.status] ?? 0) + 1;
+    }
+
+    if (order.status === CANCELED_STATUS) {
+      continue;
+    }
+
+    totalOrders += 1;
+
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates?.rates[order.currency_code.toUpperCase()]
@@ -180,14 +196,19 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       regions[order.region.name] =
         (regions[order.region.name] ?? 0) + orderTotal;
     }
-
-    if (order.status) {
-      statuses[order.status] = (statuses[order.status] ?? 0) + 1;
-    }
   }
 
   let prevTotalSales = 0;
+  let prevTotalOrders = 0;
   for (const order of prevRangeOrders) {
+    // Excluded from the comparison period too, otherwise every percentage
+    // change is measured against a differently-defined baseline.
+    if (order.status === CANCELED_STATUS) {
+      continue;
+    }
+
+    prevTotalOrders += 1;
+
     const exchangeRate =
       order.currency_code.toUpperCase() !== currencyCode
         ? exchangeRates?.rates[order.currency_code.toUpperCase()]
@@ -195,9 +216,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     const orderTotal = new BigNumber(order.total).numeric / exchangeRate;
     prevTotalSales += orderTotal;
   }
-  const prevTotalOrders = prevRangeOrders.length;
 
-  const percentOrders = getPercentChange(orders.length, prevTotalOrders);
+  const percentOrders = getPercentChange(totalOrders, prevTotalOrders);
   const percentSales = getPercentChange(totalSales, prevTotalSales);
 
   const salesArray = keyRange.map((date) => ({
@@ -224,7 +244,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }));
 
   res.json({
-    total_orders: orders.length,
+    total_orders: totalOrders,
     prev_orders_percent: percentOrders,
     regions: regionsArray,
     total_sales: totalSales,

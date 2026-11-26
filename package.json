@@ -72,7 +72,7 @@
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "vite": "^5.4.19",
+    "vite": "^6.4.5",
     "yalc": "^1.0.0-pre.53"
   },
   "peerDependencies": {
